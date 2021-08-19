@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body{
+	color:#000000;
+	width:185px;
+}
+.title{
+	font-weight:800;
+}
+.title h3{
+	margin-top:0px;
+	margin-bottom:0px;
+}
+.likes{
+	width:185px;
+	height:50px;
+}
+.like{
+	/*width:80px;*/
+	float:left;
+	padding-left:5px;
+}
+.padtop{
+	padding-top:2px;
+}
+.popup-div{
+	text-align:center;
+	padding-bottom:10px;
+}
+</style>
+</head>
+<body>
+	<!--
+	<div class="popup-div likes">
+		<div class="like padtop" style="width:80px">
+			<iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fautocardanywhere&amp;width&amp;layout=button_count&amp;action=like&amp;show_faces=false&amp;share=false&amp;height=21&amp;appId=286777138155782" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
+		</div>
+
+		<div class="like padtop" style="width:60px">
+			<iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:130px; height:20px;" 
+			src="https://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwww.autocardanywhere.com%2F&text=AutocardAnywhere - autocard popups on all websites you visit! -"></iframe>
+		</div>
+		
+		<div class="like" style="width:30px">
+			<a href="#" id="google-share-button"><img src="/img/gplus-24.png" alt="Share on Google+"/></a>
+  		</div>
+	</div>
+	-->
+
+	<div class="popup-div title">
+		<img src="Icon-48.png" class="logo" id="logo" />
+		<h3>AutocardAnywhere</h3>
+	</div>
+
+	<div class="popup-div">
+		<input type="checkbox" id="site-enabled-checkbox" /><label for="site-enabled-checkbox"> Enable on this site</label>
+	</div>
+
+	<div class="popup-div">
+		<button id="options-btn" target="_blank">Options</button>
+	</div>
+
+<script type="text/javascript" src="libs/parseuri.js"></script>
+<script type="text/javascript" src="popup.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AutocardAnywhere Options</title>
+<style>
+body {
+	font-family: 'Segoe UI',Frutiger,'Frutiger Linotype','Dejavu Sans','Helvetica Neue',Arial,sans-serif;
+	font-size: 0.9em;
+}
+.main {
+	width: 850px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.hidden {
+	display: none;
+}
+.title {
+	text-align: center;
+	font-weight: 800;
+	width: 850px;
+	height: 96px;
+}
+.likes {
+	width: 80px;
+	float: right;
+}
+.like {
+	margin-bottom: 5px;
+}
+ul {
+	list-style-type: none;
+}
+/* Space out between divs */
+div+div {
+	margin-top: 10px;
+}
+/* ...but not the indicators */
+.slide-indicator,.picker-indicator {
+	margin-top: 0px !important;
+}
+.picker {
+	width: 200px;
+	height: 200px;
+	float: left;
+}
+.slide {
+	width: 20px;
+	height: 200px;
+	float: left;
+}
+
+#link-style-div input[type=color] {
+    width: 30px;
+    margin-right: 5px;
+}
+#link-style-div input[type=checkbox] {
+    width: 25px;
+    margin-right: 5px;
+}
+
+#resizable { 
+	width: 150px;
+	height: 150px;
+	padding: 0.5em;
+}
+#resizable h3 {
+	text-align: center;
+	margin: 0;
+}
+.ui-state-focus a {
+	outline: none;
+}
+
+.customNickname.heading {
+	font-weight: 800;
+}
+
+.customNickname .dictionary {
+	float:left;
+	width: 330px;
+	margin-right: 5px;
+}
+.customNickname .nickname {
+	float:left;
+	width: 170px;
+	margin-right: 5px;
+}
+.customNickname .fullname {
+	float:left;
+	width: 190px;
+	margin-right: 5px;
+}
+
+.dictionarySettings {
+	float: right;
+}
+#sortable {list-style-type:none; margin:0; padding:0; width:550px;}
+#sortable li {margin:0 3px 3px 3px; padding:0.4em; padding-left:1.5em; height:24px;}
+#sortable li span {position:absolute; margin-left:-1.3em;}
+
+.icon {
+	padding-right:14px;
+	background-position:center right;
+	background-repeat:no-repeat;
+	background-image:url(data:image/gif;base64,R0lGODlhCwALAPcAAB9rwSJswiVvwzN4x0iGzFyT0mKX03im2n2p24ev3oqy35e74rzT7dPi89bk9Njl9OHr9+Xu+Ovy+fL2+////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwALAAAISAApCBxIUGCAAQgTDggggcKAggIJNHwIUaJDiBQUTLiIUSBFgQwaEPxIoUGCBxQQUBBQoMACgQ8OQHjooGaEgRAMBMCIYCGAgAA7);
+}
+</style>
+<link rel="stylesheet" href="libs/jquery-ui.min.css" />
+</head>
+<body>
+<div class="main hidden" id="overlay">
+	<img class="overlay" src="options.png"/>
+</div>
+
+<div class="main hidden" id="settings">
+	<!--
+	<div class="likes">
+		<div class="like">
+			<iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fautocardanywhere&amp;width&amp;layout=button_count&amp;action=like&amp;show_faces=false&amp;share=false&amp;height=21&amp;appId=286777138155782" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
+		</div>
+
+		<div class="like">
+			<iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:130px; height:20px;" 
+			src="https://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwww.autocardanywhere.com%2F&text=AutocardAnywhere - autocard popups on all websites you visit! -"></iframe>
+		</div>
+
+		<div class="like">
+			<a href="#" id="google-share-button"><img src="img/gplus-24.png" alt="Share on Google+"/></a>
+  		</div>
+
+  		<div id="google-dialog"></div>
+	</div>
+	-->
+
+	<div class="title">
+		<img src="Icon-48.png" class="logo" />
+		<h3>AutocardAnywhere Options</h3>
+	</div>
+
+	<div id="tabs">
+		<ul>
+			<li><a href="#tabs-1">Card Sets</a></li>
+			<li><a href="#tabs-2">Links</a></li>
+			<li><a href="#tabs-3">Popups</a></li>
+			<li><a href="#tabs-6">Currency</a></li>
+			<li><a href="#tabs-8">Nicknames</a></li>
+			<li><a href="#tabs-4">Ignored Cards</a></li>
+			<li><a href="#tabs-5">Sites</a></li>
+			<li><a href="#tabs-7">About</a></li>
+		</ul>
+
+		<div id="tabs-1">
+			<div id="link-language-div">
+				Card sets to link. Drag and drop to change priority order:<br/>
+				<i>(Enabling extra card sets will have an impact on performance.)</i>
+				<br/><br/>
+				<ul id="sortable"></ul>
+			</div>
+		</div>
+
+		<div id="tabs-2">
+			<div id="new-tab-div">
+				<input type="checkbox" id="new-tab-checkbox" /><label for="new-tab-checkbox"> Open links in new tab</label>
+			</div>
+			
+			<div id="replace-existing-links-div">
+				<input type="checkbox" id="replace-existing-links-checkbox" /><label for="replace-existing-links-checkbox"> Add popups to existing card links</label>
+			</div>
+
+			<div id="link-style-div">
+				Link style: <span id="link-preview">Card name</span>
+				<ul>
+					<li><input type="checkbox" id="bold-checkbox" /><label for="bold-checkbox"><b>Bold</b></label></li>
+					<li><input type="checkbox" id="italic-checkbox" /><label for="italic-checkbox"><em>Italic</em></label></li>
+					<li><input type="checkbox" id="underline-checkbox" /><label for="underline-checkbox"><u>Underline</u></label></li>
+					<li><input type="checkbox" id="dashed-checkbox" /><label for="dashed-checkbox" style="border-bottom:1px dashed;">Dashed underline</label></li>
+					<li><input type="checkbox" id="icon-checkbox" /><label for="icon-checkbox">Show Icon</label></li>
+				</ul>
+			</div>
+
+			<div id="link-colour-div" style="height:320px;">
+				Link colour:<br/><br/>
+				<input type="checkbox" id="colour-inherit-checkbox" /><label for="colour-inherit-checkbox">Use site's default colour</label><br/><br/>
+				<div id="colour-picker">
+					Colour: <input type="color" id="colour-textbox" />
+					<div class="cp-default" style="display: none;">
+						<div class="picker-wrapper"><div class="picker" id="picker"></div><div class="picker-indicator" id="picker-indicator"></div></div>
+						<div class="slide-wrapper"><div class="slide" id="slide"></div><div class="slide-indicator" id="slide-indicator"></div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="tabs-3">
+			<div id="enable-popups-div">
+				<input type="checkbox" id="enable-popups-checkbox" /><label for="enable-popups-checkbox"> Enable mouseover popups</label><br />
+			</div>
+			<div id="popup-language-div">
+				Popup image language <i>(Cards that have never been printed in the selected language will show the English language version instead)</i>:
+				<ul>
+					<li><input type="radio" id="popup-language-radio-original" name="popup-language-radio" value="original" /><label for="popup-language-radio-original"> Original language</label></li>
+					<li><input type="radio" id="popup-language-radio-en" name="popup-language-radio" value="en" /><label for="popup-language-radio-en"> English</label></li>
+					<li><input type="radio" id="popup-language-radio-de" name="popup-language-radio" value="de" /><label for="popup-language-radio-de"> Deutsch</label></li>
+					<li><input type="radio" id="popup-language-radio-fr" name="popup-language-radio" value="fr" /><label for="popup-language-radio-fr"> Français</label></li>
+					<li><input type="radio" id="popup-language-radio-it" name="popup-language-radio" value="it" /><label for="popup-language-radio-it"> Italiano</label></li>
+					<li><input type="radio" id="popup-language-radio-pt" name="popup-language-radio" value="pt" /><label for="popup-language-radio-pt"> Português</label></li>
+					<li><input type="radio" id="popup-language-radio-es" name="popup-language-radio" value="es" /><label for="popup-language-radio-es"> Español</label></li>
+					<li><input type="radio" id="popup-language-radio-ru" name="popup-language-radio" value="ru" /><label for="popup-language-radio-ru"> Русский язык</label></li>
+					<li><input type="radio" id="popup-language-radio-jp" name="popup-language-radio" value="jp" /><label for="popup-language-radio-jp"> 日本語</label></li>
+					<li><input type="radio" id="popup-language-radio-hans" name="popup-language-radio" value="hans" /><label for="popup-language-radio-hans"> 简体中文</label></li>
+					<li><input type="radio" id="popup-language-radio-hant" name="popup-language-radio" value="hant" /><label for="popup-language-radio-hant"> 繁體中文</label></li>
+					<li><input type="radio" id="popup-language-radio-ko" name="popup-language-radio" value="ko" /><label for="popup-language-radio-ko"> 한국어</label></li>
+				</ul>
+			</div>
+			<div id="enable-extra-info-div">
+				<input type="checkbox" id="enable-extra-info-checkbox" /><label for="enable-extra-info-checkbox"> Enable extra info on mouseover (e.g.: Oracle Text, Format Legality)</label><br />
+			</div>
+			<div id="popup-size-div">
+				Popup image size (Drag to resize)<br/><br/>
+				<div id="resizable" class="ui-widget-content" style="border:none; background-repeat:no-repeat; background-size:cover;"></div>
+			</div>
+			<div id="popup-animation-div">
+				Popup show animation
+				<ul>
+					<li><input type="radio" id="popup-show-radio-fadeIn" name="popup-show-radio" value="fadeIn" /><label for="popup-show-radio-fadeIn"> Fade In</label></li>
+					<li><input type="radio" id="popup-show-radio-slideDown" name="popup-show-radio" value="slideDown" /><label for="popup-show-radio-slideDown"> Roll Down</label></li>
+					<li><input type="radio" id="popup-show-radio-show" name="popup-show-radio" value="show" /><label for="popup-show-radio-show"> Slide Out</label></li>
+					<li>Duration (ms): <span id="popup-show-duration">0</span><br/><br/><div id="popup-show-duration-slider"></div></li>
+				</ul>
+				Popup hide animation
+				<ul>
+					<li><input type="radio" id="popup-hide-radio-fadeOut" name="popup-hide-radio" value="fadeOut" /><label for="popup-hide-radio-fadeOut"> Fade Out</label></li>
+					<li><input type="radio" id="popup-hide-radio-slideUp" name="popup-hide-radio" value="slideUp" /><label for="popup-hide-radio-slideUp"> Roll Up</label></li>
+					<li><input type="radio" id="popup-hide-radio-hide" name="popup-hide-radio" value="hide" /><label for="popup-hide-radio-hide"> Slide In</label></li>
+					<li>Duration (ms): <span id="popup-hide-duration">0</span><br/><br/><div id="popup-hide-duration-slider"></div></li>
+				</ul>
+				Carousel animation
+				<ul>
+					<li><input type="radio" id="popup-carousel-radio-backSlide" name="popup-carousel-radio" value="backSlide" /><label for="popup-carousel-radio-backSlide"> Back Slide</label></li>
+					<li><input type="radio" id="popup-carousel-radio-slide" name="popup-carousel-radio" value="slide" /><label for="popup-carousel-radio-slide"> Slide</label></li>
+					<li><input type="radio" id="popup-carousel-radio-goDown" name="popup-carousel-radio" value="goDown" /><label for="popup-carousel-radio-goDown"> Go Down</label></li>
+					<li><input type="radio" id="popup-carousel-radio-fade" name="popup-carousel-radio" value="fade" /><label for="popup-carousel-radio-fade"> Fade</label></li>
+					<li><input type="radio" id="popup-carousel-radio-fadeUp" name="popup-carousel-radio" value="fadeUp" /><label for="popup-carousel-radio-fadeUp"> Pop</label></li>
+				</ul>
+				<input type="checkbox" id="carousel-autoplay-checkbox" /><label for="carousel-autoplay-checkbox"> Auto play carousel</label>
+			</div>
+		</div>
+
+		<div id="tabs-6"></div>
+
+		<div id="tabs-8">
+			<div id="custom-nicknames-div">
+				<div class="customNickname heading">
+					<span class="dictionary">Card Set</span>
+					<span class="nickname">Nickname</span>
+					<span class="fullname">Full Name</span>
+					<span>&nbsp;</span>
+				</div>
+			</div>
+			<br/>
+			<button id="add-custom-nickname-button">Add New Nickname</button>
+			<button id="export-nicknames-button">Export List</button>
+			<button id="import-nicknames-button">Import List</button>
+			<br/><br/>
+			<div id="expand-nicknames-div">
+				<input type="checkbox" id="expand-nicknames-checkbox" /><label for="expand-nicknames-checkbox"> Expand nickname to full name</label>
+			</div>
+		</div>
+
+		<div id="tabs-4">
+			<div id="case-sensitive-div">
+				<input type="checkbox" id="case-sensitive-checkbox" /><label for="case-sensitive-checkbox"> Case sensitive (e.g. match "Wipe Away" but not "wipe away")</label>
+			</div>
+			<br/>
+			<div id="ignored-cards-div">
+				Ignored card names (one per line):<br />
+				<textarea id="ignored-cards-textbox" rows="20" cols="40"></textarea>
+			</div>
+		</div>
+
+		<div id="tabs-5">
+			<div id="blocked-sites-div">
+				<input type="radio" name="list-type-radio" id="list-type-radio1" value="blacklist" /><label for="list-type-radio1"> Enabled by default, disabled on listed sites (blacklist):</label><br />
+				<input type="radio" name="list-type-radio" id="list-type-radio2" value="whitelist" /><label for="list-type-radio2"> Disabled by default, enabled only on listed sites (whitelist):</label><br />
+				<textarea id="listed-sites-textbox" rows="20" cols="40"></textarea>
+			</div>
+		</div>
+		<div id="tabs-7">
+			<h3>AutocardAnywhere&nbsp;<span id="versionNumber"></span></h3>
+			<ul>
+				<li>Copyright (c) 2011-<span id="currentYear"></span> Obtuse Goose Ltd</li>
+				<li>Last data update: <span id="lastUpdate"></span></li>
+		  		<li>Licensed under <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL 2.0</a></li>
+		  		<li>&nbsp;</li>
+				<li><a href="http://www.autocardanywhere.com/">Website</a></li>
+		  		<li>&nbsp;</li>
+				<li><a href="http://www.autocardanywhere.com/contact.php">Comments, queries, bug reports and suggestions</a></li>
+	  		</ul>
+	  		<h3>Credits</h3>
+			<p>Thanks to the following talented people whose work I've used:</p>
+			<ul>
+				<li><a href="https://www.vickidalton.com/">Vicki Dalton</a> - The AutocardAnywhere icon and promotional images</li>
+				<li>&nbsp;</li>
+				<li><a href="https://jquery.com/">jQuery</a> - The jQuery Foundation (<a href="https://jquery.org/license/">MIT Licence</a>)</li>
+				<li><a href="https://jqueryui.com/">jQuery UI</a> - The jQuery Foundation (<a href="https://jquery.org/license/">MIT Licence</a>)</li>
+				<li><a href="https://github.com/maranomynet/linkify">Linkify</a> - Már Örlygsson (dual licensed under the <a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a> and <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2 Licences</a>)</li>
+				<li><a href="https://atomiks.github.io/tippyjs/">Tippy.js</a> - atomiks (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT Licence</a>)</li>
+				<li><a href="https://swiperjs.com/">Swiper</a> - NO LIMITS 4 WEB (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT Licence</a>) </li>
+				<li><a href="https://stevenlevithan.com">ParseURI</a> - Steven Levithan (<a href="http://opensource.org/licenses/mit-license.php">MIT Licence</a>)</li>
+				<li><a href="https://invokeit.wordpress.com/frequency-word-lists/">Word lists</a> - Hermit Dave (<a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Licence</a>)</li>
+	  		</ul>
+	  		<h3>Data sources:</h3>
+	  		<ul>
+	  			<li><a href="https://tcgplayer.com?partner=AUTOANY">TCGPlayer</a> - Paper card prices</li>
+	  			<li><a href="https://scryfall.com">Scryfall</a> - MTG card images, data and online card prices</li>
+	  			<li><a href="https://github.com/fawazahmed0/currency-api">Currency API</a> - Exchange rate data</li>
+	  		</ul>
+		</div>
+	</div>
+</div>
+
+<div id="dialogs"></div>
+
+<script type="text/javascript" src="libs/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="libs/jquery-ui-1.12.1.min.js"></script>
+<script type="text/javascript" src="games/dictionary.js"></script>
+<script type="text/javascript" src="games/games.js"></script>
+<script type="text/javascript" src="settings.js"></script>
+<script type="text/javascript" src="options.js"></script>
+
+</body>
+</html>
