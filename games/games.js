@@ -1694,7 +1694,7 @@ MtgDictionary.prototype.createPriceElement = function(href, text1, text2, colour
 	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
 	
 	$(priceDiv).on('mouseover', function() {
-		this.style.backgroundColor = '#F5F6F7';
+		this.style.backgroundColor = '#eaeaeb';
 	});
 	$(priceDiv).on('mouseout', function() {
 		this.style.backgroundColor = '#ffffff';
