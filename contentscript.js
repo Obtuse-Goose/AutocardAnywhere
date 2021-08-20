@@ -1,4 +1,4 @@
-if (typeof browser !== 'undefined') {let chrome = browser;}
+if (typeof chrome !== 'undefined') {var browser = chrome;}
 let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
@@ -154,7 +154,7 @@ let AutocardAnywhere = {
 			return safari.extension.baseURI + filename;
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			return chrome.runtime.getURL(filename);
+			return browser.runtime.getURL(filename);
 		}
 	},
 	getCurrentUrl: function() {
@@ -910,7 +910,7 @@ let AutocardAnywhere = {
 			}, false);
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			chrome.runtime.onMessage.addListener(function(request) {
+			browser.runtime.onMessage.addListener(function(request) {
 				if (request.name == 'contextmenuitemclick') { AutocardAnywhere.contextMenuClick(); }
 			});
 		}
@@ -1100,7 +1100,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.loaded = true;
 		}
 		else { // disabled on this site
-			if (!AutocardAnywhereSettings.isSafari) {chrome.runtime.sendMessage({'name': 'disableIcon'})}
+			if (!AutocardAnywhereSettings.isSafari) {browser.runtime.sendMessage({'name': 'disableIcon'})}
 		}
 	}
 }

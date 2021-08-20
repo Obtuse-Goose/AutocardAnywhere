@@ -1,4 +1,4 @@
-if (typeof browser !== 'undefined') {let chrome = browser;}
+if (typeof chrome !== 'undefined') {var browser = chrome;}
 let prefix = 'autocardAnywhere';
 let isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1);
 let listedSites = '';
@@ -18,7 +18,7 @@ function getSettingsURL() {
 		return safari.extension.baseURI + 'options.html';
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		return chrome.runtime.getURL('options.html');
+		return browser.runtime.getURL('options.html');
 	}
 }
 
@@ -38,7 +38,7 @@ function getCurrentHost(callback) {
 		callback(parseUri(safari.application.activeBrowserWindow.activeTab.url).host.toLowerCase());
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+		browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
 			// Check the current site isn't already on the list
 			callback(parseUri(tabs[0].url).host.toLowerCase());
 	    });
@@ -103,7 +103,7 @@ function settingsClick() {
     	safari.extension.popovers[0].hide();
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.tabs.create({
+		browser.tabs.create({
 			url: getSettingsURL()
 		});
 		// Close the popup
@@ -114,7 +114,7 @@ function settingsClick() {
 /*
 function showGoogleDialog() {
 	window.open(
-		"https://plus.google.com/share?url=https://chrome.google.com/webstore/detail/eobkhgkgoejnjaiofdmphhkemmomfabg", 
+		"https://plus.google.com/share?url=https://browser.google.com/webstore/detail/eobkhgkgoejnjaiofdmphhkemmomfabg", 
 		'', 
 		'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=550,width=400'
 	);

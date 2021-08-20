@@ -1,4 +1,4 @@
-if (typeof browser !== 'undefined') {let chrome = browser;}
+if (typeof chrome !== 'undefined') {var browser = chrome;}
 AutocardAnywhereGuid = function() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 	    let r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
@@ -160,7 +160,7 @@ AutocardAnywhereSettings = {
 			safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': prefix, 'settings': settings});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			chrome.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
+			browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
 		}
 	},
 	parser: new DOMParser(),
@@ -187,7 +187,7 @@ AutocardAnywhereSettings = {
 			return safari.extension.displayVersion;
 		}
 		else if (!AutocardAnywhereSettings.isBookmarklet) { // Chrome, Opera, Firefox or Edge
-			return chrome.runtime.getManifest().version;
+			return browser.runtime.getManifest().version;
 		}
 		return '';
 	}

@@ -1,4 +1,4 @@
-if (typeof browser !== 'undefined') {let chrome = browser;}
+if (typeof chrome !== 'undefined') {var browser = chrome;}
 let dictionaries = [];
 
 function getItem(key) {
@@ -71,7 +71,7 @@ function getURL(filename) {
 		return safari.extension.baseURI + filename;
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		return chrome.runtime.getURL(filename);
+		return browser.runtime.getURL(filename);
 	}
 }
 
@@ -81,7 +81,7 @@ function openURL(url) {
 		window.open(url, '_blank');
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.tabs.create({'url': url});
+		browser.tabs.create({'url': url});
 	}
 }
 
@@ -174,7 +174,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 				//delete dictionaries[gameName + gameLanguage];
 				let item = {};
 				item[gameName] = response;
-				chrome.storage.local.set(item, function() {
+				browser.storage.local.set(item, function() {
 					delete dictionaries[gameName + gameLanguage];
 				});
 			});
@@ -190,7 +190,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 				//delete dictionaries[gameName + gameLanguage];
 				let item = {};
 				item[gameName + gameLanguage] = response;
-				chrome.storage.local.set(item, function() {
+				browser.storage.local.set(item, function() {
 					delete dictionaries[gameName + gameLanguage];
 				});
 			});
@@ -264,7 +264,7 @@ function getDictionary(port, request) {
 		checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
 	}
 
-	chrome.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
+	browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
 		if (dictionaries[gameName + gameLanguage]) {
 			//console.log('found data in memory');
 			
@@ -394,8 +394,8 @@ function onRequest(request, sender, sendResponse) {
 		}
 	}
 	else if (request.name == "disableIcon") {
-		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-			chrome.browserAction.setIcon({
+		browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			browser.browserAction.setIcon({
 				'path': 'Icon-24-grey.png',
 				'tabId': tabs[0].id
 			});
@@ -429,26 +429,26 @@ if (AutocardAnywhereSettings.isSafari) {
 }
 else { // Chrome, Opera, Firefox or Edge
 	// Simple messages
-	chrome.runtime.onMessage.addListener(onRequest);
+	browser.runtime.onMessage.addListener(onRequest);
 	// Persistent connections
-	chrome.runtime.onConnect.addListener(onConnect);
+	browser.runtime.onConnect.addListener(onConnect);
 
 	// Add the context menu item
-	chrome.contextMenus.removeAll(function() {
-		chrome.contextMenus.create({
+	browser.contextMenus.removeAll(function() {
+		browser.contextMenus.create({
 			id: 'autocardanywherecontextmenuitem',
 			title: 'AutocardAnywhere Lookup',
 			contexts: ["selection"],
 			onclick: function(info, tab) {
-				chrome.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
+				browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
 			}
 		});
 	});
 
 	// On first install open the options page
-	chrome.runtime.onInstalled.addListener(function(details) {
+	browser.runtime.onInstalled.addListener(function(details) {
 		if (details.reason == 'install') {
-			openURL(chrome.runtime.getURL('options.html'));
+			openURL(browser.runtime.getURL('options.html'));
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
 	});

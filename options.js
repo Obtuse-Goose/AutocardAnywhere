@@ -1,4 +1,4 @@
-if (typeof browser !== 'undefined') {let chrome = browser;}
+if (typeof chrome !== 'undefined') {var browser = chrome;}
 let cp;
 let oldValue;
 let dictionaries = [];
@@ -339,7 +339,7 @@ function save(settings) {
 		safari.self.tab.dispatchMessage('saveSettings', {'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.runtime.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
+		browser.runtime.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 	}
 };
 
@@ -625,7 +625,7 @@ function showDialog(settings, values, game, language) {
 /*
 function showGoogleDialog() {
 	window.open(
-		"https://plus.google.com/share?url=https://chrome.google.com/webstore/detail/eobkhgkgoejnjaiofdmphhkemmomfabg", 
+		"https://plus.google.com/share?url=https://browser.google.com/webstore/detail/eobkhgkgoejnjaiofdmphhkemmomfabg", 
 		'', 
 		'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=400'
 	);
@@ -645,7 +645,7 @@ function loadCardlistSettings(settings, game, language) {
 		safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': AutocardAnywhereSettings.prefix + game + language, 'settings': settings});
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.runtime.sendMessage({'name': 'loadSettings', 'prefix': AutocardAnywhereSettings.prefix + game + language, 'settings': settings}, function(response) {
+		browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': AutocardAnywhereSettings.prefix + game + language, 'settings': settings}, function(response) {
 			showDialog(settings, response, game, language);
 		});
 	}
@@ -656,7 +656,7 @@ function getURL(filename) {
 		return safari.extension.baseURI + filename;
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		return chrome.runtime.getURL(filename);
+		return browser.runtime.getURL(filename);
 	}
 };
 
@@ -673,6 +673,6 @@ $(function() {
 		safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': AutocardAnywhereSettings.prefix, 'settings': AutocardAnywhereSettings.settings});
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		chrome.runtime.sendMessage({'name': 'loadSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': AutocardAnywhereSettings.settings}, loadSettings);
+		browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': AutocardAnywhereSettings.settings}, loadSettings);
 	}
 });
