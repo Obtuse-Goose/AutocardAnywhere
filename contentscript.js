@@ -154,7 +154,7 @@ let AutocardAnywhere = {
 			return safari.extension.baseURI + filename;
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			return chrome.extension.getURL(filename);
+			return chrome.runtime.getURL(filename);
 		}
 	},
 	getCurrentUrl: function() {

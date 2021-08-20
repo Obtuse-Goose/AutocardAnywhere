@@ -71,7 +71,7 @@ function getURL(filename) {
 		return safari.extension.baseURI + filename;
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		return chrome.extension.getURL(filename);
+		return chrome.runtime.getURL(filename);
 	}
 }
 
@@ -448,7 +448,7 @@ else { // Chrome, Opera, Firefox or Edge
 	// On first install open the options page
 	chrome.runtime.onInstalled.addListener(function(details) {
 		if (details.reason == 'install') {
-			openURL(chrome.extension.getURL('options.html'));
+			openURL(chrome.runtime.getURL('options.html'));
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
 	});

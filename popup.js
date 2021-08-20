@@ -18,7 +18,7 @@ function getSettingsURL() {
 		return safari.extension.baseURI + 'options.html';
 	}
 	else { // Chrome, Opera, Firefox or Edge
-		return chrome.extension.getURL('options.html');
+		return chrome.runtime.getURL('options.html');
 	}
 }
 
