@@ -26,7 +26,7 @@ let AutocardAnywhere = {
         };
         return d[len1][len2];
     },
-	ajax: function(url, callback, isXml) {
+	ajax: function(url, callback) {
 		// Performs an ajax call in the manner accepted by each browser.
 		if (AutocardAnywhereSettings.isBookmarklet) {
 			let xmlhttp = new XMLHttpRequest();
@@ -41,12 +41,7 @@ let AutocardAnywhere = {
 		else if (AutocardAnywhereSettings.isSafari) {
 			function getResponse(event) {
 				if ((event.name != "getFileCallback") || (event.message.url != url)) {return}
-				if (isXml) {
-					callback($.parseXML(event.message.data));
-				}
-				else {
-					callback(event.message.data);
-				}
+				callback(event.message.data);
 			}
 			safari.self.addEventListener("message", getResponse, false);
 			safari.self.tab.dispatchMessage("getFile", {'url': url});
@@ -55,15 +50,10 @@ let AutocardAnywhere = {
 			function messageReceived(response) {
 				if (response.url != url) {return}
 				AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
-				if (response.isXml) {
-					callback($.parseXML(response.data));
-				}
-				else {
-					callback(response.data);
-				}
+				callback(response.data);
 			}
 			AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
-			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url, 'isXml': isXml});
+			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
 		}
 	},
 	format: function(s, card, dictionary) {
@@ -136,9 +126,9 @@ let AutocardAnywhere = {
 		result.style.fontSize = AutocardAnywhere.fontSize + 'px';
 		result.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 		result.style.fontFamily = AutocardAnywhereSettings.priceFont;
-		result.style.textAlign = 'center';
-		result.style.color = '#000000';
-		result.style.backgroundColor = '#ffffff';
+		//result.style.textAlign = 'center';
+		//result.style.color = '#000000';
+		//result.style.backgroundColor = '#ffffff';
 		if (className) {
 			result.className = className;
 		}
@@ -146,37 +136,6 @@ let AutocardAnywhere = {
 			result.style.paddingTop = '12px';
 			result.appendChild(document.createTextNode(text));
 		}
-		return result;
-	},
-	createPriceElement: function(href, text1, text2, colour, position, count) {
-		let result = document.createElement("a");
-		result.href = href;
-		if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
-
-		let priceDiv = document.createElement("div");
-		priceDiv.appendChild(document.createTextNode(text1));
-		priceDiv.appendChild(document.createElement('br'));
-		priceDiv.appendChild(document.createTextNode(text2));
-		priceDiv.style.setProperty('background-color', colour, 'important');
-		priceDiv.style.marginTop = '5px';
-		priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
-		priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
-		priceDiv.style.textAlign = 'center';
-		priceDiv.style.color = '#414DD3';
-		priceDiv.style.fontWeight = 'normal';
-		priceDiv.style.float = 'left';
-		priceDiv.style.width = (Math.floor(100 / count)) + '%';
-		priceDiv.style.padding = '5px 0 5px 0';
-		priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
-		priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
-		priceDiv.addEventListener('mouseover', function() {
-			this.style.textDecoration="underline";
-		});
-		priceDiv.addEventListener('mouseout', function() {
-			this.style.textDecoration="none";
-		});
-
-		result.appendChild(priceDiv);
 		return result;
 	},
 	replaceSelection: function(element) {
@@ -291,6 +250,7 @@ let AutocardAnywhere = {
 				if (!cards) {return}
 				let cardsElement = document.createElement("div");
 				cardsElement.className = 'autocardanywhere-popup';
+				cardsElement.style.backgroundColor = '#F5F6F7';
 
 				// If there are multiple cards to display, use a carousel...
 				let width = AutocardAnywhere.popupWidth;
@@ -319,6 +279,12 @@ let AutocardAnywhere = {
 					paginationElement.className = 'swiper-pagination';
 					result.appendChild(paginationElement);
 				}
+				/*
+				let ignore = document.createElement("a");
+				ignore.href = 'https://www.google.com';
+				ignore.appendChild(document.createTextNode('Ignore this card in future'));
+				result.appendChild(ignore);
+				*/
             	return result;
 			}
 			
@@ -348,9 +314,8 @@ let AutocardAnywhere = {
 					// If this tooltip has already been rendered, do nothing
 					if (target.data('popup')) return;
 
-					content.find('.autocardanywhere-stub').addClass('autocardanywhere-loading').removeClass('autocardanywhere-stub');
-
 					let paginationNumbers = false;
+					let extraInfoEnabled = false;
 					// Run through each of the cards in this popup
 					cards.map(function(card) {
 						let dictionary = AutocardAnywhere.dictionaries[card.game + card.language];
@@ -372,38 +337,17 @@ let AutocardAnywhere = {
 										function(response) {
 											// Set the content of any matching price divs upon successful retrieval
 											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
-										},
-										true
+										}
 									);
 								});
 							}
 						}
 
-						// Get the online price of the card
-						if (dictionary.settings.enableOnlinePrices) { // An element will only be returned if enablePrices is set on the dictionary
-							if (content.find('.autocardanywhere-online-price').length == 0) {
-								// Get the card price from the location specified in the dictionary...
-								AutocardAnywhere.ajax(
-									AutocardAnywhere.format(dictionary.settings.onlinePriceURL, card, dictionary),
-									function(response) {
-										// Set the content of any matching price divs upon successful retrieval
-										$('.autocardanywhere-online-prices-' + card.id).replaceWith(dictionary.parseOnlinePriceData(card, response));
-									}
-								);
-							}
-						}
-
 						// Fill-in the extra info data if extra info is enabled and any is configured for this game...
-						if (AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0)) {
+						extraInfoEnabled = AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0);
+						if (extraInfoEnabled) {
 							let dataDivClass = '.autocardanywhere-data-' + dictionary.game + dictionary.language + '-' + card.id;
 							if (content.find(dataDivClass + '.autocardanywhere-loaded').length == 0) {
-								content.find('img, ' + dataDivClass).on('mouseover', function() {
-									content.find(dataDivClass).show();
-								});
-								content.find('.autocardanywhere-loading').on('mouseout', function() {
-									content.find(dataDivClass).hide();
-								});
-
 								content.find(dataDivClass + ' button').on('click', function() {
 									let dataDiv = content.find(dataDivClass);
 									dataDiv.find('.autocardanywhere-data-section').hide();
@@ -422,31 +366,10 @@ let AutocardAnywhere = {
 													dictionary.parseExtraInfo(response, section, card)
 												).addClass('autocardanywhere-loaded');
 											});
-										},
-										false
+										}
 									);
 								});
 							}
-						}
-					});
-
-					// Check if the image has loaded
-					content.find('.autocardanywhere-loading img').on('load', function() {
-						//let loadingDiv = $(this).parents('.autocardanywhere-loading');
-						//loadingDiv.removeClass('autocardanywhere-loading');
-						content.find('.autocardanywhere-loading').removeClass('autocardanywhere-loading');
-					})
-					.on('error', function() {
-						let loadingDiv = $(this).parents('.autocardanywhere-loading');
-						loadingDiv.removeClass('autocardanywhere-loading');
-						loadingDiv.addClass('autocardanywhere-broken');
-					})
-					.each(function() {
-						if (this.complete) {
-							$(this).load();
-						} 
-						else if (this.error) {
-							$(this).error();
 						}
 					});
 
@@ -469,6 +392,36 @@ let AutocardAnywhere = {
 							}
 						});
 					}
+
+					// If extra info is enabled, setup listeners to show/hide it on mouseover/out.
+					if (extraInfoEnabled) {
+						content.find('.autocardanywhere-loading').on('mouseover', function() {
+							$(this).find('.autocardanywhere-data').show();
+						});
+						content.find('.autocardanywhere-loading').on('mouseout', function() {
+							$(this).find('.autocardanywhere-data').hide();
+						});
+					}
+
+					// Check if the image has loaded
+					content.find('.autocardanywhere-loading img').on('load', function() {
+						let loadingDiv = $(this).parents('.autocardanywhere-loading');
+						loadingDiv.removeClass('autocardanywhere-loading');
+						//content.find('.autocardanywhere-loading').removeClass('autocardanywhere-loading');
+					})
+					.on('error', function() {
+						let loadingDiv = $(this).parents('.autocardanywhere-loading');
+						loadingDiv.removeClass('autocardanywhere-loading');
+						loadingDiv.addClass('autocardanywhere-broken');
+					})
+					.each(function() {
+						if (this.complete) {
+							$(this).load();
+						} 
+						else if (this.error) {
+							$(this).error();
+						}
+					});
 
 					target.data('popup', 1);
 				}

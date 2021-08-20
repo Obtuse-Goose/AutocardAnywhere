@@ -174,7 +174,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	result.dataset.url = linkHref;
 
 	let cardDiv = document.createElement("div");
-	cardDiv.className = 'autocardanywhere-stub';
+	cardDiv.className = 'autocardanywhere-loading';
 	cardDiv.style.height = AutocardAnywhere.popupHeight + 'px';
 	cardDiv.style.width = AutocardAnywhere.popupWidth + 'px';
 	let cardImg = document.createElement("img");
@@ -248,7 +248,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 
 		let buttonWidth = Math.round(96 / sectionCount);
 
-		extraInfoDiv.className = 'autocardanywhere-data-' + this.game + this.language + '-' + card.id;
+		extraInfoDiv.className = 'autocardanywhere-data autocardanywhere-data-' + this.game + this.language + '-' + card.id;
 		extraInfoDiv.style.display = 'none';
 		extraInfoDiv.style.position = 'absolute';
 		extraInfoDiv.style.width = overlayWidth + 'px';
@@ -262,7 +262,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		extraInfoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 		extraInfoDiv.style.left = '0px';
 		extraInfoDiv.style.top = '0px';
-		if (card.rotate == 90 || linkCount == 1) {
+		if (card.rotate == 90) {
 			extraInfoDiv.style.top = '6px';
 		}
 
@@ -323,22 +323,17 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		let result = document.createElement("div");
 		result.style.textDecoration = 'none';
 		result.style.fontWeight = 400;
-		result.style.height = '36px';
+		//result.style.height = '36px';
 		return result;
 	}
 
 	if (this.settings.enablePrices || this.settings.enableOnlinePrices) {
 		let outerDiv = createOuterPriceDiv();
 		let pricesDiv;
-		let onlinePricesDiv;
 
 		if (this.settings.enablePrices) {
 			pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id, 'Loading price data...');
 			outerDiv.appendChild(pricesDiv);
-		}
-		if (this.settings.enableOnlinePrices) {
-			onlinePricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-online-prices-' + card.id, '', true);
-			outerDiv.appendChild(onlinePricesDiv);
 		}
 		result.appendChild(outerDiv);
 	}
@@ -367,7 +362,39 @@ Dictionary.prototype.formatCurrency = function(value) {
 	}
 	return result;
 };
-Dictionary.prototype.parsePriceData = function(card, xmlDoc, currencyExchangeRate) {
+Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, position, count) {
+	let result = document.createElement("a");
+	result.href = href;
+	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
+
+	let priceDiv = document.createElement("div");
+	priceDiv.appendChild(document.createTextNode(text1));
+	priceDiv.appendChild(document.createElement('br'));
+	priceDiv.appendChild(document.createTextNode(text2));
+	priceDiv.style.setProperty('background-color', colour, 'important');
+	priceDiv.style.marginTop = '5px';
+	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
+	priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
+	priceDiv.style.textAlign = 'center';
+	priceDiv.style.color = '#414DD3';
+	priceDiv.style.fontWeight = 'normal';
+	priceDiv.style.float = 'left';
+	priceDiv.style.width = (Math.floor(100 / count)) + '%';
+	priceDiv.style.padding = '5px 0 5px 0';
+	priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
+	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
+	priceDiv.addEventListener('mouseover', function() {
+		this.style.textDecoration="underline";
+	});
+	priceDiv.addEventListener('mouseout', function() {
+		this.style.textDecoration="none";
+	});
+
+	result.appendChild(priceDiv);
+	return result;
+};
+Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
+	let xmlDoc = $.parseXML(response);
 	let priceLinkHref = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, this) + AutocardAnywhereSettings.partnerString;
 	let pricesDiv = AutocardAnywhere.createPricesElement();
 
@@ -385,9 +412,9 @@ Dictionary.prototype.parsePriceData = function(card, xmlDoc, currencyExchangeRat
 		let priceCount = 2;
 		if (enableFoil) priceCount++;
 		if (this.settings.enableOnlinePrices) priceCount++;
-		pricesDiv.appendChild(AutocardAnywhere.createPriceElement(priceLinkHref, 'Low', lowPrice, '#FCD1D1', 'left', priceCount));
-		pricesDiv.appendChild(AutocardAnywhere.createPriceElement(priceLinkHref, 'Median', avgPrice, '#D1DFFC', (this.settings.enableOnlinePrices || enableFoil) ? 'centre' : 'right', priceCount));
-		if (enableFoil) { pricesDiv.appendChild(AutocardAnywhere.createPriceElement(priceLinkHref, 'Foil', foilPrice, '#FFCAB1', this.settings.enableOnlinePrices ? 'centre' : 'right', priceCount)); }
+		pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Low', lowPrice, '#FCD1D1', 'left', priceCount));
+		pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Median', avgPrice, '#D1DFFC', (this.settings.enableOnlinePrices || enableFoil) ? 'centre' : 'right', priceCount));
+		if (enableFoil) { pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Foil', foilPrice, '#FFCAB1', this.settings.enableOnlinePrices ? 'centre' : 'right', priceCount)); }
 	}
 	else {
 		pricesDiv.style.paddingTop = '12px';

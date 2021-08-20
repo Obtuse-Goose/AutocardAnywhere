@@ -161,13 +161,14 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 
 	//console.log('Updating data for: ' + gameName + gameLanguage);
 	// Check if there are updated files available. If so, download them and store in localstorage.
-	let gameDataUrl = 'https://update.autocardanywhere.com/' + gameName + '-data.json';
-	let languageDataUrl = 'https://update.autocardanywhere.com/' + gameLanguage + '-data.json';
+	let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@4/games/';
+	let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
+	let languageDataUrl = baseUrl + gameName + '/' + gameLanguage + '-data.json';
 	
-	headFile(gameDataUrl, function(response) {
-		let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
+	//headFile(gameDataUrl, function(response) {
+	//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
 		//console.log(lastModified);
-		if (lastModified > lastUpdate) {
+	//	if (lastModified > lastUpdate) {
 			getFile(gameDataUrl, function(response) {
 				//setItem(requestPrefix + gameName, response);
 				//delete dictionaries[gameName + gameLanguage];
@@ -177,13 +178,13 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 					delete dictionaries[gameName + gameLanguage];
 				});
 			});
-		}
-	});
+	//	}
+	//});
 	
-	headFile(languageDataUrl, function(response) {
-		let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
+	//headFile(languageDataUrl, function(response) {
+	//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
 		//console.log(lastModified);
-		if (lastModified > lastUpdate) {
+	//	if (lastModified > lastUpdate) {
 			getFile(languageDataUrl, function(response) {
 				//setItem(requestPrefix + gameName + gameLanguage, response);
 				//delete dictionaries[gameName + gameLanguage];
@@ -193,8 +194,8 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 					delete dictionaries[gameName + gameLanguage];
 				});
 			});
-		}
-	});
+	//	}
+	//});
 
 	saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now}, false);
 	saveSettings(requestPrefix, {'lastDataUpdate': now}, false);
@@ -336,7 +337,7 @@ function onConnect(port) {
 		}
 		else if (request.type == "file") { // Requested a file by url
 			getFile(request.url, function(response) {
-				port.postMessage({'url': request.url, 'isXml': request.isXml, 'data': response});
+				port.postMessage({'url': request.url, 'data': response});
 			});
 		}
 	});

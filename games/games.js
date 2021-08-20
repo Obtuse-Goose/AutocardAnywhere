@@ -1427,7 +1427,8 @@ MtgDictionary.prototype = new Dictionary({
 			'name': 'priceURL',
 			'type': 'string',
 			'resetToDefault': true,
-			'default': 'https://partner.tcgplayer.com/x3/phl.asmx/p?pk=AUTOANY&s=&p=<name:simple>'
+			//'default': 'https://partner.tcgplayer.com/x3/phl.asmx/p?pk=AUTOANY&s=&p=<name:simple>'
+			'default': 'https://api.scryfall.com/cards/<id>'
 		},
 		{
 			'name': 'onlinePriceURL',
@@ -1436,14 +1437,21 @@ MtgDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enablePrices',
-			'description': 'Display card prices (provided by TCGPlayer)',
+			'description': 'Display card prices',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
 		},
 		{
+			'name': 'enableFoilPrices',
+			'description': 'Display foil card prices',
+			'type': 'boolean',
+			'default': false,
+			'controlType': 'checkbox'
+		},
+		{
 			'name': 'enableOnlinePrices',
-			'description': 'Display online card prices (provided by Scryfall)',
+			'description': 'Display online card prices',
 			'type': 'boolean',
 			'default': false,
 			'controlType': 'checkbox'
@@ -1490,31 +1498,6 @@ MtgDictionary.prototype = new Dictionary({
 				're': '"set_name":"(.*?)"'
 			}]
 		}
-		/*
-		{
-			'url': 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>',
-			'sections': [{
-				'name': 'oracletext',
-				'description': 'Oracle',
-				're': '<div class="label"[^>]*>\r\n[^A-Z<]*(Card Text:|Mana Cost:|Types:|<b>P/T:</b>|Loyalty:)</div>[^<]*<div class="value">\r\n\s*(.*)\r\n[^<]*</div>'
-			}]
-		},
-		{
-			'url': 'https://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid=<id>',
-			'sections': [
-				{
-					'name': 'legality',
-					'description': 'Format',
-					're': '>\r\n(.*)\r\n.*?</td>\r\n.*?<td style="text-align:center;">\r\ns*(.*?)\r\n.*?</td>\r\n.*?<td id="ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_LegalityList'
-				},
-				{
-					'name': 'sets',
-					'description': 'Set',
-					're': '<img id="ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_PrintingsList_listRepeater_ctl\\d\\d_cardSymbol"[^>]*alt="([^"]*)"[^>]*>'
-				}
-			]
-		}
-		*/
 	]
 });
 
@@ -1529,7 +1512,11 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	function addLine(div, text, indented, capitalised) {
 		if (!text) return;
-		text = text.replace(/[{}]/g, '');
+		text = 
+			text.replace(/[{}]/g, '')
+			.replace('historicbrawl', 'historic brawl')
+			.replace('paupercommander', 'Pauper Commander')
+			.replace('duel', 'Duel Commander');
 
 		let line = document.createElement("div");
 		line.appendChild(document.createTextNode(text));
@@ -1590,6 +1577,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 		else if (section.name == 'legality') {
 			$.each(card.legalities, function(legality) {
+				if (legality == 'oldschool') return;
 				addLine(result, (legality + ': ' + card.legalities[legality]).replace('_', ' '), false, true);
 			});
 			break;
@@ -1671,72 +1659,93 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	card.id = card[this.language] ? card[this.language] : card.en;
 	return card;
 };
-MtgDictionary.prototype.parseOnlinePriceData = function(card, json) {
-	let data = $.parseJSON(json);
-	if (!data || !data.prices) return;
-	let pricesDiv = AutocardAnywhere.createPricesElement();
-	//let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-online-prices-' + card.id, '', true);
-			
+MtgDictionary.prototype.createPriceElement = function(href, text1, text2, colour, position, count) {
+	let result = document.createElement("a");
+	result.href = href;
+	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
 
-	if (data.prices.tix) {
-		pricesDiv.appendChild(AutocardAnywhere.createPriceElement('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=' + card.name + '&' + AutocardAnywhereSettings.partnerString, 'Online', data.prices.tix + ' tix', '#D9FCD1', 'right', (this.settings.enablePrices ? 4 : 1)));
-		//pricesDiv.appendChild(AutocardAnywhere.createPriceElement('https://www.cardhoarder.com/cards/' + '?' + AutocardAnywhereSettings.partnerString, 'Online Foil', data.prices.tix + ' tix', '#FFCAB1', 'right', 2));
-	}
-	else {
-		pricesDiv.appendChild(AutocardAnywhere.createPriceElement('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=' + card.name + '&' + AutocardAnywhereSettings.partnerString, 'Online', 'Search', '#D9FCD1', 'right', (this.settings.enablePrices ? 4 : 1)));
-		
-	}
-	return pricesDiv;
+	let priceDiv = document.createElement("div");
+	let left = document.createElement("div");
+	let right = document.createElement("div");
+	left.style.float = 'left';
+	right.style.float = 'left';
+	left.style.width = '67%';
+	right.style.width = '33%';
+	left.appendChild(document.createTextNode('Buy at ' + text1));
+	right.appendChild(document.createTextNode(text2));
+	priceDiv.appendChild(left);
+	priceDiv.appendChild(right);
+	//priceDiv.style.setProperty('background-color', colour, 'important');
+	priceDiv.style.height = '16px';
+	priceDiv.style.marginTop = '2px';
+	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
+	priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
+	//priceDiv.style.textAlign = 'center';
+	//priceDiv.style.color = '#414DD3';
+	priceDiv.style.color = '#000000';
+	priceDiv.style.fontWeight = 'normal';
+	//priceDiv.style.float = 'left';
+	//priceDiv.style.width = (Math.floor(100 / count)) + '%';
+	priceDiv.style.padding = '4px';
+	//priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
+	priceDiv.style.borderColor = colour;
+	priceDiv.style.borderWidth = '3px';
+	priceDiv.style.borderStyle = 'solid';
+	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
+	
+	$(priceDiv).on('mouseover', function() {
+		this.style.backgroundColor = '#F5F6F7';
+	});
+	$(priceDiv).on('mouseout', function() {
+		this.style.backgroundColor = '#ffffff';
+	});
+	
+
+	result.appendChild(priceDiv);
+	return result;
 };
+MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
+	let dictionary = this;
+	let data = JSON.parse(response);
+	let tcgplayerLink = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
+	let cardmarketLink = '';
+	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
+	
+	let pricesDiv = AutocardAnywhere.createPricesElement();
 
-/*
-MtgDictionary.prototype.parseCardhoarderPriceData = function(card, json) {
+	if (data.prices) {
+		let prices = data.prices;
+		let tcgPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd);
+		let cardmarketPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur);
 
-	function findMin(cards, isFoil, inStockOnly) {
-		let min = -1;
-		let minId = 0;
-		for (let i in cards) {
-			let card = cards[i].Card;
-			if ((card.quantity > 0) || !inStockOnly) {
-				if (isFoil == card.is_foil) {
-					if (card.sell < min || min === -1) {
-						min = card.sell;
-						minId = card.id;
-					}
-				}
+		if (dictionary.settings.enablePrices) {
+			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player', tcgPrice, '#FCD1D1'));
+			if (dictionary.settings.enableFoilPrices && prices.usd_foil) {
+				let tcgFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd_foil);
+				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player Foil', tcgFoilPrice, '#FFCAB1'));
+			}
+			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', cardmarketPrice, '#D1DFFC'));
+			if (dictionary.settings.enableFoilPrices && prices.eur_foil) {
+				let cardmarketFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur_foil);
+				pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket Foil', cardmarketFoilPrice, '#FFCAB1'));
 			}
 		}
-		// If nothing was found in stock, return out of stock price.
-		if (min === -1 && inStockOnly) {
-			return findMin(cards, isFoil, false);
+		if (dictionary.settings.enableOnlinePrices && prices.tix) {
+			let mtgoPrice = prices.tix + ' tix';
+			pricesDiv.appendChild(dictionary.createPriceElement(cardhoarderLink, 'Cardhoarder', mtgoPrice, '#FCD1D1'));
 		}
-		let result = new Array();
-		result['price'] = AutocardAnywhereSettings.stripHtml(min);
-		result['id'] = AutocardAnywhereSettings.stripHtml(minId);
-		return result;
 	}
-  	
-	let data = $.parseJSON(json);
-	if (data && data.success && data.data && data.data.cards) {
-		let pricesDiv = AutocardAnywhere.createPricesElement();
-
-	  	if (data.data.cards.length > 0) {
-			let minRegular = findMin(data.data.cards, false, true);
-			let minFoil = findMin(data.data.cards, true, true);
-
-			pricesDiv.appendChild(AutocardAnywhere.createPriceElement('https://www.cardhoarder.com/cards/' + minRegular.id + '?' + AutocardAnywhereSettings.partnerString, 'Online', minRegular.price + ' tix', '#D9FCD1', 'left', 2));
-			pricesDiv.appendChild(AutocardAnywhere.createPriceElement('https://www.cardhoarder.com/cards/' + minFoil.id + '?' + AutocardAnywhereSettings.partnerString, 'Online Foil', minFoil.price + ' tix', '#FFCAB1', 'right', 2));
-		}
-		else {
-			pricesDiv.style.paddingTop = '12px';
-			pricesDiv.appendChild(document.createTextNode("Online price unavailable"));
-		}
-		return pricesDiv;
+	else {
+		let link = document.createElement("a");
+		link.href = tcgplayerLink;
+		if (AutocardAnywhere.openInNewTab) { link.target = "_blank"; }
+		link.appendChild(document.createTextNode("Error loading prices"));
+		pricesDiv.style.paddingTop = '12px';
+		pricesDiv.appendChild(link);
 	}
 
-	return;
+	return pricesDiv;
 };
-*/
 //==============================================================================
 // Individual language(s)
 //==============================================================================
