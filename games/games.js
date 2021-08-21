@@ -1439,6 +1439,20 @@ MtgDictionary.prototype = new Dictionary({
 			'name': 'enablePrices',
 			'description': 'Display card prices',
 			'type': 'boolean',
+			'default': true
+			//'controlType': 'checkbox'
+		},
+		{
+			'name': 'enableTcgPrices',
+			'description': 'Display TCGPlayer card prices',
+			'type': 'boolean',
+			'default': true,
+			'controlType': 'checkbox'
+		},
+		{
+			'name': 'enableCardmarketPrices',
+			'description': 'Display Cardmarket card prices',
+			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
 		},
@@ -1659,51 +1673,6 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	card.id = card[this.language] ? card[this.language] : card.en;
 	return card;
 };
-MtgDictionary.prototype.createPriceElement = function(href, text1, text2, colour, position, count) {
-	let result = document.createElement("a");
-	result.href = href;
-	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
-
-	let priceDiv = document.createElement("div");
-	let left = document.createElement("div");
-	let right = document.createElement("div");
-	left.style.float = 'left';
-	right.style.float = 'left';
-	left.style.width = '67%';
-	right.style.width = '33%';
-	left.appendChild(document.createTextNode('Buy at ' + text1));
-	right.appendChild(document.createTextNode(text2));
-	priceDiv.appendChild(left);
-	priceDiv.appendChild(right);
-	//priceDiv.style.setProperty('background-color', colour, 'important');
-	priceDiv.style.height = '16px';
-	priceDiv.style.marginTop = '2px';
-	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
-	priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
-	//priceDiv.style.textAlign = 'center';
-	//priceDiv.style.color = '#414DD3';
-	priceDiv.style.color = '#000000';
-	priceDiv.style.fontWeight = 'normal';
-	//priceDiv.style.float = 'left';
-	//priceDiv.style.width = (Math.floor(100 / count)) + '%';
-	priceDiv.style.padding = '4px';
-	//priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
-	priceDiv.style.borderColor = colour;
-	priceDiv.style.borderWidth = '3px';
-	priceDiv.style.borderStyle = 'solid';
-	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
-	
-	$(priceDiv).on('mouseover', function() {
-		this.style.backgroundColor = '#eaeaeb';
-	});
-	$(priceDiv).on('mouseout', function() {
-		this.style.backgroundColor = '#ffffff';
-	});
-	
-
-	result.appendChild(priceDiv);
-	return result;
-};
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
 	let dictionary = this;
 	let data = JSON.parse(response);
@@ -1713,26 +1682,30 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement();
 
+	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
+
 	if (data.prices) {
 		let prices = data.prices;
 		let tcgPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd);
 		let cardmarketPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur);
 
-		if (dictionary.settings.enablePrices) {
-			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player', tcgPrice, '#FCD1D1'));
+		if (dictionary.settings.enableTcgPrices) {
+			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player', tcgPrice, colours['tcg']));
 			if (dictionary.settings.enableFoilPrices && prices.usd_foil) {
 				let tcgFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd_foil);
-				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player Foil', tcgFoilPrice, '#FFCAB1'));
+				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player Foil', tcgFoilPrice, colours['foil']));
 			}
-			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', cardmarketPrice, '#D1DFFC'));
+		}
+		if (dictionary.settings.enableCardmarketPrices) {
+			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', cardmarketPrice, colours['cardmarket']));
 			if (dictionary.settings.enableFoilPrices && prices.eur_foil) {
 				let cardmarketFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur_foil);
-				pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket Foil', cardmarketFoilPrice, '#FFCAB1'));
+				pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket Foil', cardmarketFoilPrice, colours['foil']));
 			}
 		}
 		if (dictionary.settings.enableOnlinePrices && prices.tix) {
 			let mtgoPrice = prices.tix + ' tix';
-			pricesDiv.appendChild(dictionary.createPriceElement(cardhoarderLink, 'Cardhoarder', mtgoPrice, '#FCD1D1'));
+			pricesDiv.appendChild(dictionary.createPriceElement(cardhoarderLink, 'Cardhoarder', mtgoPrice, colours['cardhoarder']));
 		}
 	}
 	else {

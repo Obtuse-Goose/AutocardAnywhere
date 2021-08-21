@@ -100,14 +100,6 @@ function getExchangeRate(callback) {
 	updateRequired = ((now - lastUpdate) > updateInterval);
 
 	if (currencyInfo.exchangeRateLastUpdated == '' || updateRequired) {
-		/*
-		getFile('https://api.exchangeratesapi.io/latest?base=USD&symbols=' + currencyInfo.currency, function(data) {
-			data = JSON.parse(data);
-			let exchangeRate = data.rates[currencyInfo.currency];
-			saveSettings(AutocardAnywhereSettings.prefix, {exchangeRate: exchangeRate, exchangeRateLastUpdated: now}, true);
-			callback(exchangeRate);
-		});
-		*/
 		getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
 			data = JSON.parse(data);
 			let exchangeRate = data[currencyInfo.currency.toLowerCase()];

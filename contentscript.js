@@ -3,7 +3,7 @@ let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
 	// Utility functions
-	levenshtein: function(a, b){
+	levenshtein: function(a, b) {
         if(a == b)return 0;
         if(!a.length || !b.length)return b.length || a.length;
         let len1 = a.length,
@@ -250,7 +250,7 @@ let AutocardAnywhere = {
 				if (!cards) {return}
 				let cardsElement = document.createElement("div");
 				cardsElement.className = 'autocardanywhere-popup';
-				cardsElement.style.backgroundColor = '#F5F6F7';
+				cardsElement.style.fontWeight = 'normal';
 
 				// If there are multiple cards to display, use a carousel...
 				let width = AutocardAnywhere.popupWidth;
@@ -299,7 +299,7 @@ let AutocardAnywhere = {
 				allowHTML: true,
 				interactive: true,
 				hideOnClick: false,
-				theme: 'light',
+				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
 				animation: 'scale',
 				content: popupContent,
 				onShow() {
@@ -328,7 +328,8 @@ let AutocardAnywhere = {
 						// If any of the cards are from a dictionary with paginationNumbers turned-on, switch it on for the current carousel
 						paginationNumbers = paginationNumbers || dictionary.settings.paginationNumbers;
 						// Get the price of the card
-						if (dictionary.settings.enablePrices) { // An element will only be returned if enablePrices is set on the dictionary
+						let enablePrices = dictionary.settings.enablePrices || dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
+						if (enablePrices) { // An element will only be returned if enablePrices is set on the dictionary
 							if (content.find('.autocardanywhere-price').length == 0) {
 								AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
 									// Get the card price from the location specified in the dictionary...
@@ -655,13 +656,11 @@ let AutocardAnywhere = {
 		}
 
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/light.css"));
-        injectCSSFile(AutocardAnywhere.getURL("libs/tippy/light-border.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/material.css"));
-        injectCSSFile(AutocardAnywhere.getURL("libs/tippy/translucent.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/scale.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/swiper-bundle.min.css"));
 
-		let popupCss     =  ".autocardanywhere-popup {background-color: #ffffff !important; z-index: 15001 !important;}";
+		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}";
 		let imgLoadedCss =  ".autocardanywhere-popup .autocardanywhere-loading,.autocardanywhere-broken{background-color: black;background-position: center center;background-repeat: no-repeat;border-radius: 10px;}" +
 							".autocardanywhere-popup .autocardanywhere-loading{background-image: url('" + AutocardAnywhere.getURL('img/loading.gif') + "');background-color: black;}" +
 							".autocardanywhere-popup .autocardanywhere-broken{background-image: url('" + AutocardAnywhere.getURL('img/broken.png') + "');background-color: #be3730;}" +
@@ -954,6 +953,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.popupHideDuration = response.popupHideDuration;
 			AutocardAnywhere.carouselEffect = response.carouselEffect;
 			AutocardAnywhere.carouselAutoPlay = response.carouselAutoPlay;
+			AutocardAnywhere.theme = response.theme;
 
 			AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
 

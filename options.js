@@ -80,6 +80,12 @@ function nicknamesToString() {
 }
 
 function loadSettings(response) {
+	// Dark mode
+	if (response.theme == 'dark') {
+		$('[name="darkmode"]').prop('checked', true);
+		switchTheme('dark');
+	}
+
 	// Card sets page
 	let dictionariesHash = {};
 	AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
@@ -281,7 +287,7 @@ function loadSettings(response) {
 	});
     $("#sortable").disableSelection();
 	$("#tabs").tabs();
-	$("#resizable").css("background-image", "url(" + getURL("img/" + Math.floor((Math.random()*8)+1) + ".jpg") + ")");
+	$("#resizable").css("background-image", "url(" + getURL("img/" + Math.floor((Math.random()*8)+1) + ".png") + ")");
 
     // Initialise colour picker
 	if (response.linkStyleFontColourInherit) {
@@ -344,6 +350,14 @@ function save(settings) {
 };
 
 function saveSettings(settings) {
+	// Dark mode
+	if ($("#darkmode").prop('checked')) {
+		settings.theme = 'dark';
+	}
+	else {
+		settings.theme = 'light';
+	}
+
 	// Set preview style
 	$("#link-preview").css('color', $("#colour-textbox").val());
 	$("#link-preview").css('font-weight', $("#bold-checkbox").prop('checked') ? 'bold' : 'normal');
@@ -660,6 +674,30 @@ function getURL(filename) {
 	}
 };
 
+function switchTheme(newTheme) {
+	// Selecting all the required classes from HTML to change 
+	let body = $(document.body);
+	let box = $('.box');
+	let ball = $('.ball');
+	let stylesheet = $('#theme-css');
+
+	// Conditions to apply when dark mode is enabled
+	if (newTheme == 'dark') {
+		stylesheet.attr('href', 'libs/dark/jquery-ui.min.css');
+		box.attr('style','background-color:white;');
+		ball.attr('style','transform:translatex(100%);');
+		body.attr('style','background-color:#505355; color:white;');
+	}
+
+	// Conditions to apply when light mode is enabled
+	else if (newTheme == 'light') {
+		stylesheet.attr('href', 'libs/light/jquery-ui.min.css');
+		box.attr('style','background-color:#505355; color:white;');
+		ball.attr('style','transform:translatex(0%);');
+		body.attr('style','background-color:white; color:#505355;');
+	}
+}
+
 $(function() {
 	// Load settings
 	if (AutocardAnywhereSettings.isSafari) {
@@ -675,4 +713,17 @@ $(function() {
 	else { // Chrome, Opera, Firefox or Edge
 		browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': AutocardAnywhereSettings.settings}, loadSettings);
 	}
+
+	// Initialise dark mode switch
+	// Adding an eventListener function to change color everytime var check is changed.(checked & unchecked)
+	$('#darkmode').on('change', function() {
+		if (this.checked == true) {
+			switchTheme('dark');
+		}
+		else {
+			switchTheme('light');
+		}
+		// Save the new setting
+		saveSettings({});
+	});
 });

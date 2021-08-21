@@ -45,9 +45,7 @@
       "img/loading.gif",
       "img/broken.png",
 	  "libs/tippy/light.css",
-	  "libs/tippy/light-border.css",
 	  "libs/tippy/material.css",
-	  "libs/tippy/translucent.css",
 	  "libs/tippy/scale.css",
 	  "libs/swiper-bundle.min.css"
    ],

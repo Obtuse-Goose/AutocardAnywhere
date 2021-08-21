@@ -19,6 +19,22 @@ AutocardAnywhereSettings = {
 	partnerString: 'partner=AUTOANY&affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card',
 	prefix: 'autocardAnywhere',
 	maxLevenshteinFactor: 1,
+	themes: {
+		light: {
+			tcg: '#864CF0',
+			cardmarket: '#243F7E',
+			cardhoarder: '#3C3C3C',
+			foil: '#CCA18D',
+			mouseover: '#EAEAEB'
+		},
+		dark: {
+			tcg: '#DAC9FA',
+			cardmarket: '#BDC5D8',
+			cardhoarder: '#C4C4C4',
+			foil: '#FFCAB1',
+			mouseover: '#171717'
+		}
+	},
 	dictionaries: [
 		{'game': 'mtg', 'language': 'de', 'default': 0},
 		{'game': 'mtg', 'language': 'fr', 'default': 0},
@@ -74,7 +90,7 @@ AutocardAnywhereSettings = {
 		{'name': 'replaceExistingLinks', 'type': 'boolean', 'default': true},
 		{'name': 'newTab', 'type': 'boolean', 'default': true},
 		{'name': 'linkStyleBold', 'type': 'boolean', 'default': false},
-		{'name': 'linkStyleItalic', 'type': 'boolean', 'default': true},
+		{'name': 'linkStyleItalic', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleUnderline', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleFontColourInherit', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleFontColour', 'type': 'string', 'default': '#9F004B'},
@@ -94,7 +110,8 @@ AutocardAnywhereSettings = {
 		{'name': 'customNicknames', 'type': 'string', 'default': "mtgen|Bob|Dark Confidant||mtgen|bolt|Lightning Bolt||mtgen|BoP|Birds of Paradise||mtgen|CoB|City of Brass||mtgen|FoW|Force of Will||mtgen|Goyf|Tarmogoyf||mtgen|O Ring|Oblivion Ring||mtgen|StP|Swords to Plowshares||mtgen|Tim|Prodigal Sorcerer||mtgen|Gary|Gray Merchant of Asphodel||mtgen|Sad Robot|Solemn Simulacrum||mtgen|Skittles|Skithiryx, the Blight Dragon||mtgen|BBE|Bloodbraid Elf||mtgen|Belcher|Goblin Charbelcher||mtgen|Delver|Delver of Secrets||mtgen|Finkel|Shadowmage Infiltrator||mtgen|FoF|Fact or Fiction||mtgen|GGT|Golgari Grave-Troll||mtgen|JTMS|Jace, the Mind Sculptor||mtgen|WoG|Wrath of God||mtgen|I can't even|Void Winnower||mtgen|I literally can't even|Void Winnower||mylittleponyen|RPSS|Rock, Paper, Scissors, Shoot!||mylittleponyen|RTO|Rarity, Truly Outrageous||netrunneren|Beckman|Rachel Beckman||netrunneren|CyCourt|Cybernetics Court||netrunneren|DLR|Data Leak Reversal||netrunneren|Dino|Dinosaurus||netrunneren|Déjà Vu|Deja Vu||netrunneren|E3|E3 Feedback Implants||netrunneren|FAO|Forged Activation Orders||netrunneren|Femme|Femme Fatale||netrunneren|Jackson|Jackson Howard||netrunneren|Josh B|Joshua B.||netrunneren|NEH|Near Earth Hub||netrunneren|NRE|Net-Ready Eyes||netrunneren|Personal Touch|The Personal Touch||netrunneren|QT|Quality Time||netrunneren|SMC|Self-modifying Code||netrunneren|SOT|Same Old Thing||hearthstoneen|Patron|Grim Patron||hearthstoneen|Al'Akir|Al'Akir the Windlord||hearthstoneen|BGH|Big Game Hunter||hearthstoneen|Bolvar|Bollet Fordragon||hearthstoneen|Chugga|Showchugger||hearthstoneen|Ragnaros|Ragnaros the Firelord||hearthstoneen|Antonidas|Archmage Antonidas||hearthstoneen|Thalnos|Bloodmage Thalnos||hearthstoneen|Cairne|Cairne Bloodhoof||hearthstoneen|FoK|Fan of Knives||hearthstoneen|Gormok|Gormok The Impaler||hearthstoneen|Jaraxxus|Lord Jaraxxus||hearthstoneen|Justicar|Justicar Trueheart||hearthstoneen|Sylvanas|Sylvanas Windrunner||hearthstoneen|Troggzor|Troggzor the Earthinator||hearthstoneen|UTH|Unleash the Hounds||xwingen|PTL|Push the Limit||xwingen|ATC|Advanced Targeting Computer||xwingen|HLC|Heavy Laser Cannon||xwingen|TLT|Twin Laser Turret||xwingen|ABT|Autoblaster Turret||xwingen|K4|K4 Security Droid||xwingen|Fel|Soontir Fel||codexen|Vandy|Vandy Anadrose||codexen|Orpal|Orpal Gloor||codexen|Garth|Garth Torken||codexen|Bigby|Bigby Hayes||codexen|Onimaru|General Onimaru||codexen|Quince|Sirus Quince||codexen|Midori|Master Midori||codexen|Calamandra|Calamandra Moss||codexen|Argagarg|Argagarg Garg||codexen|Troq|Troq Bashar||codexen|River|River Montoya||codexen|Prynn|Prynn Pasternaak||codexen|Geiger|Max Geiger||codexen|Vir|Vir Garbarean||codexen|Zane|Captain Zane||codexen|Drakk|Drakk Ramhorn||codexen|Jaina|Jaina Stormborne||codexen|Grave|Grave Stormborne||codexen|Setsuki|Setsuki Hiruki||codexen|Rook|Garus Rook||faeriaen|Thulgar|Baron Thulgar||eternalen|Jekk|Jekk, the Bounty Hunter||eternalen|Marisen|Marisen, the Eldest||yugiohen|econ|Enemy Controller||yugiohen|bewd|Blue-Eyes White Dragon||yugiohen|beud|Blue-Eyes Ultimate Dragon||yugiohen|rebd|Red-Eyes Black Dragon||yugiohen|dm|Dark Magician||yugiohen|dmg|Dark Magician Girl||yugiohen|windstorm|Windstorm of Etaqua||"},
 		{'name': 'expandNicknames', 'type': 'boolean', 'default': false},
 		{'name': 'currency', 'type': 'string', 'default': 'USD'},
-		{'name': 'lastDataUpdate', 'type': 'string', 'default': ''}
+		{'name': 'lastDataUpdate', 'type': 'string', 'default': ''},
+		{'name': 'theme', 'type': 'string', 'default': 'light'}
 	],
 	currencies: [
 		{'name': 'AUD', 'value': 'AUD', 'description': 'Australian Dollar', 'locale': 'en'},
