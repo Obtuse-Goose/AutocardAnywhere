@@ -429,18 +429,19 @@ Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, p
 */
 Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
 	let xmlDoc = $.parseXML(response);
+	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let priceLinkHref = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, this) + AutocardAnywhereSettings.partnerString;
 	let pricesDiv = AutocardAnywhere.createPricesElement();
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("hiprice")[0]) {
-		let lowPrice = this.formatCurrency(currencyExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
-		let avgPrice = this.formatCurrency(currencyExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue));
+		let lowPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
+		let avgPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue));
 		//let hiPrice  = AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
 		let width = '50%';
 		let enableFoil = xmlDoc.getElementsByTagName("foilavgprice")[0] && xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue != '0';
 		let foilPrice = 0;
 		if (enableFoil) {
-			foilPrice = this.formatCurrency(currencyExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue));
+			foilPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue));
 			width = '33%';
 		}
 		let priceCount = 2;

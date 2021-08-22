@@ -405,7 +405,7 @@ function saveSettings(settings) {
 
 	// Prices page
 	settings.currency = $('input[name=currency-radio]:checked').val();
-	settings.exchangeRateLastUpdated = '';
+	settings.exchangeRateLastUpdatedv4 = '';
 
 	// Custom nicknames page
 	settings.expandNicknames = $("#expand-nicknames-checkbox").prop('checked');

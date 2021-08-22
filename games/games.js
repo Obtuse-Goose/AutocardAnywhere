@@ -1676,6 +1676,8 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
 	let dictionary = this;
 	let data = JSON.parse(response);
+	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
+	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
 	let tcgplayerLink = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
 	let cardmarketLink = '';
 	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
@@ -1685,26 +1687,24 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
 	if (data.prices) {
-		let prices = data.prices;
-		let tcgPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd);
-		let cardmarketPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur);
-
 		if (dictionary.settings.enableTcgPrices) {
+			let tcgPrice = dictionary.formatCurrency(dollarExchangeRate * data.prices.usd);
 			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player', tcgPrice, colours['tcg']));
-			if (dictionary.settings.enableFoilPrices && prices.usd_foil) {
-				let tcgFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.usd_foil);
+			if (dictionary.settings.enableFoilPrices && data.prices.usd_foil) {
+				let tcgFoilPrice = dictionary.formatCurrency(dollarExchangeRate * data.prices.usd_foil);
 				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player Foil', tcgFoilPrice, colours['foil']));
 			}
 		}
 		if (dictionary.settings.enableCardmarketPrices) {
+			let cardmarketPrice = dictionary.formatCurrency(euroExchangeRate * data.prices.eur);
 			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', cardmarketPrice, colours['cardmarket']));
-			if (dictionary.settings.enableFoilPrices && prices.eur_foil) {
-				let cardmarketFoilPrice = dictionary.formatCurrency(currencyExchangeRate * prices.eur_foil);
+			if (dictionary.settings.enableFoilPrices && data.prices.eur_foil) {
+				let cardmarketFoilPrice = dictionary.formatCurrency(euroExchangeRate * data.prices.eur_foil);
 				pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket Foil', cardmarketFoilPrice, colours['foil']));
 			}
 		}
-		if (dictionary.settings.enableOnlinePrices && prices.tix) {
-			let mtgoPrice = prices.tix + ' tix';
+		if (dictionary.settings.enableOnlinePrices && data.prices.tix) {
+			let mtgoPrice = data.prices.tix + ' tix';
 			pricesDiv.appendChild(dictionary.createPriceElement(cardhoarderLink, 'Cardhoarder', mtgoPrice, colours['cardhoarder']));
 		}
 	}

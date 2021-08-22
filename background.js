@@ -88,30 +88,43 @@ function openURL(url) {
 function getExchangeRate(callback) {
 	let currencyInfo = loadSettings(AutocardAnywhereSettings.prefix, [
 		{'name': 'currency', 'type': 'string', 'default': 'USD'},
-		{'name': 'exchangeRate', 'type': 'float', 'default': 1.0},
+		{'name': 'dollarExchangeRate', 'type': 'float', 'default': 1.0},
+		{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
 		{'name': 'exchangeRateLastUpdated', 'type': 'string', 'default': ''}
 	]);
 	// If the currency is US Dollars then no conversion is necessary
-	if (currencyInfo.currency == 'USD') {callback(1.0);}
+	//if (currencyInfo.currency == 'USD') {callback(1.0);}
 
 	let now = new Date();
 	let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdated);
 	let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
 	updateRequired = ((now - lastUpdate) > updateInterval);
 
-	if (currencyInfo.exchangeRateLastUpdated == '' || updateRequired) {
-		getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
-			data = JSON.parse(data);
-			let exchangeRate = data[currencyInfo.currency.toLowerCase()];
-			if (exchangeRate) {
-				saveSettings(AutocardAnywhereSettings.prefix, {exchangeRate: exchangeRate, exchangeRateLastUpdated: now}, true);
-				callback(exchangeRate);
-			}
-		});
+	if (currencyInfo.exchangeRateLastUpdated != '' && !updateRequired) {
+		callback(currencyInfo);
 	}
-	else {
-		callback(currencyInfo.exchangeRate);
-	}
+
+	// Update is required
+	getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+		data = JSON.parse(data);
+		let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
+		if (dollarExchangeRate) {
+
+			getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+				data = JSON.parse(data);
+				let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
+				if (euroExchangeRate) {
+					let exchangeRate = {
+						dollarExchangeRate: dollarExchangeRate,
+						euroExchangeRate: euroExchangeRate,
+						exchangeRateLastUpdated: now
+					};
+					saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
+					callback(exchangeRate);
+				}
+			});
+		}
+	});
 }
 
 function getFile(url, callback) {
