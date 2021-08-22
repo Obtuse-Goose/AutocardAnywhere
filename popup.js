@@ -125,6 +125,11 @@ function showGoogleDialog() {
 //==============================================================================
 // Event listeners
 function onShow() {
+	if (window.localStorage.autocardAnywheretheme == 'dark') {
+		let body = document.body;
+		body.setAttribute('style','background-color:#505355; color:white;');
+	}
+
 	document.getElementById('site-enabled-checkbox').addEventListener('change', enableChange);
 	document.getElementById('options-btn').addEventListener('click', settingsClick);
 	//document.getElementById('google-share-button').addEventListener('click', showGoogleDialog);

@@ -90,17 +90,17 @@ function getExchangeRate(callback) {
 		{'name': 'currency', 'type': 'string', 'default': 'USD'},
 		{'name': 'dollarExchangeRate', 'type': 'float', 'default': 1.0},
 		{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
-		{'name': 'exchangeRateLastUpdated', 'type': 'string', 'default': ''}
+		{'name': 'exchangeRateLastUpdatedv4', 'type': 'string', 'default': ''}
 	]);
 	// If the currency is US Dollars then no conversion is necessary
 	//if (currencyInfo.currency == 'USD') {callback(1.0);}
 
 	let now = new Date();
-	let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdated);
+	let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
 	let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
 	updateRequired = ((now - lastUpdate) > updateInterval);
 
-	if (currencyInfo.exchangeRateLastUpdated != '' && !updateRequired) {
+	if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
 		callback(currencyInfo);
 	}
 
@@ -117,7 +117,7 @@ function getExchangeRate(callback) {
 					let exchangeRate = {
 						dollarExchangeRate: dollarExchangeRate,
 						euroExchangeRate: euroExchangeRate,
-						exchangeRateLastUpdated: now
+						exchangeRateLastUpdatedv4: now
 					};
 					saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
 					callback(exchangeRate);

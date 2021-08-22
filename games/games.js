@@ -1413,7 +1413,7 @@ MtgDictionary.prototype = new Dictionary({
 			'default': 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>',
 			'controlType': 'radio',
 			'options': [
-				{name: 'TCGPlayer', description: 'TCG Player', value: 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
+				{name: 'TCGPlayer', description: 'TCG Player', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
