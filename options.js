@@ -263,6 +263,8 @@ function loadSettings(response) {
 	// Ignored cards page
 	let ignored = response.ignoredCards.replace(/\|/g,'\n');
 	$("#ignored-cards-textbox").val(ignored);
+	let unignored = response.unignoredCards.replace(/\|/g,'\n');
+	$("#unignored-cards-textbox").val(unignored);
 	$("#case-sensitive-checkbox").prop('checked', response.caseSensitive);
 
 	// Sites page
@@ -309,6 +311,7 @@ function loadSettings(response) {
 	$('#enable-popups-checkbox').on('change', enablePopupsChanged);
 	$('#listed-sites-textbox').on('keyup', function() {saveSettings({})});
 	$('#ignored-cards-textbox').on('keyup', function() {saveSettings({})});
+	$('#unignored-cards-textbox').on('keyup', function() {saveSettings({})});
 	$("#colour-textbox").on('keydown', colourTextBoxKeyDown);
 	$("#colour-textbox").on('keyup', colourTextBoxKeyUp);
 	$('#colour-inherit-checkbox').on('change', colourInheritChange);
@@ -413,6 +416,7 @@ function saveSettings(settings) {
 
 	// Ignored cards page
 	settings.ignoredCards = $("#ignored-cards-textbox").val().replace(/\n/g,'|');
+	settings.unignoredCards = $("#unignored-cards-textbox").val().replace(/\n/g,'|');
 	settings.caseSensitive = $("#case-sensitive-checkbox").prop('checked');
 
 	// Sites page

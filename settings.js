@@ -99,6 +99,7 @@ AutocardAnywhereSettings = {
 		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
 		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
 		{'name': 'ignoredCards', 'type': 'string', 'default': 'Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|Time Out'},
+		{'name': 'unignoredCards', 'type': 'string', 'default': ''},
 		{'name': 'popupShowEffect', 'type': 'string', 'default': 'fadeIn'},
 		{'name': 'popupShowDuration', 'type': 'integer', 'default': 500},
 		{'name': 'popupHideEffect', 'type': 'string', 'default': 'slideUp'},

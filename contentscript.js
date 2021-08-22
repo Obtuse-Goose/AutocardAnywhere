@@ -969,6 +969,12 @@ let AutocardAnywhere = {
 					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
 				});
 			}
+			AutocardAnywhere.unignoreList = {};
+			if (response.unignoredCards !== undefined) {
+				response.unignoredCards.split('|').map(function(unignoredCard) {
+					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
+				});
+			}
 			// Always ignore the card "Ow"
 			AutocardAnywhere.ignoreList['ow'] = 1;
 			

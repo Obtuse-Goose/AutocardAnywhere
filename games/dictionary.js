@@ -46,8 +46,14 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 
 	result.cardIDs = link[1];
 	result.isDict = (link[2] == 1);
-	// Ignore dictionary words check is done here so that if a card is in 2 card lists and 1 has "ignore dictionary" on and the other doesn't, only the desired 1 gets added to the carousel
-	if (!overrideIgnoreDictionaryWords && this.settings.ignoreDictionaryWords && result.isDict) {return}
+	// Ignore dictionary words check is done here so that if a card is in 2 card lists 
+	// and 1 has "ignore dictionary" on and the other doesn't, only the desired 1 gets 
+	// added to the carousel.
+	// Check that we've not been asked to override the setting 
+	// and that the ignore dictionary words setting is set
+	// and that the card name is a dictionary word 
+	// and that the card name isn't on the "always link" override list.
+	if (!overrideIgnoreDictionaryWords && this.settings.ignoreDictionaryWords && result.isDict  && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
 	return result;
 };
 Dictionary.prototype.findCardById = function(cardID, match, isDict) {
