@@ -47,6 +47,9 @@
 	  "libs/tippy/light.css",
 	  "libs/tippy/material.css",
 	  "libs/tippy/scale.css",
+	  "libs/tippy/perspective.css",
+	  "libs/tippy/shift-away.css",
+	  "libs/tippy/shift-toward.css",
 	  "libs/swiper-bundle.min.css"
    ],
    "content_scripts" : [

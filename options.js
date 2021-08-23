@@ -175,7 +175,7 @@ function loadSettings(response) {
 	$("#resizable").height(response.popupHeight);
 	$("#resizable").resizable({aspectRatio: true, minWidth: 179, maxWidth: 400, stop: popupImageSizeChanged});
 	
-	$("#popup-show-radio-"+response.popupShowEffect).prop('checked', true);
+	$("#popup-show-radio-"+response.popupAnimation).prop('checked', true);
 	$("#popup-show-duration-slider").slider({
 		value:response.popupShowDuration,
 		min:0,
@@ -188,7 +188,7 @@ function loadSettings(response) {
 	});
 	$("#popup-show-duration").text(response.popupShowDuration);
 
-	$("#popup-hide-radio-"+response.popupHideEffect).prop('checked', true);
+	//$("#popup-hide-radio-"+response.popupHideEffect).prop('checked', true);
 	$("#popup-hide-duration-slider").slider({
 		value:response.popupHideDuration,
 		min:0,
@@ -201,7 +201,7 @@ function loadSettings(response) {
 	});
 	$("#popup-hide-duration").text(response.popupHideDuration);
 
-	$("#popup-carousel-radio-"+response.carouselEffect).prop('checked', true);
+	$("#popup-carousel-radio-"+response.carouselAnimation).prop('checked', true);
 	$("#carousel-autoplay-checkbox").prop('checked', response.carouselAutoPlay);
 
 	// Prices page
@@ -399,11 +399,11 @@ function saveSettings(settings) {
 	settings.enableExtraInfo = $("#enable-extra-info-checkbox").prop('checked');
 	settings.popupWidth = Math.round($("#resizable").width());
 	settings.popupHeight = Math.round($("#resizable").height());
-	settings.popupShowEffect = $('input[name=popup-show-radio]:checked').val();
+	settings.popupAnimation = $('input[name=popup-show-radio]:checked').val();
 	settings.popupShowDuration = $("#popup-show-duration").text();
-	settings.popupHideEffect = $('input[name=popup-hide-radio]:checked').val();
+	//settings.popupHideEffect = $('input[name=popup-hide-radio]:checked').val();
 	settings.popupHideDuration = $("#popup-hide-duration").text();
-	settings.carouselEffect = $('input[name=popup-carousel-radio]:checked').val();
+	settings.carouselAnimation = $('input[name=popup-carousel-radio]:checked').val();
 	settings.carouselAutoPlay = $("#carousel-autoplay-checkbox").prop('checked');
 
 	// Prices page

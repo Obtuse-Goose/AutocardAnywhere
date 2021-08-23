@@ -371,13 +371,16 @@ body {
 				<div id="resizable" class="ui-widget-content" style="border:none; background-repeat:no-repeat; background-size:cover;"></div>
 			</div>
 			<div id="popup-animation-div">
-				Popup show animation
+				Popup animation
 				<ul>
-					<li><input type="radio" id="popup-show-radio-fadeIn" name="popup-show-radio" value="fadeIn" /><label for="popup-show-radio-fadeIn"> Fade In</label></li>
-					<li><input type="radio" id="popup-show-radio-slideDown" name="popup-show-radio" value="slideDown" /><label for="popup-show-radio-slideDown"> Roll Down</label></li>
-					<li><input type="radio" id="popup-show-radio-show" name="popup-show-radio" value="show" /><label for="popup-show-radio-show"> Slide Out</label></li>
-					<li>Duration (ms): <span id="popup-show-duration">0</span><br/><br/><div id="popup-show-duration-slider"></div></li>
+					<li><input type="radio" id="popup-show-radio-scale" name="popup-show-radio" value="scale" /><label for="popup-show-radio-scale"> Scale</label></li>
+					<li><input type="radio" id="popup-show-radio-perspective" name="popup-show-radio" value="perspective" /><label for="popup-show-radio-perspective"> Perspective</label></li>
+					<li><input type="radio" id="popup-show-radio-shift-away" name="popup-show-radio" value="shift-away" /><label for="popup-show-radio-shift-away"> Shift Away</label></li>
+					<li><input type="radio" id="popup-show-radio-shift-toward" name="popup-show-radio" value="shift-toward" /><label for="popup-show-radio-shift-toward"> Shift Toward</label></li>
+					<li>Show Duration (ms): <span id="popup-show-duration">0</span><br/><br/><div id="popup-show-duration-slider"></div></li>
+					<li>Hide Duration (ms): <span id="popup-hide-duration">0</span><br/><br/><div id="popup-hide-duration-slider"></div></li>
 				</ul>
+				<!--
 				Popup hide animation
 				<ul>
 					<li><input type="radio" id="popup-hide-radio-fadeOut" name="popup-hide-radio" value="fadeOut" /><label for="popup-hide-radio-fadeOut"> Fade Out</label></li>
@@ -385,13 +388,13 @@ body {
 					<li><input type="radio" id="popup-hide-radio-hide" name="popup-hide-radio" value="hide" /><label for="popup-hide-radio-hide"> Slide In</label></li>
 					<li>Duration (ms): <span id="popup-hide-duration">0</span><br/><br/><div id="popup-hide-duration-slider"></div></li>
 				</ul>
+			-->
 				Carousel animation
 				<ul>
-					<li><input type="radio" id="popup-carousel-radio-backSlide" name="popup-carousel-radio" value="backSlide" /><label for="popup-carousel-radio-backSlide"> Back Slide</label></li>
+					<li><input type="radio" id="popup-carousel-radio-coverflow" name="popup-carousel-radio" value="coverflow" /><label for="popup-carousel-radio-coverflow"> Coverflow</label></li>
 					<li><input type="radio" id="popup-carousel-radio-slide" name="popup-carousel-radio" value="slide" /><label for="popup-carousel-radio-slide"> Slide</label></li>
-					<li><input type="radio" id="popup-carousel-radio-goDown" name="popup-carousel-radio" value="goDown" /><label for="popup-carousel-radio-goDown"> Go Down</label></li>
 					<li><input type="radio" id="popup-carousel-radio-fade" name="popup-carousel-radio" value="fade" /><label for="popup-carousel-radio-fade"> Fade</label></li>
-					<li><input type="radio" id="popup-carousel-radio-fadeUp" name="popup-carousel-radio" value="fadeUp" /><label for="popup-carousel-radio-fadeUp"> Pop</label></li>
+					<li><input type="radio" id="popup-carousel-radio-flip" name="popup-carousel-radio" value="flip" /><label for="popup-carousel-radio-flip"> Flip</label></li>
 				</ul>
 				<input type="checkbox" id="carousel-autoplay-checkbox" /><label for="carousel-autoplay-checkbox"> Auto play carousel</label>
 			</div>

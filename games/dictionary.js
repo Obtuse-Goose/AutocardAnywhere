@@ -334,6 +334,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	if (this.settings.enablePrices || this.settings.enableTcgPrices || this.settings.enableCardmarketPrices || this.settings.enableOnlinePrices) {
 		let outerDiv = createOuterPriceDiv();
 		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id, 'Loading price data...');
+		pricesDiv.style.height = '100px';
 		outerDiv.appendChild(pricesDiv);
 		result.appendChild(outerDiv);
 	}

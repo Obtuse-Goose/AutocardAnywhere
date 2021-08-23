@@ -32,7 +32,7 @@ AutocardAnywhereSettings = {
 			cardmarket: '#BDC5D8',
 			cardhoarder: '#C4C4C4',
 			foil: '#FFCAB1',
-			mouseover: '#171717'
+			mouseover: '#2e2e2e'
 		}
 	},
 	dictionaries: [
@@ -100,11 +100,11 @@ AutocardAnywhereSettings = {
 		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
 		{'name': 'ignoredCards', 'type': 'string', 'default': 'Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Path|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|Time Out'},
 		{'name': 'unignoredCards', 'type': 'string', 'default': ''},
-		{'name': 'popupShowEffect', 'type': 'string', 'default': 'fadeIn'},
+		{'name': 'popupAnimation', 'type': 'string', 'default': 'scale'},
 		{'name': 'popupShowDuration', 'type': 'integer', 'default': 500},
-		{'name': 'popupHideEffect', 'type': 'string', 'default': 'slideUp'},
+		//{'name': 'popupHideEffect', 'type': 'string', 'default': 'slideUp'},
 		{'name': 'popupHideDuration', 'type': 'integer', 'default': 200},
-		{'name': 'carouselEffect', 'type': 'string', 'default': 'backSlide'},
+		{'name': 'carouselAnimation', 'type': 'string', 'default': 'coverflow'},
 		{'name': 'carouselAutoPlay', 'type': 'boolean', 'default': true},
 		{'name': 'setupShown', 'type': 'boolean', 'default': false},
 		{'name': 'priceSetupShown', 'type': 'boolean', 'default': false},
