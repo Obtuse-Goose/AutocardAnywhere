@@ -173,7 +173,7 @@ let AutocardAnywhere = {
 			if (typeof(s) != 'string') {s = String(s)}
 			return s.replace(/&/, "&amp;");
 		}
-
+		
 		function haveCardFromGame(cards, gameName) {
 			for (let i in cards) {
 				if (cards[i].game == gameName) {
@@ -188,7 +188,6 @@ let AutocardAnywhere = {
 			let cards = new Array();
 
 			if (target.data('popup')) return;
-			//console.log(target);
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
 				target.bind('click', function(event) {
@@ -257,7 +256,6 @@ let AutocardAnywhere = {
 
 				// Get the dom element for each card
 				cards.map(function(card) {
-					//console.log(card);
 					let dictionary = AutocardAnywhere.dictionaries[card.game + card.language];
 					cardsElement.appendChild(dictionary.getCardElement(card, cards.length));
 				});
@@ -302,7 +300,8 @@ let AutocardAnywhere = {
 				interactiveBorder: 5,
 				hideOnClick: false,
 				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
-				animation: 'scale',
+				animation: AutocardAnywhere.popupAnimation, // scale, perspective, shift-away, shift-toward
+				duration: [AutocardAnywhere.popupShowDuration, AutocardAnywhere.popupHideDuration],
 				inertia: true,
 				content: popupContent,
 				onShow() {
@@ -385,12 +384,12 @@ let AutocardAnywhere = {
 						var swiper = new Swiper(popupContent, {
 							loop: true,
 							speed: 500,
-							effect: 'coverflow', // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
-							autoplay: {
+							effect: AutocardAnywhere.carouselAnimation, // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
+							autoplay: (AutocardAnywhere.carouselAutoPlay ? {
 								delay: 2000,
 								disableOnInteraction: false,
 								pauseOnMouseEnter: true
-							},
+							} : false),
 							pagination : {
 								el: paginationElement.length > 0 ? paginationElement[0] : '',
 								clickable: true
@@ -662,6 +661,9 @@ let AutocardAnywhere = {
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/light.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/material.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/scale.css"));
+        injectCSSFile(AutocardAnywhere.getURL("libs/tippy/perspective.css"));
+        injectCSSFile(AutocardAnywhere.getURL("libs/tippy/shift-away.css"));
+        injectCSSFile(AutocardAnywhere.getURL("libs/tippy/shift-toward.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/swiper-bundle.min.css"));
 
 		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}" +
@@ -866,8 +868,10 @@ let AutocardAnywhere = {
 	    			(node.parents("div.tippy-box").length === 0) &&
 	    			(!nodes[i].isContentEditable)
 	    			) {
-			    		// Linkify the new node and then add popups in it
+			    		// Linkify the new node and then add popups in it.
+						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
+						// Run the regex dictionaries over the new node.
 					    node.linkify({use: AutocardAnywhere.pluginNames});
 					    AutocardAnywhere.initialisePopups(nodes[i]);
 				}
@@ -952,11 +956,11 @@ let AutocardAnywhere = {
 			AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
 			AutocardAnywhere.caseSensitive = response.caseSensitive;
 
-			AutocardAnywhere.popupShowEffect = response.popupShowEffect;
+			AutocardAnywhere.popupAnimation = response.popupAnimation;
 			AutocardAnywhere.popupShowDuration = response.popupShowDuration;
 			AutocardAnywhere.popupHideEffect = response.popupHideEffect;
 			AutocardAnywhere.popupHideDuration = response.popupHideDuration;
-			AutocardAnywhere.carouselEffect = response.carouselEffect;
+			AutocardAnywhere.carouselAnimation = response.carouselAnimation;
 			AutocardAnywhere.carouselAutoPlay = response.carouselAutoPlay;
 			AutocardAnywhere.theme = response.theme;
 
@@ -1030,6 +1034,22 @@ let AutocardAnywhere = {
 				let pluginFunctions = {};
 				AutocardAnywhere.pluginNames = [];
 				
+				// Card names enclosed in [[]]
+				pluginFunctions['bracketed'] = function(text) {
+					return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+						// Do a fuzzy lookup by name in all dictionaries
+						for (let i in AutocardAnywhere.dictionaries) {
+							let dictionary = AutocardAnywhere.dictionaries[i];
+							let cards = dictionary.fuzzyLookup(name);
+							if (cards.length > 0) {
+								return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+							}
+						}
+						return match;
+					});
+				};
+				AutocardAnywhere.pluginNames.push('bracketed');
+				
 				// Standard card sets
 				dictionaries.map(function(dictionary) {
 					let dictionaryName = dictionary[0] + dictionary[1];
@@ -1067,7 +1087,7 @@ let AutocardAnywhere = {
 
 					if (customNicknameRE != '()') {
 						customNicknameRE = "([^a-zA-Z_0-9-'])" + customNicknameRE + "(?=[^a-zA-Z_0-9-'])";
-						pluginFunctions['custom'] = function(text) {
+						pluginFunctions['nicknames'] = function(text) {
 							return text.replace(new RegExp(customNicknameRE, "gi"), function(match, f, s) {
 								let nickname = customNicknames[s.toLowerCase()];
 								if (!nickname) {return match}
@@ -1082,7 +1102,7 @@ let AutocardAnywhere = {
 								}
 							});
 						};
-						AutocardAnywhere.pluginNames.push('custom');
+						AutocardAnywhere.pluginNames.push('nicknames');
 					}
 				}
 
@@ -1094,7 +1114,6 @@ let AutocardAnywhere = {
 				else {
 					// Replace existing card links
 					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
-
 					// Setup the linkify plugin, then run it
 					$.extend($.fn.linkify.plugins, pluginFunctions);
 					$('body').linkify({use: AutocardAnywhere.pluginNames});

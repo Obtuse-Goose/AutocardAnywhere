@@ -1572,14 +1572,12 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
-	//console.log(list);
 	let result = document.createElement("div");
 	result.style.setProperty('width', overlayWidth + 'px');
-	//console.log(section);
+
 	let sets = [];
 	for (let i in list.data) {
 		let card = list.data[i];
-		//console.log(card);
 		if (section.name == 'oracletext') {
 			if (card.card_faces && card.card_faces.length > 0) {
 				for (let j in card.card_faces) {
@@ -1679,7 +1677,6 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return card;
 };
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
-	//console.log(response);
 	let dictionary = this;
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
