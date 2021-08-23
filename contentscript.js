@@ -248,35 +248,36 @@ let AutocardAnywhere = {
 
 			function getCardsElement(cards) {
 				if (!cards) {return}
+				
+				let result = document.createElement("div");
+				result.className = 'autocardanywhere-popup swiper-container';
+
 				let cardsElement = document.createElement("div");
-				cardsElement.className = 'autocardanywhere-popup';
 				cardsElement.style.fontWeight = 'normal';
 
-				// If there are multiple cards to display, use a carousel...
-				let width = AutocardAnywhere.popupWidth;
-				if (cards.length > 1) {
-					cards.map(function(card) {
-						if (card.rotate == 90 || card.rotate == 360) {
-							width = AutocardAnywhere.popupHeight;
-						}
-					});
-					cardsElement.className = 'autocardanywhere-popup swiper-wrapper';
-					cardsElement.style.width = width + 'px';
-				}
 				// Get the dom element for each card
 				cards.map(function(card) {
 					//console.log(card);
 					let dictionary = AutocardAnywhere.dictionaries[card.game + card.language];
 					cardsElement.appendChild(dictionary.getCardElement(card, cards.length));
 				});
-				let result = document.createElement("div");
-				result.className = 'swiper-container';
 				result.appendChild(cardsElement);
+				// If there are multiple cards to display, use a carousel...
 				if (cards.length > 1) {
+					let width = AutocardAnywhere.popupWidth;
+					cards.map(function(card) {
+						if (card.rotate == 90 || card.rotate == 360) {
+							width = AutocardAnywhere.popupHeight;
+						}
+					});
+					cardsElement.className = 'swiper-wrapper';
+					cardsElement.style.width = width + 'px';
+
 					let paginationElement = document.createElement("div");
-					paginationElement.style.height = '50px';
-					paginationElement.style.backgroundColor = '#00ff00';
 					paginationElement.className = 'swiper-pagination';
+					paginationElement.style.position = 'static';
+					paginationElement.style.marginTop = '5px';
+					paginationElement.style.width = AutocardAnywhere.popupWidth;
 					result.appendChild(paginationElement);
 				}
 				/*
@@ -298,11 +299,15 @@ let AutocardAnywhere = {
 				placement: 'right',
 				allowHTML: true,
 				interactive: true,
+				interactiveBorder: 5,
 				hideOnClick: false,
 				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
 				animation: 'scale',
+				inertia: true,
 				content: popupContent,
 				onShow() {
+					// Hide all other tips
+					tippy.hideAll();
 					// If there is a carousel in this tip, start it playing.
 					if (swiper) swiper.autoplay.start();
 				},
@@ -377,8 +382,7 @@ let AutocardAnywhere = {
 					// If there's more than 1 card, setup a carousel to view them...
 					if (cards.length > 1) {
 						let paginationElement = content.find('.swiper-pagination');
-						//console.log(paginationElement);
-						swiper = new Swiper(popupContent, {
+						var swiper = new Swiper(popupContent, {
 							loop: true,
 							speed: 500,
 							effect: 'coverflow', // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
@@ -387,8 +391,8 @@ let AutocardAnywhere = {
 								disableOnInteraction: false,
 								pauseOnMouseEnter: true
 							},
-							pagination: {
-								el: '.swiper-pagination',
+							pagination : {
+								el: paginationElement.length > 0 ? paginationElement[0] : '',
 								clickable: true
 							}
 						});
@@ -660,7 +664,8 @@ let AutocardAnywhere = {
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/scale.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/swiper-bundle.min.css"));
 
-		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}";
+		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}" +
+							".autocardanywhere-popup .swiper-pagination-bullets .swiper-pagination-bullet {margin: 4px;}";
 		let imgLoadedCss =  ".autocardanywhere-popup .autocardanywhere-loading,.autocardanywhere-broken{background-color: black;background-position: center center;background-repeat: no-repeat;border-radius: 10px;}" +
 							".autocardanywhere-popup .autocardanywhere-loading{background-image: url('" + AutocardAnywhere.getURL('img/loading.gif') + "');background-color: black;}" +
 							".autocardanywhere-popup .autocardanywhere-broken{background-image: url('" + AutocardAnywhere.getURL('img/broken.png') + "');background-color: #be3730;}" +

@@ -1428,13 +1428,15 @@ MtgDictionary.prototype = new Dictionary({
 			'type': 'string',
 			'resetToDefault': true,
 			//'default': 'https://partner.tcgplayer.com/x3/phl.asmx/p?pk=AUTOANY&s=&p=<name:simple>'
-			'default': 'https://api.scryfall.com/cards/<id>'
+			'default': 'https://api.scryfall.com/cards/named?exact=<name:simple>'
 		},
+		/*
 		{
 			'name': 'onlinePriceURL',
 			'type': 'string',
 			'default': 'https://api.scryfall.com/cards/named?exact=<name:simple>'
 		},
+		*/
 		{
 			'name': 'enablePrices',
 			'description': 'Display card prices',
@@ -1600,7 +1602,10 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 			sets.push(card.set_name);
 		}
 	}
+	// Sort the set list alphabetically
 	sets.sort();
+	// Remove any duplicates
+	sets = [...new Set(sets)];
 	sets.map(function(set) {
 		addLine(result, set);
 	});
@@ -1674,11 +1679,12 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return card;
 };
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
+	//console.log(response);
 	let dictionary = this;
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
-	let tcgplayerLink = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
+	let tcgplayerLink = AutocardAnywhere.format('https://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
 	let cardmarketLink = '';
 	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
 	
