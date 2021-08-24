@@ -169,6 +169,7 @@ function loadSettings(response) {
 
 	// Popups page
 	$("#enable-popups-checkbox").prop('checked', response.enablePopups);
+	$("#enable-ignore-card-checkbox").prop('checked', response.enableIgnoreCardLink);
 	$("#popup-language-radio-"+response.popupLanguage).prop('checked', true);
 	$("#enable-extra-info-checkbox").prop('checked', response.enableExtraInfo);
 	$("#resizable").width(response.popupWidth);
@@ -395,6 +396,7 @@ function saveSettings(settings) {
 
 	// Popups page
 	settings.enablePopups = $("#enable-popups-checkbox").prop('checked');
+	settings.enableIgnoreCardLink = $("#enable-ignore-card-checkbox").prop('checked');
 	settings.popupLanguage = $('input[name=popup-language-radio]:checked').val();
 	settings.enableExtraInfo = $("#enable-extra-info-checkbox").prop('checked');
 	settings.popupWidth = Math.round($("#resizable").width());
@@ -433,6 +435,7 @@ function saveSettings(settings) {
 
 function enablePopupsChanged() {
 	let checked = $('#enable-popups-checkbox').prop('checked');
+	$('#enable-ignore-card-checkbox').attr('disabled', !checked);
 	$('[name="popup-language-radio"]').attr('disabled', !checked);
 	$('#enable-extra-info-checkbox').attr('disabled', !checked);
 	if (checked) {
@@ -441,6 +444,9 @@ function enablePopupsChanged() {
 	else {
 		$("#resizable").resizable("disable");
 	}
+	$('[name="popup-show-radio"]').attr('disabled', !checked);
+	$('[name="popup-carousel-radio"]').attr('disabled', !checked);
+	$('#carousel-autoplay-checkbox').attr('disabled', !checked);
 };
 
 function popupImageSizeChanged() {

@@ -125,7 +125,7 @@ let AutocardAnywhere = {
 		result.style.marginTop = '5px';
 		result.style.fontSize = AutocardAnywhere.fontSize + 'px';
 		result.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
-		result.style.fontFamily = AutocardAnywhereSettings.priceFont;
+		//result.style.fontFamily = AutocardAnywhereSettings.font;
 		//result.style.textAlign = 'center';
 		//result.style.color = '#000000';
 		//result.style.backgroundColor = '#ffffff';
@@ -163,6 +163,15 @@ let AutocardAnywhere = {
 		if (typeof(window.document.location) === 'undefined') {return ''}
 		return window.document.location.href.toLowerCase();
 	},
+	saveSettings: function(settings) {
+		// Saves settings in browser-specific way
+		if (AutocardAnywhereSettings.isSafari) {
+			safari.self.tab.dispatchMessage('saveSettings', {'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
+		}
+		else { // Chrome, Opera, Firefox or Edge
+			browser.runtime.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
+		}
+	},
 	// Main extension code
 	initialisePopups: function(node) {
 		// Searches node for any autocard anywhere links and adds a popup.
@@ -185,9 +194,8 @@ let AutocardAnywhere = {
 
 		$(node).find('a.autocardanywhere-link').each(function() {
 			let target = $(this);
-			let cards = new Array();
-
 			if (target.data('popup')) return;
+			let cards = new Array();
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
 				target.bind('click', function(event) {
@@ -228,8 +236,7 @@ let AutocardAnywhere = {
 			}
 
 			// Create the tip for this link
-			/*
-			// Get the popup title
+			// Get the matched text
 			let text = this.childNodes[0];
 			// If the linked node just contains text, display it's nodeValue...
 			if (text.nodeType == 3) {
@@ -243,13 +250,13 @@ let AutocardAnywhere = {
 			if (text == '') {
 				text = cards[0].match;
 			}
-			*/
 
 			function getCardsElement(cards) {
 				if (!cards) {return}
 				
 				let result = document.createElement("div");
 				result.className = 'autocardanywhere-popup swiper-container';
+				result.style.fontFamily = AutocardAnywhereSettings.font;
 
 				let cardsElement = document.createElement("div");
 				cardsElement.style.fontWeight = 'normal';
@@ -278,12 +285,31 @@ let AutocardAnywhere = {
 					paginationElement.style.width = AutocardAnywhere.popupWidth;
 					result.appendChild(paginationElement);
 				}
-				/*
-				let ignore = document.createElement("a");
-				ignore.href = 'https://www.google.com';
-				ignore.appendChild(document.createTextNode('Ignore this card in future'));
-				result.appendChild(ignore);
-				*/
+				
+				if (AutocardAnywhere.enableIgnoreCardLink) {
+					let ignore = document.createElement("a");
+					ignore.href = '#';
+					ignore.style.marginTop = '2px';
+					ignore.style.float = 'right';
+					ignore.style.fontSize = '10px';
+					ignore.style.textDecoration = 'none';
+					ignore.appendChild(document.createTextNode('Ignore this card in future'));
+					$(ignore).on('click', function() {
+						// Hide the current popup
+						tippy.hideAll({duration: 0});
+						// Remove the current link
+						target.replaceWith(function() {
+							return $(this).text();
+						});
+						// Add the card name to the ignored cards list
+						let newIgnoredCards = AutocardAnywhere.ignoredCards + '|' + text;
+						AutocardAnywhere.saveSettings({
+							ignoredCards: newIgnoredCards
+						});
+					});
+					result.appendChild(ignore);
+				}
+				
             	return result;
 			}
 			
@@ -306,7 +332,7 @@ let AutocardAnywhere = {
 				content: popupContent,
 				onShow() {
 					// Hide all other tips
-					tippy.hideAll();
+					tippy.hideAll({duration: 0});
 					// If there is a carousel in this tip, start it playing.
 					if (swiper) swiper.autoplay.start();
 				},
@@ -962,6 +988,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
 			AutocardAnywhere.openInNewTab = response.newTab;
 			AutocardAnywhere.enablePopups = response.enablePopups;
+			AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
 			AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
 			AutocardAnywhere.caseSensitive = response.caseSensitive;
 
@@ -981,6 +1008,7 @@ let AutocardAnywhere = {
 				}
 			})
 	
+			AutocardAnywhere.ignoredCards = response.ignoredCards;
 			AutocardAnywhere.ignoreList = {};
 			if (response.ignoredCards !== undefined) {
 				response.ignoredCards.split('|').map(function(ignoredCard) {

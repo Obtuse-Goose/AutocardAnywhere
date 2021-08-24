@@ -265,7 +265,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		extraInfoDiv.style.opacity = 0.85;
 		extraInfoDiv.style.borderRadius = '10px';
 		extraInfoDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
-		extraInfoDiv.style.fontFamily = AutocardAnywhereSettings.extraInfoFont;
+		//extraInfoDiv.style.fontFamily = AutocardAnywhereSettings.font;
 		extraInfoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 		extraInfoDiv.style.left = '0px';
 		extraInfoDiv.style.top = '0px';
@@ -285,7 +285,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 				sourceButton.style.borderRadius = '3px';
 				sourceButton.style.border = '3px solid #4A6594';
 				sourceButton.style.color = '#ffffff';
-				sourceButton.style.fontFamily = AutocardAnywhereSettings.extraInfoFont;
+				//sourceButton.style.fontFamily = AutocardAnywhereSettings.font;
 				sourceButton.style.fontSize = AutocardAnywhere.fontSize + 'px';
 				sourceButton.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 				sourceButton.style.float = 'left';
@@ -304,7 +304,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 				let infoDiv = document.createElement("div");
 				infoDiv.className = 'autocardanywhere-data-section autocardanywhere-' + section.name;
 				infoDiv.style.color = '#ffffff';
-				infoDiv.style.fontFamily = AutocardAnywhereSettings.extraInfoFont;
+				//infoDiv.style.fontFamily = AutocardAnywhereSettings.font;
 				infoDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
 				infoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 				infoDiv.style.float = 'left';
@@ -424,7 +424,7 @@ Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, p
 	priceDiv.style.width = (Math.floor(100 / count)) + '%';
 	priceDiv.style.padding = '5px 0 5px 0';
 	priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
-	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
+	priceDiv.style.fontFamily = AutocardAnywhereSettings.font;
 	priceDiv.addEventListener('mouseover', function() {
 		this.style.textDecoration="underline";
 	});
