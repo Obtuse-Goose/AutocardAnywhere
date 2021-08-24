@@ -25,8 +25,8 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 		// This has to exactly match what the equivalent funcion in php is doing.
 		// Capitalise the first letter of the string
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-		// Capitalise anything that follows a space, full stop, hyphen, slash or bracket.
-		str = str.replace(/([\s\.\-\/\(\)])([a-z])/g, function(match, character, letter) {
+		// Capitalise anything that follows a space, full stop, hyphen, slash, ampersand or bracket.
+		str = str.replace(/([\s\.\-\/&\(\)])([a-z])/g, function(match, character, letter) {
 			return character + letter.toUpperCase();
 		});
 		return str;
@@ -389,7 +389,7 @@ Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, p
 	priceDiv.style.borderColor = colour;
 	priceDiv.style.borderWidth = '1px';
 	priceDiv.style.borderStyle = 'solid';
-	priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
+	//priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
 	
 	$(priceDiv).on('mouseover', function() {
 		this.style.backgroundColor = AutocardAnywhereSettings.themes[AutocardAnywhere.theme]['mouseover'];
