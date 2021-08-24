@@ -75,6 +75,13 @@ function setIcon(enabled) {
 	}
 }
 
+function sendMessage(message) {
+	browser.tabs.query({currentWindow: true, active: true}, function (tabs) {
+		var activeTab = tabs[0];
+		chrome.tabs.sendMessage(activeTab.id, {name: message});
+	});
+}
+
 function enableChange() {
 	if (document.getElementById('site-enabled-checkbox').checked) {
 		setIcon(true);
@@ -84,6 +91,7 @@ function enableChange() {
 		else {
 			removeHostFromList();
 		}
+		sendMessage('enableSite');
 	}
 	else {
 		setIcon(false);
@@ -93,6 +101,7 @@ function enableChange() {
 		else {
 			addHostToList();
 		}
+		sendMessage('disableSite');
 	}
 }
 

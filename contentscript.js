@@ -900,10 +900,25 @@ let AutocardAnywhere = {
 	},
 
 	initialiseContextMenu: function() {
-		if (AutocardAnywhereSettings.isTouchInterface) {
-			// No context menu
+		function processMessage(message) {
+			if (message.name == 'contextmenuitemclick') { 
+				if (!AutocardAnywhereSettings.isTouchInterface) { // No context menu on touch interfaces
+					AutocardAnywhere.contextMenuClick();
+				}
+			}
+			else if (message.name == 'enableSite') {
+				// Reload the extenstion
+				//AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+			}
+			else if (message.name == 'disableSite') {
+				// Remove all links added by AutocardAnywhere
+				$(document.body).find('a.autocardanywhere-link').replaceWith(function() {
+					return $(this).text();
+				});
+			}
 		}
-		else if (AutocardAnywhereSettings.isSafari) {
+
+		if (AutocardAnywhereSettings.isSafari) {
 			// When the context menu is displayed, store the current selection.
 			// This is so the background script can determine whether or not to display the menu item.
 			document.addEventListener("contextmenu", function(event) {
@@ -911,16 +926,10 @@ let AutocardAnywhere = {
 			}, false);
 
 			// Respond to messages sent by the background script when the context menu item is clicked.
-			safari.self.addEventListener("message", function(msg) {
-				if (msg.name == 'contextmenuitemclick') {
-					AutocardAnywhere.contextMenuClick();
-				}
-			}, false);
+			safari.self.addEventListener("message", processMessage, false);
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			browser.runtime.onMessage.addListener(function(request) {
-				if (request.name == 'contextmenuitemclick') { AutocardAnywhere.contextMenuClick(); }
-			});
+			browser.runtime.onMessage.addListener(processMessage);
 		}
 	},
 	
