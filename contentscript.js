@@ -419,6 +419,17 @@ let AutocardAnywhere = {
 							pagination : {
 								el: paginationElement.length > 0 ? paginationElement[0] : '',
 								clickable: true
+							},
+							on: {
+								slideChangeTransitionEnd: function () {
+									console.log('slide changed');
+									// Update the card link when the carousel changes
+									let slide = content.find('.swiper-slide-active');
+									if (slide.length == 1) {
+										let cardUrl = $(slide[0]).data('url');
+										target.attr('href', cardUrl);
+									}
+								}
 							}
 						});
 					}
