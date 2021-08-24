@@ -1486,13 +1486,6 @@ MtgDictionary.prototype = new Dictionary({
 		},
 		*/
 		{
-			'name': 'enablePrices',
-			'description': 'Display card prices',
-			'type': 'boolean',
-			'default': true
-			//'controlType': 'checkbox'
-		},
-		{
 			'name': 'enableTcgPrices',
 			'description': 'Display TCGPlayer card prices',
 			'type': 'boolean',
@@ -1734,6 +1727,8 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return card;
 };
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
+	console.log('got price data for ' + card.name);
+	//console.log(response);
 	let dictionary = this;
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
@@ -1742,7 +1737,7 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let cardmarketLink = AutocardAnywhere.format('https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>', card, dictionary);
 	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
 	
-	let pricesDiv = AutocardAnywhere.createPricesElement();
+	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
@@ -2319,7 +2314,7 @@ PokemonDictionary.prototype = new Dictionary({
 			'default': 'https://partner.tcgplayer.com/x3/pkphl.asmx/p?pk=AUTOANY&s=<set>&p=<name:simple>'
 		},
 		{
-			'name': 'enablePrices',
+			'name': 'enableTcgPrices',
 			'description': 'Display card prices (provided by TCGPlayer)',
 			'type': 'boolean',
 			'default': true,
@@ -2743,7 +2738,7 @@ WowDictionary.prototype = new Dictionary({
 			'default': 'https://partner.tcgplayer.com/x3/wowtcgphl.asmx/p?pk=AUTOANY&s=<set>&p=<name:simple>'
 		},
 		{
-			'name': 'enablePrices',
+			'name': 'enableTcgPrices',
 			'description': 'Display card prices (provided by TCGPlayer)',
 			'type': 'boolean',
 			'default': true,
@@ -2965,7 +2960,7 @@ YugiohDictionary.prototype = new Dictionary({
 			'default': 'https://partner.tcgplayer.com/x3/ygophl.asmx/p?pk=AUTOANY&s=<set>&p=<name>&n=<en>'
 		},
 		{
-			'name': 'enablePrices',
+			'name': 'enableTcgPrices',
 			'description': 'Display card prices (provided by TCGPlayer)',
 			'type': 'boolean',
 			'default': true,

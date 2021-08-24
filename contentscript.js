@@ -343,9 +343,20 @@ let AutocardAnywhere = {
 				onTrigger() {
 					// If this tooltip has already been rendered, do nothing
 					if (target.data('popup')) return;
+					console.log('loading popup');
 
-					let paginationNumbers = false;
+					//let paginationNumbers = false;
 					let extraInfoEnabled = false;
+					let pricesEnabled = false;
+
+					function checkIfLoadComplete() {
+						if ((!extraInfoEnabled || content.find('.autocardanywhere-loaded').length > 0) &&
+							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
+								console.log('all loaded');
+								target.data('popup', 1);
+							}
+					}
+
 					// Run through each of the cards in this popup
 					cards.map(function(card) {
 						let dictionary = AutocardAnywhere.dictionaries[card.game + card.language];
@@ -353,14 +364,14 @@ let AutocardAnywhere = {
 						// Set the image source
 						content.find("img[data-id='" + card.id + '-' + card.face + "']").each(function() {
 							$(this).attr('src', AutocardAnywhere.format(dictionary.settings.imageURL, card, dictionary));
-						});	
+						});
 
 						// If any of the cards are from a dictionary with paginationNumbers turned-on, switch it on for the current carousel
-						paginationNumbers = paginationNumbers || dictionary.settings.paginationNumbers;
+						//paginationNumbers = paginationNumbers || dictionary.settings.paginationNumbers;
 						// Get the price of the card
-						let enablePrices = dictionary.settings.enablePrices || dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
-						if (enablePrices) { // An element will only be returned if enablePrices is set on the dictionary
-							if (content.find('.autocardanywhere-price').length == 0) {
+						pricesEnabled = dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
+						if (pricesEnabled) { // An element will only be returned if enablePrices is set on the dictionary
+							if (content.find('.autocardanywhere-prices').length == 0) {
 								AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
 									// Get the card price from the location specified in the dictionary...
 									AutocardAnywhere.ajax(
@@ -368,6 +379,7 @@ let AutocardAnywhere = {
 										function(response) {
 											// Set the content of any matching price divs upon successful retrieval
 											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
+											checkIfLoadComplete();
 										}
 									);
 								});
@@ -397,6 +409,7 @@ let AutocardAnywhere = {
 													dictionary.parseExtraInfo(response, section, card)
 												).addClass('autocardanywhere-loaded');
 											});
+											checkIfLoadComplete();
 										}
 									);
 								});
@@ -464,7 +477,7 @@ let AutocardAnywhere = {
 						}
 					});
 
-					target.data('popup', 1);
+					checkIfLoadComplete();
 				}
 			});
 

@@ -337,7 +337,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		return result;
 	}
 
-	if (dictionary.settings.enablePrices || dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices) {
+	if (dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices) {
 		let outerDiv = createOuterPriceDiv();
 		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id, 'Loading price data...');
 		pricesDiv.style.height = '100px';
@@ -446,7 +446,7 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 	let xmlDoc = $.parseXML(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let priceLinkHref = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, this) + AutocardAnywhereSettings.partnerString;
-	let pricesDiv = AutocardAnywhere.createPricesElement();
+	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("hiprice")[0]) {
 		let lowPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
