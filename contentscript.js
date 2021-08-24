@@ -334,16 +334,19 @@ let AutocardAnywhere = {
 					// Hide all other tips
 					tippy.hideAll({duration: 0});
 					// If there is a carousel in this tip, start it playing.
-					if (swiper) swiper.autoplay.start();
+					if (swiper) {
+						swiper.autoplay.start();
+					}
 				},
 				onHide() {
 					// If there is a carousel in this tip, stop it playing.
-					if (swiper) swiper.autoplay.stop();
+					if (swiper) {
+						swiper.autoplay.stop();
+					}
 				},
 				onTrigger() {
 					// If this tooltip has already been rendered, do nothing
 					if (target.data('popup')) return;
-					console.log('loading popup');
 
 					//let paginationNumbers = false;
 					let extraInfoEnabled = false;
@@ -352,7 +355,6 @@ let AutocardAnywhere = {
 					function checkIfLoadComplete() {
 						if ((!extraInfoEnabled || content.find('.autocardanywhere-loaded').length > 0) &&
 							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
-								console.log('all loaded');
 								target.data('popup', 1);
 							}
 					}
@@ -420,7 +422,7 @@ let AutocardAnywhere = {
 					// If there's more than 1 card, setup a carousel to view them...
 					if (cards.length > 1) {
 						let paginationElement = content.find('.swiper-pagination');
-						var swiper = new Swiper(popupContent, {
+						swiper = new Swiper(popupContent, {
 							loop: true,
 							speed: 500,
 							effect: AutocardAnywhere.carouselAnimation, // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
