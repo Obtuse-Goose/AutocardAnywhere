@@ -1417,6 +1417,7 @@ MtgDictionary.prototype = new Dictionary({
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
 				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
+				{name: 'Cardmarket', description: 'Cardmarket', value: 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
 				{name: 'Magidex', description: 'magidex.com', value: 'https://magidex.com/search?q=<name:simple>'},
 				{name: 'TappedOut', description: 'Tapped Out', value: 'http://tappedout.net/mtg-card/<name:hyphenated>/'},
@@ -1679,7 +1680,7 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
 	let tcgplayerLink = AutocardAnywhere.format('https://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
-	let cardmarketLink = '';
+	let cardmarketLink = AutocardAnywhere.format('https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>', card, dictionary);
 	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement();
