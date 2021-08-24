@@ -173,7 +173,8 @@ Dictionary.prototype.run = function(text) {
 };
 // Functions related to the popup
 Dictionary.prototype.getCardElement = function(card, linkCount) {
-	let linkHref = AutocardAnywhere.format(this.settings.linkTarget, card, this) + AutocardAnywhereSettings.partnerString;
+	let dictionary = this;
+	let linkHref = AutocardAnywhere.format(dictionary.settings.linkTarget, card, dictionary) + AutocardAnywhereSettings.partnerString;
 
 	let result = document.createElement("div");
 	result.className = 'autocardanywhere-card swiper-slide';
@@ -198,7 +199,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	let overlayHeight = AutocardAnywhere.popupHeight;
 
 	// If we have rotation set at 360 and are using Scryfall as the image target, then change rotation to 90.
-	if ((card.rotate == 360) && (this.settings.imageURL.indexOf('api.scryfall.com') > -1)) {
+	if ((card.rotate == 360) && (dictionary.settings.imageURL.indexOf('api.scryfall.com') > -1)) {
 		card.rotate = 90;
 	}
 
@@ -244,18 +245,18 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 
 	// If the extra info setting is enabled and this game type has extra info sources defined
 	let extraInfoDiv = '';
-	if (AutocardAnywhere.enableExtraInfo && this.extraInfo && (this.extraInfo.length > 0)) {
+	if (AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0)) {
 		let extraInfoDiv = document.createElement("div");
 		let textBoxHeight = overlayHeight - 43;
 
 		let sectionCount = 0;
-		this.extraInfo.map(function(source) {
+		dictionary.extraInfo.map(function(source) {
 			sectionCount += source.sections.length;
 		});
 
 		let buttonWidth = Math.round(96 / sectionCount);
 
-		extraInfoDiv.className = 'autocardanywhere-data autocardanywhere-data-' + this.game + this.language + '-' + card.id;
+		extraInfoDiv.className = 'autocardanywhere-data autocardanywhere-data-' + dictionary.game + dictionary.language + '-' + card.id;
 		extraInfoDiv.style.display = 'none';
 		extraInfoDiv.style.position = 'absolute';
 		extraInfoDiv.style.width = overlayWidth + 'px';
@@ -275,7 +276,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		buttonDiv.style.marginTop = '5px';
 		buttonDiv.style.width = (overlayWidth-6) + 'px';
 
-		this.extraInfo.map(function(source) {
+		dictionary.extraInfo.map(function(source) {
 			source.sections.map(function(section) {
 				let sourceButton = document.createElement("button");
 				sourceButton.dataset.div = 'autocardanywhere-' + section.name;
@@ -299,7 +300,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		extraInfoDiv.appendChild(buttonDiv);
 
 		let hidden = false;
-		this.extraInfo.map(function(source) {
+		dictionary.extraInfo.map(function(source) {
 			source.sections.map(function(section) {
 				let infoDiv = document.createElement("div");
 				infoDiv.className = 'autocardanywhere-data-section autocardanywhere-' + section.name;
@@ -312,7 +313,12 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 				infoDiv.style.height = textBoxHeight + 'px';
 				infoDiv.style.overflow = 'auto';
 				infoDiv.style.setProperty('padding', '5px', 'important');
-				if (hidden) { infoDiv.style.display = 'none'; }
+				if (!dictionary.settings.defaultSection)  { 
+					if (hidden) infoDiv.style.display = 'none';
+				}
+				else if (section.name != dictionary.settings.defaultSection) {
+					infoDiv.style.display = 'none';
+				}
 				extraInfoDiv.appendChild(infoDiv);
 				hidden = true;
 			});
@@ -331,7 +337,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		return result;
 	}
 
-	if (this.settings.enablePrices || this.settings.enableTcgPrices || this.settings.enableCardmarketPrices || this.settings.enableOnlinePrices) {
+	if (dictionary.settings.enablePrices || dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices) {
 		let outerDiv = createOuterPriceDiv();
 		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id, 'Loading price data...');
 		pricesDiv.style.height = '100px';

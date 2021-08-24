@@ -96,6 +96,18 @@ CardfightVanguardDictionary.prototype = new Dictionary({
 			'description': 'Image source:',
 			'type': 'string',
 			'default': '<img>'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'info',
+			'controlType': 'radio',
+			'options': [
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'text', description: 'Text', value: 'text'},
+				{name: 'flavour', description: 'Flavour', value: 'flavour'}
+			]
 		}
 	],
 	extraInfo: [
@@ -972,6 +984,18 @@ GwentDictionary.prototype = new Dictionary({
 			'description': 'Image source:',
 			'type': 'string',
 			'default': 'https://media-seawolf.cursecdn.com/avatars/thumbnails/<img>'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'cardtext',
+			'controlType': 'radio',
+			'options': [
+				{name: 'cardtext', description: 'Card Text', value: 'cardtext'},
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'}
+			]
 		}
 	],
 	extraInfo: [
@@ -1079,7 +1103,19 @@ HearthstoneDictionary.prototype = new Dictionary({
 				{name: 'Hearthpwn', description: 'Hearthpwn', value: 'http://media-hearth.cursecdn.com/avatars/<hearthpwnImageFilename>'},
 				{name: 'Custom', description: 'Custom:', value: ''}
 			]
-		}	
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'info',
+			'controlType': 'radio',
+			'options': [
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'cardtext', description: 'Text', value: 'cardtext'},
+				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'}
+			]
+		}
 	],
 	extraInfo: [
 		{
@@ -1249,6 +1285,18 @@ L5rDictionary.prototype = new Dictionary({
 			'description': 'Image source:',
 			'type': 'string',
 			'default': 'http://imperialassembly.com/oracle/showimage?prefix=printing&cardid=<id>&nestid=1&class=details&tagid=34&.jpg'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'text',
+			'controlType': 'radio',
+			'options': [
+				{name: 'text', description: 'Text', value: 'text'},
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'flavour', description: 'Flavour', value: 'flavour'}
+			]
 		}
 	],
 	extraInfo: [
@@ -1419,7 +1467,6 @@ MtgDictionary.prototype = new Dictionary({
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
 				{name: 'Cardmarket', description: 'Cardmarket', value: 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
-				{name: 'Magidex', description: 'magidex.com', value: 'https://magidex.com/search?q=<name:simple>'},
 				{name: 'TappedOut', description: 'Tapped Out', value: 'http://tappedout.net/mtg-card/<name:hyphenated>/'},
 				{name: 'Custom', description: 'Custom:', value: ''}
 			]
@@ -1472,6 +1519,18 @@ MtgDictionary.prototype = new Dictionary({
 			'type': 'boolean',
 			'default': false,
 			'controlType': 'checkbox'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'oracletext',
+			'controlType': 'radio',
+			'options': [
+				{name: 'oracletext', description: 'Oracle Text', value: 'oracletext'},
+				{name: 'legality', description: 'Format', value: 'legality'},
+				{name: 'sets', description: 'Set', value: 'sets'}
+			]
 		},
 		{
 			'name': 'legality',
@@ -2021,6 +2080,18 @@ MyLittlePonyDictionary.prototype = new Dictionary({
 			'description': 'Image source:',
 			'type': 'string',
 			'default': '<img>'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'text',
+			'controlType': 'radio',
+			'options': [
+				{name: 'text', description: 'Text', value: 'text'},
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'flavour', description: 'Flavour', value: 'flavour'}
+			]
 		}
 	],
 	extraInfo: [
@@ -2127,7 +2198,19 @@ NetrunnerDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'type': 'string',
 			'default': 'http://www.cardgamedb.com/forums/uploads/an/ffg_<image>.png'
-		}	
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'cardtext',
+			'controlType': 'radio',
+			'options': [
+				{name: 'cardtext', description: 'Text', value: 'cardtext'},
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'}
+			]
+		}
 	],
 	extraInfo: [
 		{
@@ -2241,6 +2324,18 @@ PokemonDictionary.prototype = new Dictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'info',
+			'controlType': 'radio',
+			'options': [
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'cardtext', description: 'Text', value: 'cardtext'},
+				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'}
+			]
 		}
 	],
 	extraInfo: [
@@ -2653,6 +2748,18 @@ WowDictionary.prototype = new Dictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'text',
+			'controlType': 'radio',
+			'options': [
+				{name: 'text', description: 'Text', value: 'text'},
+				{name: 'legality', description: 'Legality', value: 'legality'},
+				{name: 'editions', description: 'Editions', value: 'editions'}
+			]
 		}
 	],
 	extraInfo: [
@@ -2863,6 +2970,17 @@ YugiohDictionary.prototype = new Dictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'text',
+			'controlType': 'radio',
+			'options': [
+				{name: 'text', description: 'Card Text', value: 'text'},
+				{name: 'info', description: 'Info', value: 'info'}
+			]
 		}
 	],
 	extraInfo: [
