@@ -102,7 +102,6 @@ AutocardAnywhereSettings = {
 		{'name': 'unignoredCards', 'type': 'string', 'default': ''},
 		{'name': 'popupAnimation', 'type': 'string', 'default': 'scale'},
 		{'name': 'popupShowDuration', 'type': 'integer', 'default': 500},
-		//{'name': 'popupHideEffect', 'type': 'string', 'default': 'slideUp'},
 		{'name': 'popupHideDuration', 'type': 'integer', 'default': 200},
 		{'name': 'carouselAnimation', 'type': 'string', 'default': 'coverflow'},
 		{'name': 'carouselAutoPlay', 'type': 'boolean', 'default': true},

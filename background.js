@@ -52,6 +52,16 @@ function loadSettings(prefix, settings) {
 		}
 		else {
 			result[setting.name] = getItem(prefix + setting.name) || setting.default;
+
+			// Rewrite defunct link targets
+			if (setting.name == 'linkTarget') {
+				if (result[setting.name] == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
+					result[setting.name] = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
+				}
+				else if (result[setting.name] == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
+					result[setting.name] = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
+				}
+			}
 		}
 	});
 	return result;

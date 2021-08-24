@@ -1415,10 +1415,10 @@ MtgDictionary.prototype = new Dictionary({
 			'options': [
 				{name: 'TCGPlayer', description: 'TCG Player', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
-				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>'},
+				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
+				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
 				{name: 'Magidex', description: 'magidex.com', value: 'https://magidex.com/search?q=<name:simple>'},
-				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
 				{name: 'TappedOut', description: 'Tapped Out', value: 'http://tappedout.net/mtg-card/<name:hyphenated>/'},
 				{name: 'Custom', description: 'Custom:', value: ''}
 			]
@@ -1501,17 +1501,14 @@ MtgDictionary.prototype = new Dictionary({
 			'url': 'https://api.scryfall.com/cards/search?order=released&q=<name>&unique=prints',
 			'sections': [{
 				'name': 'oracletext',
-				'description': 'Oracle',
-				're': '"oracle_text":"(.*?)"'
+				'description': 'Oracle'
 			},
 			{
 				'name': 'legality',
-				'description': 'Format',
-				're': '"legalities":{(.*?)}'
+				'description': 'Format'
 			},{
 				'name': 'sets',
-				'description': 'Set',
-				're': '"set_name":"(.*?)"'
+				'description': 'Set'
 			}]
 		}
 	]
