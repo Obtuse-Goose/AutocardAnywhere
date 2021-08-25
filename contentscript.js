@@ -113,6 +113,18 @@ let AutocardAnywhere = {
 		}
 		return s;
 	},
+	appendPartnerString: function(url) {
+		url = url.toLowerCase();
+		let lastChar = url.charAt(url.length-1);
+		if (url.indexOf('?') < 0) url = url + '?';
+		else if (lastChar != '?' && lastChar != '&' ) {
+			url = url + '&';
+		}
+		for (const [key, value] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
+			if (url.indexOf(key) >= 0) url = url + value;
+		}
+		return url;
+	},
 	decodeHTMLEntities: function(text) {
 	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
 	    for (let i in entities) {
@@ -437,7 +449,6 @@ let AutocardAnywhere = {
 							},
 							on: {
 								slideChangeTransitionEnd: function () {
-									console.log('slide changed');
 									// Update the card link when the carousel changes
 									let slide = content.find('.swiper-slide-active');
 									if (slide.length == 1) {

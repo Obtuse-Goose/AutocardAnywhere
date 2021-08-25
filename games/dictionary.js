@@ -128,7 +128,7 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 // Functions called when linkifying the page
 Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, href, cardID, isFuzzy) {
 	let anchor = document.createElement("a");
-	anchor.href = href ? href : (AutocardAnywhere.format(dictionary.settings.linkTarget, card, dictionary) + AutocardAnywhereSettings.partnerString);
+	anchor.href = href ? href : AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.linkTarget, card, dictionary));
 	anchor.className = 'autocardanywhere-link';
 	if (dictionary.settings.emphasiseText) { anchor.className += ' autocardanywhere-emphasised'; }
 	anchor.dataset.dictionary = this.game + this.language;
@@ -443,28 +443,29 @@ Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, p
 };
 */
 Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
+	let dictionary = this;
 	let xmlDoc = $.parseXML(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
-	let priceLinkHref = AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, this) + AutocardAnywhereSettings.partnerString;
+	let priceLinkHref = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary));
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("hiprice")[0]) {
-		let lowPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
-		let avgPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue));
+		let lowPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
+		let avgPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue));
 		//let hiPrice  = AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
 		let width = '50%';
 		let enableFoil = xmlDoc.getElementsByTagName("foilavgprice")[0] && xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue != '0';
 		let foilPrice = 0;
 		if (enableFoil) {
-			foilPrice = this.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue));
+			foilPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue));
 			width = '33%';
 		}
 		let priceCount = 2;
 		if (enableFoil) priceCount++;
-		if (this.settings.enableOnlinePrices) priceCount++;
-		pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Low', lowPrice, '#FCD1D1', 'left', priceCount));
-		pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Median', avgPrice, '#D1DFFC', (this.settings.enableOnlinePrices || enableFoil) ? 'centre' : 'right', priceCount));
-		if (enableFoil) { pricesDiv.appendChild(this.createPriceElement(priceLinkHref, 'Foil', foilPrice, '#FFCAB1', this.settings.enableOnlinePrices ? 'centre' : 'right', priceCount)); }
+		if (dictionary.settings.enableOnlinePrices) priceCount++;
+		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Low', lowPrice, '#FCD1D1', 'left', priceCount));
+		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Median', avgPrice, '#D1DFFC', (dictionary.settings.enableOnlinePrices || enableFoil) ? 'centre' : 'right', priceCount));
+		if (enableFoil) { pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Foil', foilPrice, '#FFCAB1', dictionary.settings.enableOnlinePrices ? 'centre' : 'right', priceCount)); }
 	}
 	else {
 		pricesDiv.style.paddingTop = '12px';

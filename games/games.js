@@ -1727,15 +1727,14 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return card;
 };
 MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
-	console.log('got price data for ' + card.name);
-	//console.log(response);
+	//console.log('got price data for ' + card.name);
 	let dictionary = this;
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
-	let tcgplayerLink = AutocardAnywhere.format('https://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
-	let cardmarketLink = AutocardAnywhere.format('https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>', card, dictionary);
-	let cardhoarderLink = AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary) + AutocardAnywhereSettings.partnerString;
+	let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary));
+	let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>', card, dictionary));
+	let cardhoarderLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary));
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 

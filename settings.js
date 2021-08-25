@@ -15,7 +15,6 @@ AutocardAnywhereSettings = {
 	isBookmarklet: (typeof(AutocardAnywhereLoader) !== 'undefined'),
 	isTouchInterface: false,//('ontouchstart' in window),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
-	partnerString: 'partner=AUTOANY&affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card',
 	prefix: 'autocardAnywhere',
 	maxLevenshteinFactor: 1,
 	themes: {
@@ -33,6 +32,11 @@ AutocardAnywhereSettings = {
 			foil: '#FFCAB1',
 			mouseover: '#2e2e2e'
 		}
+	},
+	partnerStrings: {
+		tcgplayer: 'partner=AUTOANY',
+		cardmarket: 'referrer=autocardanywhere&utm_campaign=card_prices&utm_medium=text&utm_source=autocardanywhere',
+		cardhoarder: 'affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card'
 	},
 	dictionaries: [
 		{'game': 'mtg', 'language': 'de', 'default': 0},
