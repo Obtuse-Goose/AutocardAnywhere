@@ -336,13 +336,28 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		return result;
 	}
 
-	if (dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices) {
+	if (dictionary.settings.tcgPlayerURL || dictionary.settings.cardmarketURL) {
 		let outerDiv = createOuterPriceDiv();
-		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id, 'Loading price data...');
-		pricesDiv.style.height = '100px';
+		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id);
+		let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
+
+		if (dictionary.settings.tcgPlayerURL) {
+			let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.tcgPlayerURL, card, dictionary));
+			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer', 0, colours['tcg']));
+		}
+		if (dictionary.settings.cardmarketURL) {
+			let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardmarketURL, card, dictionary));
+			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', 0, colours['cardmarket']));
+		}
+
+		if (dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices) {
+			pricesDiv.style.height = '100px';
+		}
+
 		outerDiv.appendChild(pricesDiv);
 		result.appendChild(outerDiv);
 	}
+
 
 	return result;
 };
@@ -448,7 +463,7 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 	let dictionary = this;
 	let xmlDoc = $.parseXML(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
-	let priceLinkHref = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary));
+	let priceLinkHref = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.tcgPlayerURL, card, dictionary));
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
@@ -467,9 +482,10 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 			pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Foil', foilPrice, colours['foil'])); 
 		}
 	}
-	else {
-		pricesDiv.style.paddingTop = '4px';
-		pricesDiv.appendChild(document.createTextNode("Error loading prices"));
+	
+	if (dictionary.settings.cardmarketURL) {
+		let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardmarketURL, card, dictionary));
+		pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', 0, colours['cardmarket']));
 	}
 
 	return pricesDiv;

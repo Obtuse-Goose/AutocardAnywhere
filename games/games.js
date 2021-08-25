@@ -152,13 +152,23 @@ CardfightVanguardDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://store.tcgplayer.com/cardfight-vanguard/product/show?ProductName=<name:simple>'
+			'default': 'https://store.tcgplayer.com/cardfight-vanguard/product/show?ProductName=<name:simple>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
 			'default': '<img>'
+		},
+		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/cardfight-vanguard/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/Vanguard/Products/Search?searchString=<name:simple>'
 		},
 		{
 			'name': 'defaultSection',
@@ -886,6 +896,11 @@ FabDictionary.prototype = new Dictionary({
 			'default': 'https://fabdb2.imgix.net/cards/printings/<img>.png'
 		},
 		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://www.tcgplayer.com/search/flesh-and-blood-tcg/product?q=<id>'
+		},
+		{
 			'name': 'defaultSection',
 			'description': 'Default info section:',
 			'type': 'string',
@@ -915,11 +930,10 @@ FabDictionary.prototype = new Dictionary({
 });
 
 // Override parent functions
-/*
 FabDictionary.prototype.simplify = function(s) {
 	return s.replace(/ /g, '%20');
 };
-*/
+
 FabDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
 	if (!cardData) {return}
@@ -1096,6 +1110,11 @@ ForceOfWillDictionary.prototype = new Dictionary({
 			'type': 'string',
 			'default': 'http://db.fowtcg.us/cards/<img>'
 		}
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/FoW/Products/Search?searchString=<name:simple>'
+		},
 	]
 }); 
 
@@ -1629,14 +1648,14 @@ MtgDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>',
+			'default': 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>',
 			'controlType': 'radio',
 			'options': [
 				{name: 'TCGPlayer', description: 'TCGplayer', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
+				{name: 'Cardmarket', description: 'Cardmarket', value: 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'},
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
 				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
-				{name: 'Cardmarket', description: 'Cardmarket', value: 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
 				{name: 'TappedOut', description: 'Tapped Out', value: 'http://tappedout.net/mtg-card/<name:hyphenated>/'},
 				{name: 'Custom', description: 'Custom:', value: ''}
@@ -1655,6 +1674,21 @@ MtgDictionary.prototype = new Dictionary({
 			'resetToDefault': true,
 			//'default': 'https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=<id>'
 			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<id:folders>.png'
+		},
+		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'
+		},
+		{
+			'name': 'cardhoarderURL',
+			'type': 'string',
+			'default': 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'
 		},
 		{
 			'name': 'enableTcgPrices',
@@ -1740,9 +1774,6 @@ MtgDictionary.prototype = new Dictionary({
 
 // Override parent functions
 MtgDictionary.prototype.simplify = function(s) {
-	if (s.indexOf('cardhoarder.com') > -1) { // If it's a Cardhoarder url, need to make additional replacements
-		s = s.replace(' // ', '/').replace(/data\[name\]=Ae/, 'data[name]=Æ');
-	}
 	return s.replace(/ /g, '%20');
 };
 MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
@@ -1903,9 +1934,9 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
-	let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary));
-	let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>', card, dictionary));
-	let cardhoarderLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('https://www.cardhoarder.com/cards/index/sort:relevance/viewtype:detailed?data%5Bsearch%5D=<name:simple>', card, dictionary));
+	let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.tcgPlayerURL, card, dictionary));
+	let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardmarketURL, card, dictionary));
+	let cardhoarderLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardhoarderURL, card, dictionary));
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
@@ -1931,14 +1962,6 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 			let mtgoPrice = data.prices.tix;
 			pricesDiv.appendChild(dictionary.createPriceElement(cardhoarderLink, 'Cardhoarder', mtgoPrice > 0 ? mtgoPrice + ' tix' : '' , colours['cardhoarder']));
 		}
-	}
-	else {
-		let link = document.createElement("a");
-		link.href = tcgplayerLink;
-		if (AutocardAnywhere.openInNewTab) { link.target = "_blank"; }
-		link.appendChild(document.createTextNode("Error loading prices"));
-		pricesDiv.style.paddingTop = '4px';
-		pricesDiv.appendChild(link);
 	}
 
 	return pricesDiv;
@@ -2177,6 +2200,11 @@ MyLittlePonyDictionary.prototype = new Dictionary({
 			'default': '<img>'
 		},
 		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/MyLittlePony/Products/Search?searchString=<name:simple>'
+		},
+		{
 			'name': 'defaultSection',
 			'description': 'Default info section:',
 			'type': 'string',
@@ -2395,7 +2423,7 @@ PokemonDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
 		},
 		{
 			'name': 'imageURL',
@@ -2408,6 +2436,16 @@ PokemonDictionary.prototype = new Dictionary({
 			'type': 'string',
 			'resetToDefault': true,
 			'default': 'https://partner.tcgplayer.com/x3/pkphl.asmx/p?pk=AUTOANY&s=<set>&p=<name:simple>'
+		},
+		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=<name:simple>'
 		},
 		{
 			'name': 'enableTcgPrices',
@@ -2809,19 +2847,29 @@ WowDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://www.wowcards.info/scans/<set>/en/<en><img>.jpg'
+			'default': 'https://www.wowcards.info/scans/<set>/en/<en><img>.jpg'
 		},
 		{
 			'name': 'priceURL',
 			'type': 'string',
 			'resetToDefault': true,
 			'default': 'https://partner.tcgplayer.com/x3/wowtcgphl.asmx/p?pk=AUTOANY&s=<set>&p=<name:simple>'
+		},
+		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/WoW/Products/Search?searchString=<name:simple>'
 		},
 		{
 			'name': 'enableTcgPrices',
@@ -3040,6 +3088,16 @@ YugiohDictionary.prototype = new Dictionary({
 			'type': 'string',
 			'resetToDefault': true,
 			'default': 'https://partner.tcgplayer.com/x3/ygophl.asmx/p?pk=AUTOANY&s=&p=<name>&n='
+		},
+		{
+			'name': 'tcgPlayerURL',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'cardmarketURL',
+			'type': 'string',
+			'default': 'https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=<name:simple>'
 		},
 		{
 			'name': 'enableTcgPrices',

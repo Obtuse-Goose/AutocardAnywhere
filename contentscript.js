@@ -79,7 +79,10 @@ let AutocardAnywhere = {
 		if (!language || language == '' || language == 'original') {
 			language = card.language;
 		}
-		if (dictionary.game == 'mtg' && card[language]) card.id = card[language];
+		if (dictionary.game == 'mtg' && card[language]) {
+			card.id = card[language];
+		}
+		
 		// Make specific replacements
 		// Replace <game> with "magic" for mtg and card.game for other games 
 		s = s.replace(/<game>/g, function() {
@@ -113,10 +116,13 @@ let AutocardAnywhere = {
 		else {
 			s = s  + '&';
 		}
+		// If it's a Cardhoarder url, need to make additional replacements
+		if (s.indexOf('cardhoarder.com') > -1) { 
+			s = s.replace(' // ', '/').replace(/data\[name\]=Ae/, 'data[name]=Æ');
+		}
 		return s;
 	},
 	appendPartnerString: function(url) {
-		url = url.toLowerCase();
 		let lastChar = url.charAt(url.length-1);
 		if (url.indexOf('?') < 0) url = url + '?';
 		else if (lastChar != '?' && lastChar != '&' ) {
