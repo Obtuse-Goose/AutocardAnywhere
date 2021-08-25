@@ -2876,19 +2876,19 @@ YugiohDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': '<img>'
+			'default': 'https://storage.googleapis.com/ygoprodeck.com/pics/<id>.jpg'
 		},
 		{
 			'name': 'priceURL',
 			'type': 'string',
 			'resetToDefault': true,
-			'default': 'https://partner.tcgplayer.com/x3/ygophl.asmx/p?pk=AUTOANY&s=<set>&p=<name>&n=<en>'
+			'default': 'https://partner.tcgplayer.com/x3/ygophl.asmx/p?pk=AUTOANY&s=&p=<name>&n='
 		},
 		{
 			'name': 'enableTcgPrices',
@@ -2911,17 +2911,19 @@ YugiohDictionary.prototype = new Dictionary({
 	],
 	extraInfo: [
 		{
-			'url': 'http://yugioh.wikia.com/wiki/<name>',
+			'url': 'https://db.ygoprodeck.com/api/v7/cardinfo.php?name=<name:simple>',
 			'sections': [
 				{
 					'name': 'text',
-					'description': 'Card Text',
-					're': '<b>Card descriptions</b><br \/>[^^]*?>English<[^^]*?<td class="navbox-list"[^>]*>([^^]*?)<\/td>'
+					'description': 'Text'
 				},
 				{
 					'name': 'info',
-					'description': 'Info',
-					're': '<tr[^>]*class="cardtablerow"[^>]*><th[^>]*class="cardtablerowheader"[^>]*>(<a[^>]*>Attribute<\/a>|<a[^>]*>Types<\/a>|<a[^>]*>Level<\/a>|<a[^>]*>ATK<\/a>\/<a[^>]*>DEF<\/a>|Card effect types)<\/th>[^<]*<td[^>]*class="cardtablerowdata"[^>]*>([^^]*?)<\/a><\/td><\/tr>'
+					'description': 'Info'
+				},
+				{
+					'name': 'sets',
+					'description': 'Set'
 				}
 			]
 		}
@@ -2939,6 +2941,93 @@ YugiohDictionary.prototype.parseHtml = function(html) {
 	return html.replace(/<p class="cardfront">/g, "Front:").replace(/<p class="cardback">/g, "Back:").replace(/<li>/g, "").replace(/<\/p>/g, "");
 };
 */
+YugiohDictionary.prototype.findCardById = function(cardID, match, isDict) {
+	let cardData = this.cardData[cardID];
+	if (!cardData) {return}
+	return {
+		'game': this.game,
+		'language': this.language,
+		'id': cardID,
+		'name': match.replace(/"/g, '`'),
+		'match': match,
+		'isDict': isDict || 0
+	};
+};
+YugiohDictionary.prototype.parseExtraInfo = function(content, section, card) {
+
+	function addLine(div, text, indented, capitalised) {
+		if (!text) return;
+
+		let line = document.createElement("div");
+		line.appendChild(document.createTextNode(text));
+		if (indented) {
+			line.style.setProperty('padding-left', '10px');
+		}
+		if (capitalised) {
+			line.style.setProperty('text-transform', 'capitalize');
+		}
+		div.appendChild(line);
+	}
+
+	function processCard(card) {
+		if (card.level) {
+			addLine(result, 'Level: ' + card.level);
+		}
+		if (card.race) {
+			addLine(result, 'Race: ' + card.race);
+		}
+		if (card.type) {
+			addLine(result, 'Type: ' + card.type);
+		}
+		if (card.archetype) {
+			addLine(result, 'Archetype: ' + card.archetype);
+		}
+		if (card.atk) {
+			addLine(result, 'ATK/' + card.atk + ' DEF/' + card.def);
+		}
+	}
+
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+
+	// Parses the returned content for the specified section
+	let list = JSON.parse(content);
+	let result = document.createElement("div");
+	result.style.setProperty('width', overlayWidth + 'px');
+
+	for (let i in list.data) {
+		let card = list.data[i];
+		if (section.name == 'text') {
+			if (card.desc) {
+				addLine(result, 'Card Text:');
+				let lines = card.desc.split("\n");
+				lines.map(function(line) {
+					addLine(result, line, true);
+				});
+			}
+			break;
+		}
+		else if (section.name == 'info') {
+			processCard(card);
+			break;
+		}
+		else if (section.name == 'sets') {
+			let sets = [];
+			for (let j in card.card_sets) {
+				sets.push(card.card_sets[j].set_name);
+			}
+
+			// Sort the set list alphabetically
+			sets.sort();
+			// Remove any duplicates
+			sets = [...new Set(sets)];
+			sets.map(function(set) {
+				addLine(result, set);
+			});
+		}
+	}
+
+	return result;
+};
 
 //==============================================================================
 // Individual language(s)

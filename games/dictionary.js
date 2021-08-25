@@ -62,7 +62,6 @@ Dictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return {
 		'game': this.game,
 		'language': this.language,
-		'id': cardID,
 		'name': match.replace(/"/g, '`'),
 		'match': match,
 		'id': cardID,

@@ -79,7 +79,7 @@ let AutocardAnywhere = {
 		if (!language || language == '' || language == 'original') {
 			language = card.language;
 		}
-		if (card[language]) card.id = card[language];
+		if (dictionary.game == 'mtg' && card[language]) card.id = card[language];
 		// Make specific replacements
 		// Replace <game> with "magic" for mtg and card.game for other games 
 		s = s.replace(/<game>/g, function() {
@@ -417,7 +417,7 @@ let AutocardAnywhere = {
 								dictionary.extraInfo.map(function(source) {
 									AutocardAnywhere.ajax(
 										// Get the source url and interpolate any card data required
-										AutocardAnywhere.format(source.url, card), 
+										AutocardAnywhere.format(source.url, card, dictionary), 
 										function(response) {
 											source.sections.map(function(section) {
 												// Set the content of any matching divs upon successful retrieval
