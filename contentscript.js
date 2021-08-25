@@ -835,6 +835,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.theme = response.theme;
 
 			AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
+			AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
 
 			AutocardAnywhereSettings.currencies.map(function(currency) {
 				if (currency.value == response.currency) {
@@ -906,22 +907,22 @@ let AutocardAnywhere = {
 				AutocardAnywhere.pluginNames = [];
 				
 				// Card names enclosed in [[]]
-				/*
-				pluginFunctions['bracketed'] = function(text) {
-					return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
-						// Do a fuzzy lookup by name in all dictionaries
-						for (let i in AutocardAnywhere.dictionaries) {
-							let dictionary = AutocardAnywhere.dictionaries[i];
-							//let cards = dictionary.fuzzyLookup(name);
-							//if (cards.length > 0) {
-							//	return dictionary.createLink(dictionary, cards[0], name, null, null, true);
-							//}
-						}
-						return match;
-					});
-				};
-				AutocardAnywhere.pluginNames.push('bracketed');
-				*/
+				if (AutocardAnywhere.fuzzyLookup) {
+					pluginFunctions['bracketed'] = function(text) {
+						return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+							// Do a fuzzy lookup by name in all dictionaries
+							for (let i in AutocardAnywhere.dictionaries) {
+								let dictionary = AutocardAnywhere.dictionaries[i];
+								let cards = dictionary.fuzzyLookup(name);
+								if (cards.length > 0) {
+									return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+								}
+							}
+							return match;
+						});
+					};
+					AutocardAnywhere.pluginNames.push('bracketed');
+				}
 				
 				// Standard card sets
 				dictionaries.map(function(dictionary) {

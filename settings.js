@@ -92,6 +92,7 @@ AutocardAnywhereSettings = {
 		{'name': 'popupWidth', 'type': 'integer', 'default': '200'},
 		{'name': 'popupHeight', 'type': 'integer', 'default': '285'},
 		{'name': 'replaceExistingLinks', 'type': 'boolean', 'default': true},
+		{'name': 'fuzzyLookup', 'type': 'boolean', 'default': false},
 		{'name': 'newTab', 'type': 'boolean', 'default': true},
 		{'name': 'linkStyleBold', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleItalic', 'type': 'boolean', 'default': false},

@@ -166,6 +166,7 @@ function loadSettings(response) {
 	$("#icon-checkbox").prop('checked', response.showIcon);
 	$("#new-tab-checkbox").prop('checked', response.newTab);
 	$("#replace-existing-links-checkbox").prop('checked', response.replaceExistingLinks);
+	$("#fuzzy-lookup-checkbox").prop('checked', response.fuzzyLookup);
 
 	// Popups page
 	$("#enable-popups-checkbox").prop('checked', response.enablePopups);
@@ -393,6 +394,7 @@ function saveSettings(settings) {
 	settings.showIcon = $("#icon-checkbox").prop('checked');
 	settings.newTab = $("#new-tab-checkbox").prop('checked');
 	settings.replaceExistingLinks = $("#replace-existing-links-checkbox").prop('checked');
+	settings.fuzzyLookup = $("#fuzzy-lookup-checkbox").prop('checked');
 
 	// Popups page
 	settings.enablePopups = $("#enable-popups-checkbox").prop('checked');

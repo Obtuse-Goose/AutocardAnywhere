@@ -281,8 +281,7 @@ function getDictionary(port, request) {
 
 	browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
 		if (dictionaries[gameName + gameLanguage]) {
-			//console.log('found data in memory');
-			
+			console.log('found data in memory');
 			/*
 			console.log({
 				'game': request.game,
@@ -300,7 +299,7 @@ function getDictionary(port, request) {
 			});
 		}
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
-			//console.log('found data in localstorage');
+			console.log('found data in localstorage');
 			/*
 			console.log({
 				'game': gameName,
@@ -321,7 +320,7 @@ function getDictionary(port, request) {
 			});
 		}
 		else {
-			//console.log('found data on disk');
+			console.log('found data on disk');
 			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
 				let gameData = response;
 				getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
