@@ -1478,13 +1478,13 @@ MtgDictionary.prototype = new Dictionary({
 			//'default': 'https://partner.tcgplayer.com/x3/phl.asmx/p?pk=AUTOANY&s=&p=<name:simple>'
 			'default': 'https://api.scryfall.com/cards/named?exact=<name:simple>'
 		},
-		/*
 		{
-			'name': 'onlinePriceURL',
+			'name': 'imageURL',
 			'type': 'string',
-			'default': 'https://api.scryfall.com/cards/named?exact=<name:simple>'
+			'resetToDefault': true,
+			//'default': 'https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=<id>'
+			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<id:folders>.png'
 		},
-		*/
 		{
 			'name': 'enableTcgPrices',
 			'description': 'Display TCGPlayer card prices',
@@ -1799,13 +1799,6 @@ AutocardAnywhere.games.mtg.en = new MtgDictionary({
 			'controlType': 'checkbox'
 		},
 		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			//'default': 'https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=<id>'
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<en:folders>.png'
-		},
-		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
 			'default': true
@@ -1823,12 +1816,6 @@ AutocardAnywhere.games.mtg.de = new MtgDictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
-		},
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<de:folders>.png'
 		},
 		{
 			'name': 'emphasiseText',
@@ -1850,12 +1837,6 @@ AutocardAnywhere.games.mtg.fr = new MtgDictionary({
 			'controlType': 'checkbox'
 		},
 		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<fr:folders>.png'
-		},
-		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
 			'default': true
@@ -1873,12 +1854,6 @@ AutocardAnywhere.games.mtg.it = new MtgDictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
-		},
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<it:folders>.png'
 		},
 		{
 			'name': 'emphasiseText',
@@ -1900,12 +1875,6 @@ AutocardAnywhere.games.mtg.pt = new MtgDictionary({
 			'controlType': 'checkbox'
 		},
 		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<pt:folders>.png'
-		},
-		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
 			'default': true
@@ -1923,12 +1892,6 @@ AutocardAnywhere.games.mtg.es = new MtgDictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
-		},
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<es:folders>.png'
 		},
 		{
 			'name': 'emphasiseText',
@@ -1950,12 +1913,6 @@ AutocardAnywhere.games.mtg.ru = new MtgDictionary({
 			'controlType': 'checkbox'
 		},
 		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<ru:folders>.png'
-		},
-		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
 			'default': false
@@ -1967,12 +1924,6 @@ AutocardAnywhere.games.mtg.jp = new MtgDictionary({
 	description: '日本語',
 	language: 'jp',
 	settings: [
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<jp:folders>.png'
-		},
 		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
@@ -1993,12 +1944,6 @@ AutocardAnywhere.games.mtg.hans = new MtgDictionary({
 			'controlType': 'checkbox'
 		},
 		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<hans:folders>.png'
-		},
-		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
 			'default': false
@@ -2010,12 +1955,6 @@ AutocardAnywhere.games.mtg.hant = new MtgDictionary({
 	description: '繁體中文',
 	language: 'hant',
 	settings: [
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<hant:folders>.png'
-		},
 		{
 			'name': 'emphasiseText',
 			'type': 'boolean',
@@ -2034,12 +1973,6 @@ AutocardAnywhere.games.mtg.ko = new MtgDictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
-		},
-		{
-			'name': 'imageURL',
-			'type': 'string',
-			'resetToDefault': true,
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<ko:folders>.png'
 		},
 		{
 			'name': 'emphasiseText',

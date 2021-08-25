@@ -57,6 +57,7 @@ let AutocardAnywhere = {
 		}
 	},
 	format: function(s, card, dictionary) {
+		if (!card || !dictionary) return s;
 		function removeDiacritics(str) {
 		    let lookupLetters = {
 		        "ä": "a", "ö": "o", "ü": "u", "Ä": "A", "Ö": "O", "Ü": "U",
@@ -78,14 +79,15 @@ let AutocardAnywhere = {
 		if (!language || language == '' || language == 'original') {
 			language = card.language;
 		}
+		if (card[language]) card.id = card[language];
 		// Make specific replacements
 		// Replace <game> with "magic" for mtg and card.game for other games 
-		s = s.replace(/<game>/g, function(match, key) {
+		s = s.replace(/<game>/g, function() {
 			return card.game == 'mtg' ? 'magic' : card.game;
 		});
-		// Use first two characters as folders for SCryfall images.
+		// Use first two characters as folders for Scryfall images.
 		s = s.replace(/<([^>]+):folders>/g, function(match, key) {
-			id = card[key];
+			let id = card[key];
 			return id.substr(0,1) + '/' + id.substr(1,1) + '/' + id;
 		});
 		// Make generic replacements - <key> becomes card[key]
@@ -493,211 +495,6 @@ let AutocardAnywhere = {
 					checkIfLoadComplete();
 				}
 			});
-
-			/*
-		    $(this).qtip({
-		    	style: {
-		    		'classes': 'qtip-tipped autocardanywhere-popup'
-		    	},
-		        content: {
-		        	'title': text,
-		            'text': getCardsElement(cards)
-		        },
-		        position: {
-					target: 'mouse', // Use the mouse position as the position origin
-					adjust: {
-						mouse: false, // Don't adjust continuously when moving the mouse over the element, just use initial position
-						x: 15, y: 0 // Offset it slightly from under the mouse
-					},
-			        'viewport': (AutocardAnywhereSettings.isFirefox ? $(document) : $(window)) // Stay within the viewport
-			    },
-			    show: {
-			    	// Hide any other popups immediately when this one is shown.
-			    	'solo': true,
-			    	// Animate show
-		            'effect': function() {
-	                	let duration = AutocardAnywhere.popupShowDuration;
-	                	switch (AutocardAnywhere.popupShowEffect) {
-	                		case 'fadeIn': $(this).fadeIn(duration); break;
-	                		case 'slideDown': $(this).slideDown(duration); break;
-	                		case 'show': $(this).show(duration); break;
-	                	}
-		            },
-		            event: (AutocardAnywhereSettings.isTouchInterface ? 'click' : 'mouseover')
-		        },
-	            hide: {
-	            	// Fixed and delay allow the user to mouseover the popup
-	                'fixed': true,
-	                'delay': 300,
-	                // Animate hide
-	                'effect': function() {
-	                	let duration = AutocardAnywhere.popupHideDuration;
-	                	switch (AutocardAnywhere.popupHideEffect) {
-	                		case 'fadeOut': $(this).fadeOut(duration); break;
-	                		case 'slideUp': $(this).slideUp(duration); break;
-	                		case 'hide': $(this).hide(duration); break;
-		                }
-		            },
-		            event: (AutocardAnywhereSettings.isTouchInterface ? 'unfocus' : 'mouseout')
-	            },
-	            events: {
-	            	// When the popup is rendered, pull-in any additional data via ajax and initialise the carousel...
-		            render: function(event, api) {
-			            // Grab the tooltip element from the API
-			            let content = $(api.elements.content);					
-
-						content.on('mouseover', function() {
-				        	content.find(".owl-carousel").trigger('owl.stop');
-				        });
-				        content.on('mouseout', function() {
-				        	content.find(".owl-carousel").trigger('owl.play', 2000);
-				        });
-
-				        let paginationNumbers = false;
-			            // Run through each of the cards in this popup
-			            cards.map(function(card) {
-			            	let dictionary = AutocardAnywhere.dictionaries[card.game + card.language];
-
-				            // Set the image source
-				        	content.find("img[data-id='" + card.id + '-' + card.face + "']").each(function() {
-				        		$(this).attr('src', AutocardAnywhere.format(dictionary.settings.imageURL, card, dictionary));
-				        	});	
-
-			            	// If any of the cards are from a dictionary with paginationNumbers turned-on, switch it on for the current carousel
-			            	paginationNumbers = paginationNumbers || dictionary.settings.paginationNumbers;
-			            	// Get the price of the card
-			            	if (dictionary.settings.enablePrices) { // An element will only be returned if enablePrices is set on the dictionary
-								if (content.find('.autocardanywhere-price').length == 0) {
-									AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
-										// Get the card price from the location specified in the dictionary...
-							            AutocardAnywhere.ajax(
-							            	AutocardAnywhere.format(dictionary.settings.priceURL, card, dictionary),
-							            	function(response) {
-							            		// Set the content of any matching price divs upon successful retrieval
-							            		$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
-							            	},
-							            	true
-							            );
-						        	});
-						        }
-					        }
-
-			            	// Get the online price of the card
-			            	if (dictionary.settings.enableOnlinePrices) { // An element will only be returned if enablePrices is set on the dictionary
-								if (content.find('.autocardanywhere-online-price').length == 0) {
-									// Get the card price from the location specified in the dictionary...
-						            AutocardAnywhere.ajax(
-						            	AutocardAnywhere.format(dictionary.settings.onlinePriceURL, card, dictionary),
-						            	function(response) {
-						            		// Set the content of any matching price divs upon successful retrieval
-						            		$('.autocardanywhere-online-prices-' + card.id).replaceWith(dictionary.parseOnlinePriceData(card, response));
-						            	}
-						            );
-						        }
-					        }
-
-				        	// Fill-in the extra info data if extra info is enabled and any is configured for this game...
-				        	if (AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0)) {
-				        		let dataDivClass = '.autocardanywhere-data-' + dictionary.game + dictionary.language + '-' + card.id;
-					        	if (content.find(dataDivClass + '.autocardanywhere-loaded').length == 0) {
-							        content.find('img, ' + dataDivClass).on('mouseover', function() {
-							        	content.find(dataDivClass).show();
-							        });
-							        content.find('.autocardanywhere-loading').on('mouseout', function() {
-							        	content.find(dataDivClass).hide();
-							        });
-
-							        content.find(dataDivClass + ' button').on('click', function() {
-							        	let dataDiv = content.find(dataDivClass);
-							        	dataDiv.find('.autocardanywhere-data-section').hide();
-						        		dataDiv.find('.' + $(this).data('div')).fadeTo(500, 1);
-						        	});
-
-							        // Get the extra info data from the configured source(s)
-									dictionary.extraInfo.map(function(source) {
-										AutocardAnywhere.ajax(
-											// Get the source url and interpolate any card data required
-								        	AutocardAnywhere.format(source.url, card), 
-								        	function(response) {
-								        		source.sections.map(function(section) {
-									        		// Set the content of any matching divs upon successful retrieval
-									    			content.find(dataDivClass + ' .autocardanywhere-' + section.name).empty().append(
-									    				dictionary.parseExtraInfo(response, section)
-									    			).addClass('autocardanywhere-loaded');
-												});
-								        	},
-								        	false
-								        );
-									});
-							    }
-							}
-					    });
-
-			            // Check if the image has loaded
-						content.find('.autocardanywhere-loading img').on('load', function() {
-							$(this).parent().removeClass('autocardanywhere-loading');
-						})
-						.on('error', function() {
-							let parentDiv = $(this).parent();
-							parentDiv.removeClass('autocardanywhere-loading');
-							parentDiv.addClass('autocardanywhere-broken');
-						})
-						.each(function() {
-							if(this.complete) {
-								$(this).load();
-							} else if(this.error) {
-								$(this).error();
-							}
-						});
-
- 						// If there's more than 1 card, setup a carousel to view them...
- 						if (cards.length > 1) {
- 							if (AutocardAnywhere.carouselEffect == 'slide') {delete AutocardAnywhere.carouselEffect;}
-							content.find(".owl-carousel").owlCarousel({
-								singleItem: true,
-								transitionStyle: AutocardAnywhere.carouselEffect,
-								mouseDrag: false,
-								touchDrag: false,
-								paginationNumbers: paginationNumbers,
-								afterMove: function() {
-									// Update the card link when the carousel changes
-									let carouselItem = $(this.owl.owlItems[this.currentItem]).children().first();
-									let cardUrl = carouselItem.data('url');
-									api.elements.target.attr('href', cardUrl);
-								}
-							});
-						}
-			        },
-			        show: function(event, api) {
-			        	// Start the carousel playing if there is one
-			        	if (AutocardAnywhere.carouselAutoPlay) {
-			            	$(api.elements.content).find(".owl-carousel").trigger('owl.play', 2000);
-			            }
-			        },
-		        	visible: function(event, api) {
-		        		// Change pagination numbers to Roman numerals iff the carousel has numbers switched on and there are exactly 3 cards in the carousel
-		        		if ($(api.elements.content).find('.owl-carousel').data('count') == '3') {
-			        		$(api.elements.content).find('.owl-numbers').html(function(dummy, value) {
-								let numeral = value;
-									 if (numeral == '1') {numeral = 'I';}
-				                else if (numeral == '2') {numeral = 'II';}
-				                else if (numeral == '3') {numeral = 'III';}
-				                return numeral;
-							});
-			        	}
-			        },
-			        hidden: function(event, api) {
-			        	// Stop the carousel playing if there is one
-			            $(api.elements.content).find(".owl-carousel").trigger('owl.stop');
-			        }
-			    }
-		    }).bind('click', function(event){
-		    	if (AutocardAnywhereSettings.isTouchInterface) {
-		    		event.preventDefault();
-		    		return false; 
-		    	}
-		    });
-			*/
 		});
 	},
 	
@@ -1109,20 +906,22 @@ let AutocardAnywhere = {
 				AutocardAnywhere.pluginNames = [];
 				
 				// Card names enclosed in [[]]
+				/*
 				pluginFunctions['bracketed'] = function(text) {
 					return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
 						// Do a fuzzy lookup by name in all dictionaries
 						for (let i in AutocardAnywhere.dictionaries) {
 							let dictionary = AutocardAnywhere.dictionaries[i];
-							let cards = dictionary.fuzzyLookup(name);
-							if (cards.length > 0) {
-								return dictionary.createLink(dictionary, cards[0], name, null, null, true);
-							}
+							//let cards = dictionary.fuzzyLookup(name);
+							//if (cards.length > 0) {
+							//	return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+							//}
 						}
 						return match;
 					});
 				};
 				AutocardAnywhere.pluginNames.push('bracketed');
+				*/
 				
 				// Standard card sets
 				dictionaries.map(function(dictionary) {
