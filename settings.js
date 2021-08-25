@@ -62,6 +62,7 @@ AutocardAnywhereSettings = {
 		{'game': 'elderscrolls', 'language': 'en', 'default': 0},
 		{'game': 'eternal', 'language': 'en', 'default': 0},
 		{'game': 'faeria', 'language': 'en', 'default': 0},
+		{'game': 'fab', 'language': 'en', 'default': 0},
 		{'game': 'forceofwill', 'language': 'en', 'default': 0},
 		{'game': 'gwent', 'language': 'en', 'default': 0},
 		{'game': 'hearthstone', 'language': 'en', 'default': 0},

@@ -1,3 +1,68 @@
+if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
+//if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
+AutocardAnywhere.games = {
+	load: function(games, callback) {
+		let result = {};
+	    games.map(function(game) {
+	    	let name = game[0];
+	    	let language = game[1];
+
+	    	AutocardAnywhere.games[name][language].load(function(dictionary) {
+	    		function messageCallback(response) {
+	    			dictionary.test = new RegExp(response.test, "gi");
+	    			dictionary.cardNames = response.cardNames;
+	    			dictionary.cardData = response.cardData;
+	    			result[name + language] = dictionary;
+
+		    		// Once all the dictionaries are loaded, call the callback
+		    		if (Object.keys(result).length == games.length) {
+			    		callback(result);
+			    	}
+				};
+
+				if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
+					messageCallback({
+						'cardData': [],
+						'test': AutocardAnywhereLoader[name + language].test,
+						'cardNames': AutocardAnywhereLoader[name + language].cardNames
+					});
+				}
+				else if (AutocardAnywhereSettings.isSafari) {
+					let messageID = AutocardAnywhereGuid();
+					function getResponse(event) {
+						if (event.name === messageID) {
+							messageCallback(event.message);
+						}
+					}
+					safari.self.addEventListener("message", getResponse, false);
+					safari.self.tab.dispatchMessage('getDictionary', {'id': messageID, 'game': name, 'language': language});
+				}
+				else  { // Chrome, Opera, Firefox or Edge
+					if (!AutocardAnywhere.persistentPort) {
+						AutocardAnywhere.persistentPort = chrome.runtime.connect({name: "autocardanywhere"});
+					}
+					function messageReceived(response) {
+						if (response.game == name && response.language == language) {
+							AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
+							let gameData = JSON.parse(response.gameData);
+							let languageData = JSON.parse(response.languageData);
+
+							messageCallback({
+								'cardData': gameData.cardData,
+								'test': languageData.test,
+								'cardNames': languageData.cardNames
+							});
+						}
+					}
+					
+					AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
+					AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
+		    	}
+	    	});
+	    });
+	    
+	}
+};
 //==============================================================================
 // A Game of Thrones
 //==============================================================================
@@ -48,8 +113,6 @@ AgotDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.agot = {};
 // English
 AutocardAnywhere.games.agot.en = new AgotDictionary({
@@ -145,8 +208,6 @@ CardfightVanguardDictionary.prototype.parseHtml = function(html) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.cardfightvanguard = {};
 // English
 AutocardAnywhere.games.cardfightvanguard.en = new CardfightVanguardDictionary({
@@ -216,8 +277,6 @@ ChronicleDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.chronicle = {};
 // English
 AutocardAnywhere.games.chronicle.en = new ChronicleDictionary({
@@ -289,8 +348,6 @@ CodexDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.codex = {};
 // English
 AutocardAnywhere.games.codex.en = new CodexDictionary({
@@ -361,8 +418,6 @@ DbzDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.dbz = {};
 // English
 AutocardAnywhere.games.dbz.en = new DbzDictionary({
@@ -433,8 +488,6 @@ DicemastersDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.dicemasters = {};
 // English
 AutocardAnywhere.games.dicemasters.en = new DicemastersDictionary({
@@ -506,8 +559,6 @@ DominionDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.dominion = {};
 // English
 AutocardAnywhere.games.dominion.en = new DominionDictionary({
@@ -577,8 +628,6 @@ DoomtownDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.doomtown = {};
 // English
 AutocardAnywhere.games.doomtown.en = new DoomtownDictionary({
@@ -648,8 +697,6 @@ DuelystDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.duelyst = {};
 // English
 AutocardAnywhere.games.duelyst.en = new DuelystDictionary({
@@ -719,8 +766,6 @@ ElderScrollsDictionary.prototype.findCardById = function(cardID, match, isDict) 
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.elderscrolls = {};
 // English
 AutocardAnywhere.games.elderscrolls.en = new ElderScrollsDictionary({
@@ -793,11 +838,151 @@ EternalDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.eternal = {};
 // English
 AutocardAnywhere.games.eternal.en = new EternalDictionary({
+	description: 'English',
+	language: 'en',
+	settings: [
+		{
+			'name': 'ignoreDictionaryWords',
+			'description': 'Ignore Dictionary Words',
+			'type': 'boolean',
+			'default': true,
+			'controlType': 'checkbox'
+		},
+		{
+			'name': 'emphasiseText',
+			'type': 'boolean',
+			'default': true
+		}
+	]
+});
+
+//==============================================================================
+// Flesh and Blood
+//==============================================================================
+function FabDictionary(config) {
+	this.description = this.description + ' - ' + config.description;
+	this.language = config.language;
+	this.settings = this.settings.concat(config.settings);
+};
+
+FabDictionary.prototype = new Dictionary({
+	game: 'fab',
+	description: 'Flesh and Blood',
+	// Settings and initialisation
+	settings: [
+		{
+			'name': 'linkTarget',
+			'description': 'Link target:',
+			'type': 'string',
+			'default': 'https://www.tcgplayer.com/search/flesh-and-blood-tcg/product?q=<id>'
+		},
+		{
+			'name': 'imageURL',
+			'description': 'Image source:',
+			'type': 'string',
+			'default': 'https://fabdb2.imgix.net/cards/printings/<img>.png'
+		},
+		{
+			'name': 'defaultSection',
+			'description': 'Default info section:',
+			'type': 'string',
+			'default': 'text',
+			'controlType': 'radio',
+			'options': [
+				{name: 'text', description: 'Card Text', value: 'text'},
+				{name: 'flavour', description: 'Flavour', value: 'flavour'}
+			]
+		}
+	],
+	extraInfo: [
+		{
+			'url': 'https://api.fabdb.net/cards/<id>',
+			'sections': [
+				{
+					'name': 'text',
+					'description': 'Card Text'
+				},
+				{
+					'name': 'flavour',
+					'description': 'Flavour'
+				}
+			]
+		}
+	]
+});
+
+// Override parent functions
+/*
+FabDictionary.prototype.simplify = function(s) {
+	return s.replace(/ /g, '%20');
+};
+*/
+FabDictionary.prototype.findCardById = function(cardID, match, isDict) {
+	let cardData = this.cardData[cardID];
+	if (!cardData) {return}
+	return {
+		'game': this.game,
+		'language': this.language,
+		'img': cardID,
+		'name': match.replace(/"/g, '`'),
+		'match': match,
+		'id': cardData[0],
+		'isDict': isDict || 0
+	};
+};
+
+FabDictionary.prototype.parseExtraInfo = function(content, section, card) {
+
+	function addLine(div, text, indented, capitalised) {
+		if (!text) return;
+
+		let line = document.createElement("div");
+		line.appendChild(document.createTextNode(text));
+		if (indented) {
+			line.style.setProperty('padding-left', '10px');
+		}
+		if (capitalised) {
+			line.style.setProperty('text-transform', 'capitalize');
+		}
+		div.appendChild(line);
+	}
+
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+
+	// Parses the returned content for the specified section
+	let data = JSON.parse(content);
+	let result = document.createElement("div");
+	result.style.setProperty('width', overlayWidth + 'px');
+
+	if (section.name == 'text') {
+		if (data.text) {
+			let lines = data.text.replace(/\*/g, '').split("\n");
+			lines.map(function(line) {
+				addLine(result, line);
+			});
+		}
+	}
+	else if (section.name == 'flavour') {
+		if (data.flavour) {
+			let lines = data.flavour.split("\n");
+			lines.map(function(line) {
+				addLine(result, line);
+			});
+		}
+	}
+
+	return result;
+};
+
+//==============================================================================
+// Individual language(s)
+//==============================================================================
+AutocardAnywhere.games.fab = {};
+// English
+AutocardAnywhere.games.fab.en = new FabDictionary({
 	description: 'English',
 	language: 'en',
 	settings: [
@@ -864,8 +1049,6 @@ FaeriaDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.faeria = {};
 // English
 AutocardAnywhere.games.faeria.en = new FaeriaDictionary({
@@ -936,8 +1119,6 @@ ForceOfWillDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.forceofwill = {};
 // English
 AutocardAnywhere.games.forceofwill.en = new ForceOfWillDictionary({
@@ -1042,8 +1223,6 @@ GwentDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.gwent = {};
 // English
 AutocardAnywhere.games.gwent.en = new GwentDictionary({
@@ -1165,8 +1344,6 @@ HearthstoneDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.hearthstone = {};
 // English
 AutocardAnywhere.games.hearthstone.en = new HearthstoneDictionary({
@@ -1237,8 +1414,6 @@ HexDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.hex = {};
 // English
 AutocardAnywhere.games.hex.en = new HexDictionary({
@@ -1345,8 +1520,6 @@ L5rDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.l5r = {};
 // English
 AutocardAnywhere.games.l5r.en = new L5rDictionary({
@@ -1417,8 +1590,6 @@ LotrDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.lotr = {};
 // English
 AutocardAnywhere.games.lotr.en = new LotrDictionary({
@@ -1487,7 +1658,7 @@ MtgDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display TCGPlayer card prices',
+			'description': 'Display TCG Player card prices',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -1775,8 +1946,6 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.mtg = {};
 // English
 AutocardAnywhere.games.mtg.en = new MtgDictionary({
@@ -2071,8 +2240,6 @@ MyLittlePonyDictionary.prototype.findCardById = function(cardID, match, isDict) 
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.mylittlepony = {};
 // English
 AutocardAnywhere.games.mylittlepony.en = new MyLittlePonyDictionary({
@@ -2189,8 +2356,6 @@ NetrunnerDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.netrunner = {};
 // English
 AutocardAnywhere.games.netrunner.en = new NetrunnerDictionary({
@@ -2246,7 +2411,7 @@ PokemonDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCGPlayer)',
+			'description': 'Display card prices (provided by TCG Player)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -2300,8 +2465,6 @@ PokemonDictionary.prototype.parseHtml = function(html) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.pokemon = {};
 // English
 AutocardAnywhere.games.pokemon.en = new PokemonDictionary({
@@ -2371,8 +2534,6 @@ ScrollsDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.scrolls = {};
 // English
 AutocardAnywhere.games.scrolls.en = new ScrollsDictionary({
@@ -2465,8 +2626,6 @@ SolforgeDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.solforge = {};
 // English
 AutocardAnywhere.games.solforge.en = new SolforgeDictionary({
@@ -2537,8 +2696,6 @@ StarrealmsDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.starrealms = {};
 // English
 AutocardAnywhere.games.starrealms.en = new StarrealmsDictionary({
@@ -2613,8 +2770,6 @@ Dictionary.prototype.simplify = function(s) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.warframe = {};
 // English
 AutocardAnywhere.games.warframe.en = new WarframeDictionary({
@@ -2670,7 +2825,7 @@ WowDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCGPlayer)',
+			'description': 'Display card prices (provided by TCG Player)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -2763,8 +2918,6 @@ WowDictionary.prototype.findCards = function(cardname, overrideIgnoreDictionaryW
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.wow = {};
 // English
 AutocardAnywhere.games.wow.en = new WowDictionary({
@@ -2835,8 +2988,6 @@ XwingDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.xwing = {};
 // English
 AutocardAnywhere.games.xwing.en = new XwingDictionary({
@@ -2892,7 +3043,7 @@ YugiohDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCGPlayer)',
+			'description': 'Display card prices (provided by TCG Player)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -2904,8 +3055,9 @@ YugiohDictionary.prototype = new Dictionary({
 			'default': 'text',
 			'controlType': 'radio',
 			'options': [
-				{name: 'text', description: 'Card Text', value: 'text'},
-				{name: 'info', description: 'Info', value: 'info'}
+				{name: 'text', description: 'Text', value: 'text'},
+				{name: 'info', description: 'Info', value: 'info'},
+				{name: 'sets', description: 'Set', value: 'sets'}
 			]
 		}
 	],
@@ -3032,8 +3184,6 @@ YugiohDictionary.prototype.parseExtraInfo = function(content, section, card) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
-if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games.yugioh = {};
 // English
 AutocardAnywhere.games.yugioh.en = new YugiohDictionary({

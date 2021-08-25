@@ -64,7 +64,6 @@
             "settings.js",
             "contentscript.js",
             "games/dictionary.js",
-            "games/manager.js",
             "games/games.js"
          ],
          "matches" : [
