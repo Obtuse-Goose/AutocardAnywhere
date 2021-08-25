@@ -360,7 +360,8 @@ Dictionary.prototype.formatCurrency = function(value) {
 	}
 	return result;
 };
-Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, position, count) {
+Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
+	let dictionary = this;
 	let result = document.createElement("a");
 	result.href = href;
 	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
@@ -372,8 +373,10 @@ Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, p
 	right.style.float = 'left';
 	left.style.width = '75%';
 	right.style.width = '25%';
-	left.appendChild(document.createTextNode('Buy at ' + text1));
-	right.appendChild(document.createTextNode(text2));
+	left.appendChild(document.createTextNode('Buy at ' + text));
+	if (price > 0) {
+		right.appendChild(document.createTextNode(dictionary.formatCurrency(price)));
+	}
 	priceDiv.appendChild(left);
 	priceDiv.appendChild(right);
 	//priceDiv.style.setProperty('background-color', colour, 'important');
@@ -448,27 +451,25 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let priceLinkHref = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format('http://store.tcgplayer.com/Products.aspx?GameName=<game>&Name=<name:simple>', card, dictionary));
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
+	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
-	if (xmlDoc && xmlDoc.getElementsByTagName("hiprice")[0]) {
-		let lowPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue));
-		let avgPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue));
-		//let hiPrice  = AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
-		let width = '50%';
+	if (xmlDoc && xmlDoc.getElementsByTagName("lowprice")[0]) {
+		let lowPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue);
+		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'TCG Player', lowPrice, colours['tcg']));
+
+		//let avgPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue);
+		//pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Median', avgPrice, colours['tcg']));
+
+		//let hiPrice  = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
+
 		let enableFoil = xmlDoc.getElementsByTagName("foilavgprice")[0] && xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue != '0';
-		let foilPrice = 0;
-		if (enableFoil) {
-			foilPrice = dictionary.formatCurrency(dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue));
-			width = '33%';
+		if (enableFoil) { 
+			let foilPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue);
+			pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Foil', foilPrice, colours['foil'])); 
 		}
-		let priceCount = 2;
-		if (enableFoil) priceCount++;
-		if (dictionary.settings.enableOnlinePrices) priceCount++;
-		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Low', lowPrice, '#FCD1D1', 'left', priceCount));
-		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Median', avgPrice, '#D1DFFC', (dictionary.settings.enableOnlinePrices || enableFoil) ? 'centre' : 'right', priceCount));
-		if (enableFoil) { pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Foil', foilPrice, '#FFCAB1', dictionary.settings.enableOnlinePrices ? 'centre' : 'right', priceCount)); }
 	}
 	else {
-		pricesDiv.style.paddingTop = '12px';
+		pricesDiv.style.paddingTop = '4px';
 		pricesDiv.appendChild(document.createTextNode("Error loading prices"));
 	}
 
