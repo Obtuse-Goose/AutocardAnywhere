@@ -176,7 +176,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 
 	//console.log('Updating data for: ' + gameName + gameLanguage);
 	// Check if there are updated files available. If so, download them and store in localstorage.
-	let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@4/games/';
+	let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@latest/games/';
 	let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
 	let languageDataUrl = baseUrl + gameName + '/' + gameLanguage + '-data.json';
 	
