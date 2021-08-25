@@ -1632,7 +1632,7 @@ MtgDictionary.prototype = new Dictionary({
 			'default': 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>',
 			'controlType': 'radio',
 			'options': [
-				{name: 'TCGPlayer', description: 'TCG Player', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
+				{name: 'TCGPlayer', description: 'TCGplayer', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
 				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
@@ -1658,7 +1658,7 @@ MtgDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display TCG Player card prices',
+			'description': 'Display TCGplayer card prices',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -1913,10 +1913,10 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	if (data.prices) {
 		if (dictionary.settings.enableTcgPrices) {
 			let tcgPrice = dollarExchangeRate * data.prices.usd;
-			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player', tcgPrice, colours['tcg']));
+			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer', tcgPrice, colours['tcg']));
 			if (dictionary.settings.enableFoilPrices && data.prices.usd_foil) {
 				let tcgFoilPrice = dollarExchangeRate * data.prices.usd_foil;
-				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG Player Foil', tcgFoilPrice, colours['foil']));
+				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer Foil', tcgFoilPrice, colours['foil']));
 			}
 		}
 		if (dictionary.settings.enableCardmarketPrices) {
@@ -2411,7 +2411,7 @@ PokemonDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCG Player)',
+			'description': 'Display card prices (provided by TCGplayer)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -2825,7 +2825,7 @@ WowDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCG Player)',
+			'description': 'Display card prices (provided by TCGplayer)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
@@ -3043,7 +3043,7 @@ YugiohDictionary.prototype = new Dictionary({
 		},
 		{
 			'name': 'enableTcgPrices',
-			'description': 'Display card prices (provided by TCG Player)',
+			'description': 'Display card prices (provided by TCGplayer)',
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'

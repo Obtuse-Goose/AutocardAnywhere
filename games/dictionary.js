@@ -454,7 +454,7 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("lowprice")[0]) {
 		let lowPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue);
-		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'TCG Player', lowPrice, colours['tcg']));
+		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'TCGplayer', lowPrice, colours['tcg']));
 
 		//let avgPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue);
 		//pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Median', avgPrice, colours['tcg']));
