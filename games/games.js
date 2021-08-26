@@ -1109,7 +1109,7 @@ ForceOfWillDictionary.prototype = new Dictionary({
 			'description': 'Image source:',
 			'type': 'string',
 			'default': 'http://db.fowtcg.us/cards/<img>'
-		}
+		},
 		{
 			'name': 'cardmarketURL',
 			'type': 'string',
