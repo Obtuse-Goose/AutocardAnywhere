@@ -307,21 +307,11 @@ function getDictionary(port, request) {
 	let gameName = request.game;
 	let gameLanguage = request.language;
 
-	if (gameName == 'mtg') {
-		checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
-	}
+	checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
 
 	browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
 		if (dictionaries[gameName + gameLanguage]) {
 			console.log('found data in memory');
-			/*
-			console.log({
-				'game': request.game,
-				'language': request.language,
-				'gameData': dictionaries[gameName + gameLanguage].gameData,
-				'languageData': dictionaries[gameName + gameLanguage].languageData
-			});
-			*/
 			
 			port.postMessage({
 				'game': gameName,
@@ -333,14 +323,6 @@ function getDictionary(port, request) {
 		
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 			console.log('found data in localstorage');
-			/*
-			console.log({
-				'game': gameName,
-				'language': gameLanguage,
-				'gameData': storageResponse[gameName],
-				'languageData': storageResponse[gameName + gameLanguage]
-			});
-			*/
 			
 			dictionaries[gameName + gameLanguage] = {
 				'gameData': storageResponse[gameName],

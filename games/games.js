@@ -2414,7 +2414,7 @@ PokemonDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://pkmncards.com/wp-content/uploads/<en>.jpg'
+			'default': 'https://images.pokemontcg.io/<img>_hires.png'
 		},
 		{
 			'name': 'priceURL',
@@ -2447,29 +2447,26 @@ PokemonDictionary.prototype = new Dictionary({
 			'controlType': 'radio',
 			'options': [
 				{name: 'info', description: 'Info', value: 'info'},
-				{name: 'cardtext', description: 'Text', value: 'cardtext'},
-				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'}
+				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'},
+				{name: 'attacks', description: 'Attacks', value: 'attacks'}
 			]
 		}
 	],
 	extraInfo: [
 		{
-			'url': 'http://pkmncards.com/card/<en>/',
+			'url': 'https://api.pokemontcg.io/v2/cards/<id>',
 			'sections': [
 				{
 					'name': 'info',
-					'description': 'Info',
-					're': '<div id="text-[^>]*>([^^]*?)<(?:em|\/div)>'
-				},
-				{
-					'name': 'cardtext',
-					'description': 'Legality',
-					're': '<div id="rulings-[^>]*>([^^]*?)</div>'
+					'description': 'Info'
 				},
 				{
 					'name': 'flavourtext',
-					'description': 'Flavour',
-					're': '<div id="text-[^>]*>[^^]*?<em>([^^]*?)</em>'
+					'description': 'Flavour'
+				},
+				{
+					'name': 'attacks',
+					'description': 'Attacks'
 				}
 			]
 		}
@@ -2480,9 +2477,92 @@ PokemonDictionary.prototype = new Dictionary({
 PokemonDictionary.prototype.simplify = function(s) {
 	return s.replace(/ /g, '%20').toLowerCase();
 };
+/*
 PokemonDictionary.prototype.parseHtml = function(html) {
 	html = html.replace(/<\/span><p>/g, "\n");
 	return html.replace(/<br \/>/g, "\n");
+};
+*/
+PokemonDictionary.prototype.findCardById = function(cardID, match, isDict) {
+	let cardData = this.cardData[cardID];
+	if (!cardData) {return}
+	return {
+		'game': this.game,
+		'language': this.language,
+		'name': match,
+		'match': match,
+		'id': cardID,
+		'img': cardData[0],
+		'isDict': isDict || 0
+	};
+};
+PokemonDictionary.prototype.parseExtraInfo = function(content, section, card) {
+	function addLine(div, text, indented, capitalised) {
+		if (!text) return;
+
+		let line = document.createElement("div");
+		line.appendChild(document.createTextNode(text));
+		if (indented) {
+			line.style.setProperty('padding-left', '10px');
+		}
+		if (capitalised) {
+			line.style.setProperty('text-transform', 'capitalize');
+		}
+		div.appendChild(line);
+	}
+
+	function processCard(card) {
+		let type = '';
+		if (card.supertype) {
+			type += card.supertype + ' ';
+		}
+		if (card.subtypes) {
+			type += card.subtypes.join(', ');
+		}
+		addLine(result, type);
+		if (card.level) {
+			addLine(result, 'Level: ' + card.level);
+		}
+		if (card.hp) {
+			addLine(result, 'HP: ' + card.hp);
+		}
+		if (card.evolvesFrom) {
+			addLine(result, 'Evolves from ' + card.evolvesFrom);
+		}
+		if (card.evolvesTo) {
+			addLine(result, 'Evolves into ' + card.evolvesTo);
+		}
+		if (card.rarity) {
+			addLine(result, 'Rarity: ' + card.rarity);
+		}
+	}
+
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+
+	// Parses the returned content for the specified section
+	let list = JSON.parse(content);
+	let result = document.createElement("div");
+	result.style.setProperty('width', overlayWidth + 'px');
+
+	let data = list.data;
+	if (section.name == 'info') {
+		processCard(data);
+	}
+	else if (section.name == 'flavourText') {
+		if (data.flavorText) {
+			addLine(result, data.flavorText);
+		}
+	}
+	else if (section.name == 'attacks') {
+		if (data.attacks) {
+			data.attacks.map(function(attack) {
+				addLine(result, attack['name']);
+				addLine(result, attack['text'], true);
+			});
+		}
+	}
+
+	return result;
 };
 
 //==============================================================================
