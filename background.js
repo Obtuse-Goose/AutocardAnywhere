@@ -2,18 +2,47 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 let dictionaries = [];
 
 function getItem(key) {
+	/*
+	const getStorageData = Key =>
+	new Promise((resolve, reject) =>
+		chrome.storage.sync.get(Key, result =>
+		chrome.runtime.lastError
+			? reject(Error(chrome.runtime.lastError.message))
+			: resolve(result)
+		)
+	)
+
+	const { data } = await getStorageData(key);
+	console.log(data);
+*/
 	return window.localStorage.getItem(key);
 }
 
 function setItem(key, value) {
 	window.localStorage.removeItem(key);
 	window.localStorage.setItem(key, value);
+	/*
+	let data = {};
+	data[key] = value;
+	chrome.storage.sync.set(data);
+	*/
 }
 
-function loadSettings(prefix, settings) {
+function loadSettings(prefix, settings, callback) {
 	// Load specified settings
 	let result = {};
 	result.versionNumber = AutocardAnywhereSettings.getVersionNumber();
+
+	/*
+	let requestedSettings = [];
+	settings.map(function(setting) {
+		requestedSettings.push(prefix + setting.name);
+	});
+
+	chrome.storage.sync.get(requestedSettings, function(data) {
+		console.log(data);
+	});
+	*/
 
 	settings.map(function(setting) {
 		if (setting.resetToDefault) {
@@ -33,38 +62,39 @@ function loadSettings(prefix, settings) {
 			}
 		}
 		else if (setting.type == 'integer') {
-			let val = getItem(prefix + setting.name);
-			if(/^\d+$/.test(val)) {
-			   result[setting.name] = parseInt(val);
+			let value = getItem(prefix + setting.name);
+			if(/^\d+$/.test(value)) {
+			   result[setting.name] = parseInt(value);
 			}
 			else {
 				result[setting.name] = setting.default;
 			}
 		}
 		else if (setting.type == 'float') {
-			let val = getItem(prefix + setting.name);
-			if(/^\d*\.?\d+$/.test(val)) {
-				result[setting.name] = parseFloat(val);
+			let value = getItem(prefix + setting.name);
+			if(/^\d*\.?\d+$/.test(value)) {
+				result[setting.name] = parseFloat(value);
 			}
 			else {
 				result[setting.name] = setting.default;
 			}
 		}
 		else {
-			result[setting.name] = getItem(prefix + setting.name) || setting.default;
+			let value = getItem(prefix + setting.name) || setting.default;
 
 			// Rewrite defunct link targets
 			if (setting.name == 'linkTarget') {
-				if (result[setting.name] == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
-					result[setting.name] = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
+				if (value == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
+					value = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
 				}
-				else if (result[setting.name] == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
-					result[setting.name] = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
+				else if (value == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
+					value = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
 				}
 			}
+			result[setting.name] = value;
 		}
 	});
-	return result;
+	callback(result);
 }
 
 function saveSettings(prefix, settings, updateLastSaved) {
@@ -96,44 +126,43 @@ function openURL(url) {
 }
 
 function getExchangeRate(callback) {
-	let currencyInfo = loadSettings(AutocardAnywhereSettings.prefix, [
+	loadSettings(AutocardAnywhereSettings.prefix, [
 		{'name': 'currency', 'type': 'string', 'default': 'USD'},
 		{'name': 'dollarExchangeRate', 'type': 'float', 'default': 1.0},
 		{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
 		{'name': 'exchangeRateLastUpdatedv4', 'type': 'string', 'default': ''}
-	]);
-	// If the currency is US Dollars then no conversion is necessary
-	//if (currencyInfo.currency == 'USD') {callback(1.0);}
+	], function(currencyInfo) {
 
-	let now = new Date();
-	let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
-	let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
-	updateRequired = ((now - lastUpdate) > updateInterval);
+		let now = new Date();
+		let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
+		let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
+		updateRequired = ((now - lastUpdate) > updateInterval);
 
-	if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
-		callback(currencyInfo);
-	}
-
-	// Update is required
-	getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
-		data = JSON.parse(data);
-		let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
-		if (dollarExchangeRate) {
-
-			getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
-				data = JSON.parse(data);
-				let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
-				if (euroExchangeRate) {
-					let exchangeRate = {
-						dollarExchangeRate: dollarExchangeRate,
-						euroExchangeRate: euroExchangeRate,
-						exchangeRateLastUpdatedv4: now
-					};
-					saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
-					callback(exchangeRate);
-				}
-			});
+		if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
+			callback(currencyInfo);
 		}
+
+		// Update is required
+		getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+			data = JSON.parse(data);
+			let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
+			if (dollarExchangeRate) {
+
+				getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+					data = JSON.parse(data);
+					let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
+					if (euroExchangeRate) {
+						let exchangeRate = {
+							dollarExchangeRate: dollarExchangeRate,
+							euroExchangeRate: euroExchangeRate,
+							exchangeRateLastUpdatedv4: now
+						};
+						saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
+						callback(exchangeRate);
+					}
+				});
+			}
+		});
 	});
 }
 
@@ -166,57 +195,59 @@ function headFile(url, callback) {
 
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
-	let updateInfo = loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}]);
-	let lastUpdate = updateInfo.LastDataUpdate ? new Date(updateInfo.LastDataUpdate) : new Date('1970-01-01 00:00');
-	let updateRequired = false;
-	let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86,400,000
-	let now = new Date();
-	updateRequired = ((now - lastUpdate) > updateInterval);
-	if (!updateRequired) return;
-
-	//console.log('Updating data for: ' + gameName + gameLanguage);
-	// Check if there are updated files available. If so, download them and store in localstorage.
-	let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@latest/games/';
-	let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
-	let languageDataUrl = baseUrl + gameName + '/' + gameLanguage + '-data.json';
-	
-	//headFile(gameDataUrl, function(response) {
-	//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
-		//console.log(lastModified);
-	//	if (lastModified > lastUpdate) {
-			getFile(gameDataUrl, function(response) {
-				//setItem(requestPrefix + gameName, response);
-				//delete dictionaries[gameName + gameLanguage];
-				let item = {};
-				item[gameName] = response;
-				browser.storage.local.set(item, function() {
-					delete dictionaries[gameName + gameLanguage];
+	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}], function(updateInfo) {
+		let lastUpdate = updateInfo.LastDataUpdate ? new Date(updateInfo.LastDataUpdate) : new Date('1970-01-01 00:00');
+		let updateRequired = false;
+		let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86,400,000
+		let now = new Date();
+		updateRequired = ((now - lastUpdate) > updateInterval);
+		if (!updateRequired) return;
+		
+		//console.log('Updating data for: ' + gameName + gameLanguage);
+		// Check if there are updated files available. If so, download them and store in localstorage.
+		let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@latest/games/';
+		let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
+		let languageDataUrl = baseUrl + gameName + '/' + gameLanguage + '-data.json';
+		
+		//headFile(gameDataUrl, function(response) {
+		//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
+			//console.log(lastModified);
+		//	if (lastModified > lastUpdate) {
+				getFile(gameDataUrl, function(response) {
+					//setItem(requestPrefix + gameName, response);
+					//delete dictionaries[gameName + gameLanguage];
+					let item = {};
+					item[gameName] = response;
+					browser.storage.local.set(item, function() {
+						delete dictionaries[gameName + gameLanguage];
+					});
 				});
-			});
-	//	}
-	//});
-	
-	//headFile(languageDataUrl, function(response) {
-	//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
-		//console.log(lastModified);
-	//	if (lastModified > lastUpdate) {
-			getFile(languageDataUrl, function(response) {
-				//setItem(requestPrefix + gameName + gameLanguage, response);
-				//delete dictionaries[gameName + gameLanguage];
-				let item = {};
-				item[gameName + gameLanguage] = response;
-				browser.storage.local.set(item, function() {
-					delete dictionaries[gameName + gameLanguage];
+		//	}
+		//});
+		
+		//headFile(languageDataUrl, function(response) {
+		//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
+			//console.log(lastModified);
+		//	if (lastModified > lastUpdate) {
+				getFile(languageDataUrl, function(response) {
+					//setItem(requestPrefix + gameName + gameLanguage, response);
+					//delete dictionaries[gameName + gameLanguage];
+					let item = {};
+					item[gameName + gameLanguage] = response;
+					browser.storage.local.set(item, function() {
+						delete dictionaries[gameName + gameLanguage];
+					});
 				});
-			});
-	//	}
-	//});
-
-	saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now}, false);
-	saveSettings(requestPrefix, {'lastDataUpdate': now}, false);
+		//	}
+		//});
+		
+		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now}, false);
+		saveSettings(requestPrefix, {'lastDataUpdate': now}, false);
+	});
 }
 
 function stats(requestPrefix, settings, forceFullUpdate) {
+	/*
 	let defaultPrefix = AutocardAnywhereSettings.prefix;
 	let browser = (AutocardAnywhereSettings.isSafari ? 's' : AutocardAnywhereSettings.isOpera ? 'o' : AutocardAnywhereSettings.isChrome ? 'c' : AutocardAnywhereSettings.isFirefox ? 'f' : AutocardAnywhereSettings.isEdge ? 'e' :'u');
 	let dictionary = requestPrefix.substr(defaultPrefix.length);
@@ -269,6 +300,7 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 			});
 		}
 	}
+	*/
 }
 
 function getDictionary(port, request) {
@@ -298,6 +330,7 @@ function getDictionary(port, request) {
 				'languageData': dictionaries[gameName + gameLanguage].languageData
 			});
 		}
+		/*
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 			console.log('found data in localstorage');
 			/*
@@ -307,7 +340,7 @@ function getDictionary(port, request) {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
 			});
-			*/
+			
 			dictionaries[gameName + gameLanguage] = {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
@@ -319,6 +352,7 @@ function getDictionary(port, request) {
 				'languageData': storageResponse[gameName + gameLanguage]
 			});
 		}
+		*/
 		else {
 			console.log('found data on disk');
 			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
@@ -360,16 +394,17 @@ function onConnect(port) {
 // Handle simple requests
 function onRequest(request, sender, sendResponse) {
 	if (request.name == "loadSettings") {
-		let settings;
 		if (AutocardAnywhereSettings.isSafari) {
-			settings = loadSettings(request.message.prefix, request.message.settings);
-			request.target.page.dispatchMessage(request.message.id, settings);
-			//stats(request.message.prefix, settings);
+			loadSettings(request.message.prefix, request.message.settings, function(settings) {
+				request.target.page.dispatchMessage(request.message.id, settings);
+				//stats(request.message.prefix, settings);
+			});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			settings = loadSettings(request.prefix, request.settings);
-			sendResponse(settings);
-			//stats(request.prefix, settings);
+			loadSettings(request.prefix, request.settings, function(settings) {
+				sendResponse(settings);
+				//stats(request.prefix, settings);
+			});
 		}
 	}
 	else if (request.name == "saveSettings") {
@@ -417,7 +452,7 @@ function onRequest(request, sender, sendResponse) {
 	}
 };
 
-let settings = loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings);
+//let settings = loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings);
 
 // Listen for the content script to send a message to the background page.
 if (AutocardAnywhereSettings.isSafari) {
@@ -436,10 +471,12 @@ if (AutocardAnywhereSettings.isSafari) {
 		}
 	}, false);
 	
-	if (getItem('autocardAnywheresetupShown') != 'true') {
-		openURL(safari.extension.baseURI + 'options.html');
-		setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
-	}
+	loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, function(settings) {
+		if (settings.setupShown != 'true') {
+			openURL(safari.extension.baseURI + 'options.html');
+			setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
+		}
+	});
 }
 else { // Chrome, Opera, Firefox or Edge
 	// Simple messages
