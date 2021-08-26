@@ -330,7 +330,7 @@ function getDictionary(port, request) {
 				'languageData': dictionaries[gameName + gameLanguage].languageData
 			});
 		}
-		/*
+		
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 			console.log('found data in localstorage');
 			/*
@@ -340,6 +340,7 @@ function getDictionary(port, request) {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
 			});
+			*/
 			
 			dictionaries[gameName + gameLanguage] = {
 				'gameData': storageResponse[gameName],
@@ -352,7 +353,7 @@ function getDictionary(port, request) {
 				'languageData': storageResponse[gameName + gameLanguage]
 			});
 		}
-		*/
+		
 		else {
 			console.log('found data on disk');
 			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
