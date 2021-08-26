@@ -21,7 +21,10 @@ Dictionary.prototype.parseHtml = function(html) {
 };
 // Lookup functions
 Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryWords) {
+	let dictionary = this;
+
 	function simpleTitleCase(str) {
+		if (!dictionary.settings.emphasiseText) return str;
 		// This has to exactly match what the equivalent funcion in php is doing.
 		// Capitalise the first letter of the string
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -34,10 +37,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 
 	let lookup = simpleTitleCase(cardname).replace(/’/g,"'").replace(/"/g, '`').replace(/&amp;/g, '&');
 	let link = this.cardNames[lookup];
-	
-	//console.log(lookup);
-	//console.log(this.cardNames);
-
+	//if (!link) link = this.cardNames[cardname];
 	if (!link) {return}
 	let result = {};
 	result.match = link[0] || lookup;
@@ -53,7 +53,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	// and that the ignore dictionary words setting is set
 	// and that the card name is a dictionary word 
 	// and that the card name isn't on the "always link" override list.
-	if (!overrideIgnoreDictionaryWords && this.settings.ignoreDictionaryWords && result.isDict  && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
+	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict  && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
 	return result;
 };
 Dictionary.prototype.findCardById = function(cardID, match, isDict) {
