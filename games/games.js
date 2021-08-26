@@ -1279,28 +1279,15 @@ HearthstoneDictionary.prototype = new Dictionary({
 	settings: [
 		{
 			'name': 'linkTarget',
-			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://www.hearthhead.com/cards/<name:simple:lowercase>',
-			'controlType': 'radio',
-			'options': [
-				{name: 'Hearthhead', description: 'Hearthhead', value: 'http://www.hearthhead.com/cards/<name:simple:lowercase>'},
-				{name: 'Hearthpwn', description: 'Hearthpwn', value: 'http://www.hearthpwn.com/cards/<hearthpwnCardUrl>'},
-				{name: 'Custom', description: 'Custom:', value: ''}
-			]
+			'resetToDefault': true,
+			'default': 'https://www.hearthstonetopdecks.com/cards/<name:simple:lowercase>',
 		},
 		{
 			'name': 'imageURL',
-			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://media.services.zam.com/v1/media/byName/hs/cards/enus/<hearthheadCardID>.png',
-			'controlType': 'radio',
-			'options': [
-				{name: 'Hearthhead1', description: 'Hearthhead Standard', value: 'http://media.services.zam.com/v1/media/byName/hs/cards/enus/<hearthheadCardID>.png'},
-				{name: 'Hearthhead2', description: 'Hearthhead Golden', value: 'http://media.services.zam.com/v1/media/byName/hs/cards/enus/animated/<hearthheadCardID>_premium.gif'},
-				{name: 'Hearthpwn', description: 'Hearthpwn', value: 'http://media-hearth.cursecdn.com/avatars/<hearthpwnImageFilename>'},
-				{name: 'Custom', description: 'Custom:', value: ''}
-			]
+			'resetToDefault': true,
+			'default': '<img>'
 		},
 		{
 			'name': 'defaultSection',
@@ -1317,22 +1304,22 @@ HearthstoneDictionary.prototype = new Dictionary({
 	],
 	extraInfo: [
 		{
-			'url': 'http://www.hearthpwn.com/cards/<hearthpwnCardUrl>',
+			'url': 'https://www.hearthstonetopdecks.com/cards/<name:simple:lowercase>',
 			'sections': [
 				{
 					'name': 'info',
 					'description': 'Info',
-					're': '<li>(Type|Class|Rarity|Set|Crafting Cost|Arcane Dust Gained|Artist): (.*?)</li>'
+					're': '<li><strong>([^^]*?)</strong>([^^]*?)</li>'
 				},
 				{
 					'name': 'cardtext',
 					'description': 'Text',
-					're': '<div class="card-info u-typography-format">\r\n.*?<h3>Card Text</h3>\r\n(.*?)\r\n.*?</div>'
+					're': '<h3>Card Text</h3>([^^]*?)<h3>'
 				},
 				{
 					'name': 'flavourtext',
 					'description': 'Flavour',
-					're': '<div class="card-flavor-text u-typography-format">\r\n.*?<h3>Flavor Text</h3>\r\n(.*?)\r\n.*?</div>'
+					're': '<h3>Flavor Text</h3>([^^]*?)</div>'
 				}
 			]
 		}
@@ -1341,7 +1328,7 @@ HearthstoneDictionary.prototype = new Dictionary({
 
 // Override parent functions
 HearthstoneDictionary.prototype.simplify = function(s) {
-	return s.replace(/ /g, '-');
+	return s.replace(/\s/g, '-');
 };
 HearthstoneDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
@@ -1353,9 +1340,7 @@ HearthstoneDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id' : cardID,
-		'hearthpwnCardUrl': cardData[0],
-		'hearthpwnImageFilename': cardData[1],
-		'hearthheadCardID': cardData[2],
+		'img': cardData[0],
 		'isDict': isDict || 0
 	};
 };
