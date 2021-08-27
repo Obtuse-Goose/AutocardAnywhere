@@ -394,12 +394,13 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	priceDiv.appendChild(left);
 	priceDiv.appendChild(right);
 	//priceDiv.style.setProperty('background-color', colour, 'important');
-	priceDiv.style.height = '12px';
+	priceDiv.style.height = '20px';
 	priceDiv.style.marginTop = '2px';
 	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
-	priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
+	priceDiv.style.lineHeight = '20px';
 	priceDiv.style.overflow = 'hidden';
 	priceDiv.style.whiteSpace = 'nowrap';
+	priceDiv.style.boxSizing = 'content-box';
 	//priceDiv.style.textAlign = 'center';
 	//priceDiv.style.color = '#414DD3';
 	//priceDiv.style.color = '#000000';
@@ -407,7 +408,7 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	//priceDiv.style.fontWeight = 'normal';
 	//priceDiv.style.float = 'left';
 	//priceDiv.style.width = (Math.floor(100 / count)) + '%';
-	priceDiv.style.padding = '4px';
+	priceDiv.style.paddingLeft = '4px';
 	//priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
 	priceDiv.style.borderColor = colour;
 	priceDiv.style.borderWidth = '1px';
