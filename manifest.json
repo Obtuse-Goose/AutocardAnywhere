@@ -24,9 +24,9 @@
         }
     },
     "options_ui": {
-        "page": "options.html"
+        "page": "options.html",
+		"open_in_tab": true
     },
-    "options_page": "options.html",
     "permissions": [
         "contextMenus",
         "activeTab",
