@@ -4,7 +4,7 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
-    "version": "4.0.6",
+    "version": "4.0.9",
     "manifest_version": 2,
     "background": {
         "scripts": [
