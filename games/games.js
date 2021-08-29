@@ -1765,11 +1765,6 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	function addLine(div, text, indented, capitalised) {
 		if (!text) return;
-		text = 
-			text.replace(/[{}]/g, '')
-			.replace('historicbrawl', 'historic brawl')
-			.replace('paupercommander', 'Pauper Commander')
-			.replace('duel', 'Duel Commander');
 
 		let line = document.createElement("div");
 		line.appendChild(document.createTextNode(text));
@@ -1779,6 +1774,41 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		if (capitalised) {
 			line.style.setProperty('text-transform', 'capitalize');
 		}
+		div.appendChild(line);
+	}
+
+	function addLegality(div, title, legality) {
+		if (!title) return;
+		legality = legality.replace('_', ' ');
+		if (title == 'oldschool') return;
+		title = title
+			.replace(/[{}]/g, '')
+			.replace('historicbrawl', 'historic brawl')
+			.replace('paupercommander', 'Pauper Commander')
+			.replace('duel', 'Duel Commander');
+
+		let line = document.createElement("div");
+		let left = document.createElement("div");
+		let right = document.createElement("div");
+		left.style.float = 'left';
+		right.style.float = 'left';
+		left.style.width = '67%';
+		right.style.width = '33%';
+		if (legality.toLowerCase() == 'legal') {
+			right.style.color = '#43AE43';
+		}
+		else if (legality.toLowerCase() == 'restricted') {
+			right.style.color = '#1A6DF2';
+		}
+		 // Use same colour for banned as not legal
+		else if (legality.toLowerCase() == 'banned' || legality.toLowerCase() == 'not legal') {
+			right.style.color = '#999999';
+		}
+		left.appendChild(document.createTextNode(title));
+		right.appendChild(document.createTextNode(legality));
+		line.appendChild(left);
+		line.appendChild(right);
+		line.style.setProperty('text-transform', 'capitalize');
 		div.appendChild(line);
 	}
 
@@ -1828,8 +1858,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 		else if (section.name == 'legality') {
 			$.each(card.legalities, function(legality) {
-				if (legality == 'oldschool') return;
-				addLine(result, (legality + ': ' + card.legalities[legality]).replace('_', ' '), false, true);
+				addLegality(result, legality, card.legalities[legality]);
 			});
 			break;
 		}
