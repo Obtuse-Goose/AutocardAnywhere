@@ -311,7 +311,7 @@ function getDictionary(port, request) {
 
 	browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
 		if (dictionaries[gameName + gameLanguage]) {
-			console.log('found data in memory');
+			console.log(gameName + gameLanguage + ' - found data in memory');
 			
 			port.postMessage({
 				'game': gameName,
@@ -322,8 +322,9 @@ function getDictionary(port, request) {
 		}
 		
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
-			console.log('found data in localstorage');
-			
+			console.log(gameName + gameLanguage + ' - found data in storage.local');
+			//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
+			//console.log(gameName + gameLanguage + ' - found data in storage.local, generated on ' + decoded.generated);
 			dictionaries[gameName + gameLanguage] = {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
@@ -337,11 +338,14 @@ function getDictionary(port, request) {
 		}
 		
 		else {
-			console.log('found data on disk');
 			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
 				let gameData = response;
 				getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
 					let languageData = response;
+					//let decoded = JSON.parse(languageData);
+					//console.log(gameName + gameLanguage + ' - found data on disk, generated on ' + decoded);
+					console.log(gameName + gameLanguage + ' - found data on disk');
+			
 					dictionaries[gameName + gameLanguage] = {
 						'gameData': gameData,
 						'languageData': languageData
