@@ -2420,7 +2420,7 @@ AutocardAnywhere.games.netrunner.en = new NetrunnerDictionary({
 });
 
 //==============================================================================
-// Pokemon
+// Pokémon
 //==============================================================================
 function PokemonDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
