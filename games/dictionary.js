@@ -388,7 +388,12 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	left.style.width = '75%';
 	right.style.width = '25%';
 	left.appendChild(document.createTextNode('Buy at ' + text));
-	if (price > 0) {
+	// If the price is in tix, just insert it.
+	if (typeof(price) === 'string' && price.indexOf('tix') > -1) {
+		right.appendChild(document.createTextNode(price));
+	}
+	// Else if the price isn't zero, insert it with currency symbol.
+	else if (price > 0) {
 		right.appendChild(document.createTextNode(dictionary.formatCurrency(price)));
 	}
 	priceDiv.appendChild(left);
