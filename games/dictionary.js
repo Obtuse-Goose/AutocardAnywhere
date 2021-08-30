@@ -385,8 +385,8 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	let right = document.createElement("div");
 	left.style.float = 'left';
 	right.style.float = 'left';
-	left.style.width = '75%';
-	right.style.width = '25%';
+	left.style.width = '70%';
+	right.style.width = '30%';
 	left.appendChild(document.createTextNode('Buy at ' + text));
 	// If the price is in tix, just insert it.
 	if (typeof(price) === 'string' && price.indexOf('tix') > -1) {
