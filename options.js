@@ -131,11 +131,11 @@ function loadSettings(response) {
 
 		let languageInput = document.createElement("input");
 		languageInput.type = 'checkbox';
-		languageInput.id = 'language-checkbox-' + language;
+		languageInput.id = 'language-checkbox-' + game + '-' + language;
 		languageInput.checked = dictionary[2];
 
 		let languageLabel = document.createElement("label");
-		languageLabel.htmlFor = 'language-checkbox-' + language;
+		languageLabel.htmlFor = 'language-checkbox-' + game + '-' + language;
 		languageLabel.appendChild(document.createTextNode(AutocardAnywhere.games[game][language].description));
 
 		let languageButtonDiv = document.createElement("div");
