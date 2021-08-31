@@ -99,7 +99,7 @@ AutocardAnywhereSettings = {
 		{'name': 'linkStyleItalic', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleUnderline', 'type': 'boolean', 'default': false},
 		{'name': 'linkStyleFontColourInherit', 'type': 'boolean', 'default': false},
-		{'name': 'linkStyleFontColour', 'type': 'string', 'default': '#9F004B'},
+		{'name': 'linkStyleFontColour', 'type': 'string', 'default': '#E22908'}, // #9F004B
 		{'name': 'linkStyleDashed', 'type': 'boolean', 'default': false},
 		{'name': 'showIcon', 'type': 'boolean', 'default': false},
 		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
