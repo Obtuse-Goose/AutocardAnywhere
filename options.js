@@ -324,7 +324,7 @@ function loadSettings(response) {
 	// Set preview style
 	$("#link-preview").css('color', $("#colour-textbox").val());
 	$("#link-preview").css('font-weight', $("#bold-checkbox").prop('checked') ? 'bold' : 'normal');
-	$("#link-preview").css('font-style', $("#italic-checkbox").prop('checked') ? 'italic' : 'none');
+	$("#link-preview").css('font-style', $("#italic-checkbox").prop('checked') ? 'italic' : 'normal');
 	$("#link-preview").css('text-decoration', $("#underline-checkbox").prop('checked') ? 'underline' : 'none');
 	$("#link-preview").css('border-bottom', $("#dashed-checkbox").prop('checked') ? '1px dashed' : 'none');
 	$("#icon-checkbox").prop('checked') ? $("#link-preview").addClass('icon') : $("#link-preview").removeClass('icon');
@@ -366,7 +366,7 @@ function saveSettings(settings) {
 	// Set preview style
 	$("#link-preview").css('color', $("#colour-textbox").val());
 	$("#link-preview").css('font-weight', $("#bold-checkbox").prop('checked') ? 'bold' : 'normal');
-	$("#link-preview").css('font-style', $("#italic-checkbox").prop('checked') ? 'italic' : 'none');
+	$("#link-preview").css('font-style', $("#italic-checkbox").prop('checked') ? 'italic' : 'normal');
 	$("#link-preview").css('text-decoration', $("#underline-checkbox").prop('checked') ? 'underline' : 'none');
 	$("#link-preview").css('border-bottom', $("#dashed-checkbox").prop('checked') ? '1px dashed' : 'none');
 	$("#icon-checkbox").prop('checked') ? $("#link-preview").addClass('icon') : $("#link-preview").removeClass('icon');
