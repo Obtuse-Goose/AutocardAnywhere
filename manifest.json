@@ -1,32 +1,5 @@
 {
-    "icons": {
-        "48": "Icon-48.png",
-        "128": "Icon-128.png",
-        "24": "Icon-24.png"
-    },
-    "version": "4.0.13",
-    "manifest_version": 2,
-    "background": {
-        "scripts": [
-            "settings.js",
-            "background.js"
-        ],
-        "persistent": true
-    },
-    "short_name": "AutocardAnywhere",
-    "description": "Displays card image popups for collectable card games on all webpages you visit.",
-    "name": "AutocardAnywhere",
-    "browser_action": {
-        "default_popup": "popup.html",
-        "default_icon": {
-            "19": "Icon-19.png",
-            "38": "Icon-38.png"
-        }
-    },
-    "options_ui": {
-        "page": "options.html",
-        "open_in_tab": true
-    },
+    "version": "4.0.15",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -35,25 +8,29 @@
         "http:\/\/*\/*",
         "https:\/\/*\/*"
     ],
-    "author": "Obtuse Goose Ltd",
+    "browser_action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "19": "Icon-19.png",
+            "38": "Icon-38.png"
+        }
+    },
+    "icons": {
+        "48": "Icon-48.png",
+        "128": "Icon-128.png",
+        "24": "Icon-24.png"
+    },
     "applications": {
         "gecko": {
             "id": "autocardanywhere-amo@autocardanywhere.com"
         }
     },
-    "web_accessible_resources": [
-        "img\/loading.gif",
-        "img\/broken.png",
-        "libs\/tippy\/light.css",
-        "libs\/tippy\/material.css",
-        "libs\/tippy\/scale.css",
-        "libs\/tippy\/perspective.css",
-        "libs\/tippy\/shift-away.css",
-        "libs\/tippy\/shift-toward.css",
-        "libs\/swiper-bundle.min.css"
-    ],
+    "short_name": "AutocardAnywhere",
+    "author": "Obtuse Goose Ltd",
+    "manifest_version": 2,
     "content_scripts": [
         {
+            "all_frames": false,
             "run_at": "document_end",
             "js": [
                 "libs\/jquery-3.6.0.min.js",
@@ -69,8 +46,31 @@
             "matches": [
                 "http:\/\/*\/*",
                 "https:\/\/*\/*"
-            ],
-            "all_frames": false
+            ]
         }
+    ],
+    "name": "AutocardAnywhere",
+    "background": {
+        "scripts": [
+            "settings.js",
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    },
+    "description": "Displays card image popups for collectable card games on all webpages you visit.",
+    "web_accessible_resources": [
+        "img\/loading.gif",
+        "img\/broken.png",
+        "libs\/tippy\/light.css",
+        "libs\/tippy\/material.css",
+        "libs\/tippy\/scale.css",
+        "libs\/tippy\/perspective.css",
+        "libs\/tippy\/shift-away.css",
+        "libs\/tippy\/shift-toward.css",
+        "libs\/swiper-bundle.min.css"
     ]
 }
