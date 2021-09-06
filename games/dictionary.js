@@ -341,11 +341,11 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id);
 		let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
-		if (dictionary.settings.tcgPlayerURL) {
+		if (dictionary.settings.tcgPlayerURL && dictionary.settings.enableTcgPrices !== false) {
 			let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.tcgPlayerURL, card, dictionary));
 			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer', 0, colours['tcg']));
 		}
-		if (dictionary.settings.cardmarketURL) {
+		if (dictionary.settings.cardmarketURL && dictionary.settings.enableCardmarketPrices !== false) {
 			let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardmarketURL, card, dictionary));
 			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', 0, colours['cardmarket']));
 		}
