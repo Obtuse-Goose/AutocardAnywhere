@@ -342,6 +342,7 @@ let AutocardAnywhere = {
 			// Initialise the tip
 			tippy(this, {
 				placement: 'right',
+				inlinePositioning: true,
 				allowHTML: true,
 				interactive: true,
 				interactiveBorder: 5,
