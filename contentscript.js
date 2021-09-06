@@ -355,13 +355,13 @@ let AutocardAnywhere = {
 					// Hide all other tips
 					tippy.hideAll({duration: 0});
 					// If there is a carousel in this tip, start it playing.
-					if (swiper) {
+					if (swiper && AutocardAnywhere.carouselAutoPlay) {
 						swiper.autoplay.start();
 					}
 				},
 				onHide() {
 					// If there is a carousel in this tip, stop it playing.
-					if (swiper) {
+					if (swiper && AutocardAnywhere.carouselAutoPlay) {
 						swiper.autoplay.stop();
 					}
 				},
