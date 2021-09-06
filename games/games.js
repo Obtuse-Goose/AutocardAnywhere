@@ -1765,6 +1765,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	function addLine(div, text, indented, capitalised) {
 		if (!text) return;
+		text = text.replace(/[{}]/g, '');
 
 		let line = document.createElement("div");
 		line.appendChild(document.createTextNode(text));
@@ -1782,7 +1783,6 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		legality = legality.replace('_', ' ');
 		if (title == 'oldschool') return;
 		title = title
-			.replace(/[{}]/g, '')
 			.replace('historicbrawl', 'historic brawl')
 			.replace('paupercommander', 'Pauper Commander')
 			.replace('duel', 'Duel Commander');
