@@ -351,6 +351,7 @@ let AutocardAnywhere = {
 				animation: AutocardAnywhere.popupAnimation, // scale, perspective, shift-away, shift-toward
 				duration: [AutocardAnywhere.popupShowDuration, AutocardAnywhere.popupHideDuration],
 				inertia: true,
+				appendTo: () => document.body,
 				content: popupContent,
 				onShow() {
 					// Hide all other tips
