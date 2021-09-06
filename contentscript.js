@@ -536,7 +536,8 @@ let AutocardAnywhere = {
         injectCSSFile(AutocardAnywhere.getURL("libs/swiper-bundle.min.css"));
 
 		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}" +
-							".autocardanywhere-popup .swiper-pagination-bullets .swiper-pagination-bullet {margin: 4px;}";
+							".autocardanywhere-popup .swiper-pagination-bullets .swiper-pagination-bullet {margin: 4px;}" +
+							"div.tippy-box {max-width: none !important;}";
 		let imgLoadedCss =  ".autocardanywhere-popup .autocardanywhere-loading,.autocardanywhere-broken{background-color: black;background-position: center center;background-repeat: no-repeat;border-radius: 10px;}" +
 							".autocardanywhere-popup .autocardanywhere-loading{background-image: url('" + AutocardAnywhere.getURL('img/loading.gif') + "');background-color: black;}" +
 							".autocardanywhere-popup .autocardanywhere-broken{background-image: url('" + AutocardAnywhere.getURL('img/broken.png') + "');background-color: #be3730;}" +
