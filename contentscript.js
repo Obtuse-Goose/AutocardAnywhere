@@ -777,8 +777,9 @@ let AutocardAnywhere = {
 				}
 			}
 			else if (message.name == 'enableSite') {
-				// Reload the extenstion
+				// Reload the extension
 				//AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+				alert("AutocardAnywhere is now enabled on this site.\nLinks will be added to the current page when you next reload.");
 			}
 			else if (message.name == 'disableSite') {
 				// Remove all links added by AutocardAnywhere
