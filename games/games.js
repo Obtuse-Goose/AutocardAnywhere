@@ -1849,6 +1849,10 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 			if (card.card_faces && card.card_faces.length > 0) {
 				for (let j in card.card_faces) {
 					processCard(card.card_faces[j]);
+					if (j < (card.card_faces.length - 1)) {
+						let spacer = document.createElement("hr");
+						result.appendChild(spacer);
+					}
 				}
 			}
 			else {
