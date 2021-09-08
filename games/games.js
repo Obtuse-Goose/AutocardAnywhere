@@ -1880,27 +1880,6 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	return result;
 };
-MtgDictionary.prototype.parseHtml = function(html) {
-	// Replace img tags with their alt attribute
-	html = html.replace(/<img[^>]*alt="([^"]*)"[^>]*>/g, function(match, f) {
-		// Replace mana symbols with their standard abbreviations
-		let result = f.replace(/white/gi, 'W').replace(/blue/gi, 'U').replace(/black/gi, 'B').replace(/red/gi, 'R').replace(/green/gi, 'G').replace(' or ', '/');
-		result = result.replace(/one/gi, '1').replace(/two/gi, '2').replace(/three/gi, '3').replace(/four/gi, '4').replace(/five/gi, '5');
-		result = result.replace(/six/gi, '6').replace(/seven/gi, '7').replace(/eight/gi, '8').replace(/nine/gi, '9').replace(/ten/gi, '10');
-		result = result.replace(/variable colorless/gi, 'X');
-		return result;//'{' + result + '}';
-	});
-	// Add an extra linefeed before mana cost (for flip cards etc)
-	html = html.replace(/Mana Cost:/g, "\nMana Cost:");
-	// Add an inset around the card text
-	html = html.replace(/Card Text:/g, "Card Text:\n[inset]");
-	html = html.replace(/<\/div><\/div>/g, "\n[endinset]");
-	// Add a linefeed between blocks of card text
-	html = html.replace(/<\/div><div class="cardtextbox" style="[^"]*">/g, "\n");
-	// Remove other divs
-	html = html.replace(/<div class="cardtextbox" style="[^"]*">/g, '');
-	return html.replace(/Rarity:[^<]*/g, '\n');
-};
 MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
 	if (!cardData) {
@@ -1962,10 +1941,10 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	if (data.prices) {
 		if (dictionary.settings.enableTcgPrices) {
 			let tcgPrice = dollarExchangeRate * data.prices.usd;
-			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer', tcgPrice, colours['tcg']));
+			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG player', tcgPrice, colours['tcg']));
 			if (dictionary.settings.enableFoilPrices && data.prices.usd_foil) {
 				let tcgFoilPrice = dollarExchangeRate * data.prices.usd_foil;
-				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer Foil', tcgFoilPrice, colours['foil']));
+				pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCG player Foil', tcgFoilPrice, colours['foil']));
 			}
 		}
 		if (dictionary.settings.enableCardmarketPrices) {
