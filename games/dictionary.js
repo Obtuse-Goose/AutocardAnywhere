@@ -25,11 +25,11 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 
 	function simpleTitleCase(str) {
 		if (!dictionary.settings.emphasiseText) return str;
-		// This has to exactly match what the equivalent funcion in php is doing.
+		// This has to exactly match what the equivalent funcion in util.php is doing.
 		// Capitalise the first letter of the string
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-		// Capitalise anything that follows a space, full stop, hyphen, slash, ampersand or bracket.
-		str = str.replace(/([\s\.\-\/&\(\)])([a-z])/g, function(match, character, letter) {
+		// Capitalise anything that follows a space, full stop, hyphen, slash, ampersand, speech mark or bracket.
+		str = str.replace(/([\s\.\-\/&"\(\)])([a-z])/g, function(match, character, letter) {
 			return character + letter.toUpperCase();
 		});
 		return str;
