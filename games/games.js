@@ -1741,7 +1741,7 @@ MtgDictionary.prototype = new Dictionary({
 	],
 	extraInfo: [
 		{
-			'url': 'https://api.scryfall.com/cards/search?order=released&q=<name>&unique=prints',
+			'url': 'https://api.scryfall.com/cards/search?order=released&q=!\"<name>\"&unique=prints',
 			'sections': [{
 				'name': 'oracletext',
 				'description': 'Oracle'
