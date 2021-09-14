@@ -345,7 +345,8 @@ let AutocardAnywhere = {
 				inlinePositioning: true,
 				allowHTML: true,
 				interactive: true,
-				interactiveBorder: 5,
+				interactiveBorder: 30,
+				interactiveDebounce: 100,
 				hideOnClick: false,
 				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
 				animation: AutocardAnywhere.popupAnimation, // scale, perspective, shift-away, shift-toward
@@ -355,7 +356,7 @@ let AutocardAnywhere = {
 				content: popupContent,
 				onShow() {
 					// Hide all other tips
-					tippy.hideAll({duration: 0});
+					tippy.hideAll({duration: 300});
 					// If there is a carousel in this tip, start it playing.
 					if (swiper && AutocardAnywhere.carouselAutoPlay) {
 						swiper.autoplay.start();
