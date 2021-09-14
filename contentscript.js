@@ -354,6 +354,7 @@ let AutocardAnywhere = {
 				inertia: true,
 				appendTo: () => document.body,
 				content: popupContent,
+				zIndex: 999999,
 				onShow() {
 					// Hide all other tips
 					tippy.hideAll({duration: 300});
