@@ -218,6 +218,10 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 					//delete dictionaries[gameName + gameLanguage];
 					let item = {};
 					item[gameName] = response;
+					let decoded = JSON.parse(response);
+					if (decoded.version) {
+						saveSettings(requestPrefix, {'dataVersion': decoded.version}, false);
+					}
 					browser.storage.local.set(item, function() {
 						delete dictionaries[gameName + gameLanguage];
 					});
@@ -324,7 +328,7 @@ function getDictionary(port, request) {
 		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 			console.log(gameName + gameLanguage + ' - found data in storage.local');
 			//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
-			//console.log(gameName + gameLanguage + ' - found data in storage.local, generated on ' + decoded.generated);
+			//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
 			dictionaries[gameName + gameLanguage] = {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
@@ -343,7 +347,7 @@ function getDictionary(port, request) {
 				getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
 					let languageData = response;
 					//let decoded = JSON.parse(languageData);
-					//console.log(gameName + gameLanguage + ' - found data on disk, generated on ' + decoded);
+					//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
 					console.log(gameName + gameLanguage + ' - found data on disk');
 			
 					dictionaries[gameName + gameLanguage] = {
