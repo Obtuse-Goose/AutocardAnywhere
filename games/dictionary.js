@@ -267,7 +267,9 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		extraInfoDiv.style.setProperty('background-color', '#000000', 'important');
 		extraInfoDiv.style.color = '#ffffff';
 		extraInfoDiv.style.opacity = 0.85;
-		extraInfoDiv.style.borderRadius = '10px';
+		if (dictionary.settings.extraInfoBorderRadius) {
+			extraInfoDiv.style.borderRadius = dictionary.settings.extraInfoBorderRadius + 'px';
+		}
 		extraInfoDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
 		//extraInfoDiv.style.fontFamily = AutocardAnywhereSettings.font;
 		extraInfoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
@@ -275,7 +277,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		extraInfoDiv.style.top = '0px';
 
 		let buttonDiv = document.createElement("div");
-		buttonDiv.style.marginLeft = '3px';
+		buttonDiv.style.marginLeft = '5px';
 		buttonDiv.style.marginTop = '5px';
 		buttonDiv.style.width = (overlayWidth-6) + 'px';
 

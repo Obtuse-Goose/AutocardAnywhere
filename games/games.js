@@ -1704,6 +1704,11 @@ MtgDictionary.prototype = new Dictionary({
 			'controlType': 'checkbox'
 		},
 		{
+			'name': 'extraInfoBorderRadius',
+			'type': 'integer',
+			'default': 16
+		},
+		{
 			'name': 'defaultSection',
 			'description': 'Default info section:',
 			'type': 'string',
