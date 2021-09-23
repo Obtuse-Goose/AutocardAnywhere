@@ -901,6 +901,11 @@ FabDictionary.prototype = new Dictionary({
 			'default': 'https://www.tcgplayer.com/search/flesh-and-blood-tcg/product?q=<id>'
 		},
 		{
+			'name': 'extraInfoBorderRadius',
+			'type': 'integer',
+			'default': 16
+		},
+		{
 			'name': 'defaultSection',
 			'description': 'Default info section:',
 			'type': 'string',
