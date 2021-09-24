@@ -117,6 +117,7 @@ AutocardAnywhereSettings = {
 		{'name': 'expandNicknames', 'type': 'boolean', 'default': false},
 		{'name': 'currency', 'type': 'string', 'default': 'USD'},
 		{'name': 'lastDataUpdate', 'type': 'string', 'default': ''},
+		{'name': 'dataVersion', 'type': 'string', 'default': ''},
 		{'name': 'theme', 'type': 'string', 'default': 'light'}
 	],
 	currencies: [

@@ -283,6 +283,8 @@ function loadSettings(response) {
 	$('#versionNumber').text(response.versionNumber);
 	if (response.lastDataUpdate == '') response.lastDataUpdate = 'Unknown'; 
 	$('#lastUpdate').text(new Date(response.lastDataUpdate).toLocaleDateString());
+	if (response.dataVersion == '') response.dataVersion = 'Unknown'; 
+	$('#dataVersion').text(response.dataVersion);
 	$('#currentYear').text(new Date().getFullYear());
 	
 	// Initialise jQueryUI controls

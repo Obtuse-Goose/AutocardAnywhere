@@ -346,7 +346,7 @@ let AutocardAnywhere = {
 				allowHTML: true,
 				interactive: true,
 				interactiveBorder: 30,
-				interactiveDebounce: 100,
+				interactiveDebounce: 75,
 				hideOnClick: false,
 				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
 				animation: AutocardAnywhere.popupAnimation, // scale, perspective, shift-away, shift-toward
