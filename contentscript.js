@@ -275,7 +275,7 @@ let AutocardAnywhere = {
 				if (!cards) {return}
 				
 				let result = document.createElement("div");
-				result.className = 'autocardanywhere-popup swiper-container';
+				result.className = 'autocardanywhere-popup swiper-container swiper-no-swiping';
 				result.style.fontFamily = AutocardAnywhereSettings.font;
 
 				let cardsElement = document.createElement("div");
@@ -448,6 +448,8 @@ let AutocardAnywhere = {
 					if (cards.length > 1) {
 						let paginationElement = content.find('.swiper-pagination');
 						swiper = new Swiper(popupContent, {
+							//allowSlideNext: false,
+							//allowSlidePrev: false,
 							loop: true,
 							speed: 500,
 							effect: AutocardAnywhere.carouselAnimation, // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
