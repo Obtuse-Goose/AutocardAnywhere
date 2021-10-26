@@ -1,5 +1,5 @@
 {
-    "version": "4.7.12",
+    "version": "4.8.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -35,9 +35,9 @@
             "js": [
                 "libs\/jquery-3.6.0.min.js",
                 "libs\/jquery.linkify-1.0-min.js",
-                "libs\/popper-2.9.2.min.js",
-                "libs\/tippy\/tippy-bundle-6.3.1.umd.min.js",
-                "libs\/swiper-bundle-6.7.5.min.js",
+                "libs\/popper-2.10.2.min.js",
+                "libs\/tippy\/tippy-bundle-6.3.2.umd.min.js",
+                "libs\/swiper-bundle-6.8.4.min.js",
                 "settings.js",
                 "contentscript.js",
                 "games\/dictionary.js",
