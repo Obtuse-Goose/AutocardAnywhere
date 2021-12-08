@@ -341,6 +341,19 @@ let AutocardAnywhere = {
 
 			// Initialise the tip
 			tippy(this, {
+				popperOptions: {
+					modifiers: [{
+						name: 'fixBodyTransform',
+						enabled: true,
+						phase: 'main',
+						fn({ state }) {
+							if (AutocardAnywhere.url.indexOf('dorcishlibrarian.net') == -1) return;
+							let bodyRect = document.body.getBoundingClientRect();
+							state.modifiersData.popperOffsets.x -= bodyRect.x + document.documentElement.scrollLeft;
+							state.modifiersData.popperOffsets.y -= bodyRect.y + document.documentElement.scrollTop;
+						}
+					}]
+				},
 				placement: 'right',
 				inlinePositioning: true,
 				allowHTML: true,
@@ -811,18 +824,18 @@ let AutocardAnywhere = {
 	settingsCallback: function(response) {
 		let listType = response.listType;
 		let thisSiteListed = false;
-		let url = AutocardAnywhere.getCurrentUrl();
+		AutocardAnywhere.url = AutocardAnywhere.getCurrentUrl();
 		if (response.listedSites) {
 			// boardgamearena tables explicitly disabled to avoid issue with links. 
 			let listedSites = response.listedSites + ";boardgamearena.com;";
 			listedSites.split(";").map(function(site) {
-				if ((site.length > 0) && (url.indexOf(site) != -1)) {
+				if ((site.length > 0) && (AutocardAnywhere.url.indexOf(site) != -1)) {
 					thisSiteListed = true;
 				}
 			});
 		}
 
-		if (url == 'https://www.autocardanywhere.com/contact.php') {
+		if (AutocardAnywhere.url == 'https://www.autocardanywhere.com/contact.php') {
 			response.userAgent = navigator.userAgent;
 			$('#settings').val(JSON.stringify(response, null, '  '));
 		}
