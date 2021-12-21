@@ -37,7 +37,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 
 	cardname = cardname.replace(/&amp;/gi, '&');
 	let lookup = simpleTitleCase(cardname).replace(/’/g,"'").replace(/"/g, '`');
-	let link = this.cardNames[lookup];
+	let link = dictionary.cardNames[lookup];
 	//if (!link) link = this.cardNames[cardname];
 
 	//console.log(lookup);
