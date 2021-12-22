@@ -2,30 +2,15 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 let dictionaries = [];
 
 function getItem(key) {
-	/*
-	const getStorageData = Key =>
-	new Promise((resolve, reject) =>
-		chrome.storage.sync.get(Key, result =>
-		chrome.runtime.lastError
-			? reject(Error(chrome.runtime.lastError.message))
-			: resolve(result)
-		)
-	)
-
-	const { data } = await getStorageData(key);
-	console.log(data);
-*/
 	return window.localStorage.getItem(key);
 }
 
 function setItem(key, value) {
 	window.localStorage.removeItem(key);
-	window.localStorage.setItem(key, value);
-	/*
+	//window.localStorage.setItem(key, value);
 	let data = {};
 	data[key] = value;
-	chrome.storage.sync.set(data);
-	*/
+	browser.storage.sync.set(data);
 }
 
 function loadSettings(prefix, settings, callback) {
@@ -33,68 +18,70 @@ function loadSettings(prefix, settings, callback) {
 	let result = {};
 	result.versionNumber = AutocardAnywhereSettings.getVersionNumber();
 
-	/*
 	let requestedSettings = [];
 	settings.map(function(setting) {
 		requestedSettings.push(prefix + setting.name);
 	});
 
-	chrome.storage.sync.get(requestedSettings, function(data) {
-		console.log(data);
-	});
-	*/
+	browser.storage.sync.get(requestedSettings, function(data) {
 
-	settings.map(function(setting) {
-		if (setting.resetToDefault) {
-			result[setting.name] = setting.default;
-			setItem(prefix + setting.name, setting.default);
-		}
-		else if (setting.type == 'boolean') {
-			let value = getItem(prefix + setting.name);
-			if (value == 'true') {
-				result[setting.name] = true;
-			}
-			else if (value == 'false') {
-				result[setting.name] = false;
-			}
-			else {
+		settings.map(function(setting) {
+			if (setting.resetToDefault) {
 				result[setting.name] = setting.default;
+				setItem(prefix + setting.name, setting.default);
 			}
-		}
-		else if (setting.type == 'integer') {
-			let value = getItem(prefix + setting.name);
-			if(/^\d+$/.test(value)) {
-			   result[setting.name] = parseInt(value);
-			}
-			else {
-				result[setting.name] = setting.default;
-			}
-		}
-		else if (setting.type == 'float') {
-			let value = getItem(prefix + setting.name);
-			if(/^\d*\.?\d+$/.test(value)) {
-				result[setting.name] = parseFloat(value);
-			}
-			else {
-				result[setting.name] = setting.default;
-			}
-		}
-		else {
-			let value = getItem(prefix + setting.name) || setting.default;
-
-			// Rewrite defunct link targets
-			if (setting.name == 'linkTarget') {
-				if (value == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
-					value = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
+			else if (setting.type == 'boolean') {
+				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
+				if (value == 'true') {
+					result[setting.name] = true;
 				}
-				else if (value == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
-					value = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
+				else if (value == 'false') {
+					result[setting.name] = false;
+				}
+				else {
+					result[setting.name] = setting.default;
 				}
 			}
-			result[setting.name] = value;
-		}
+			else if (setting.type == 'integer') {
+				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
+				if(/^\d+$/.test(value)) {
+				   result[setting.name] = parseInt(value);
+				}
+				else {
+					result[setting.name] = setting.default;
+				}
+			}
+			else if (setting.type == 'float') {
+				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
+				if(/^\d*\.?\d+$/.test(value)) {
+					result[setting.name] = parseFloat(value);
+				}
+				else {
+					result[setting.name] = setting.default;
+				}
+			}
+			else {
+				let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
+	
+				// Rewrite defunct link targets
+				if (setting.name == 'linkTarget') {
+					if (value == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
+						value = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
+					}
+					else if (value == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
+						value = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
+					}
+				}
+				result[setting.name] = value;
+			}
+		});
+
+		// This next line is a temporary addition to allow a transition to using the storage API without losing user settings.
+		// To be removed once there's been enough time for everyone to upgrade.
+		saveSettings(prefix, settings, false);
+
+		callback(result);
 	});
-	callback(result);
 }
 
 function saveSettings(prefix, settings, updateLastSaved) {
@@ -250,8 +237,8 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	});
 }
 
+/*
 function stats(requestPrefix, settings, forceFullUpdate) {
-	/*
 	let defaultPrefix = AutocardAnywhereSettings.prefix;
 	let browser = (AutocardAnywhereSettings.isSafari ? 's' : AutocardAnywhereSettings.isOpera ? 'o' : AutocardAnywhereSettings.isChrome ? 'c' : AutocardAnywhereSettings.isFirefox ? 'f' : AutocardAnywhereSettings.isEdge ? 'e' :'u');
 	let dictionary = requestPrefix.substr(defaultPrefix.length);
@@ -304,8 +291,8 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 			});
 		}
 	}
-	*/
 }
+*/
 
 function getDictionary(port, request) {
 	let gameName = request.game;
@@ -380,6 +367,8 @@ function onConnect(port) {
 			});
 		}
 	});
+
+	return true;
 }
 
 // Handle simple requests
@@ -388,14 +377,10 @@ function onRequest(request, sender, sendResponse) {
 		if (AutocardAnywhereSettings.isSafari) {
 			loadSettings(request.message.prefix, request.message.settings, function(settings) {
 				request.target.page.dispatchMessage(request.message.id, settings);
-				//stats(request.message.prefix, settings);
 			});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			loadSettings(request.prefix, request.settings, function(settings) {
-				sendResponse(settings);
-				//stats(request.prefix, settings);
-			});
+			loadSettings(request.prefix, request.settings, sendResponse);
 		}
 	}
 	else if (request.name == "saveSettings") {
@@ -441,6 +426,8 @@ function onRequest(request, sender, sendResponse) {
 			});
 	    });
 	}
+
+	return true;
 };
 
 //let settings = loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings);
