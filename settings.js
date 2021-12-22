@@ -187,25 +187,6 @@ AutocardAnywhereSettings = {
 			browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
 		}
 	},
-	parser: new DOMParser(),
-	stripHtml: function(html) {
-		// Removes all html tags from a string.
-		if ((!html) || (typeof(html) !== 'string')) {
-			return html;
-		}
-		// Add a linefeed between blocks of text
-		html = html.replace(/<\/p>/g, "\n");
-		html = html.replace(/<li>/g, "\n");
-		// Remove all other tags
-		let doc = this.parser.parseFromString(html, "text/html");
-        html = doc.documentElement.textContent;
-
-		// Replace newlines with html line breaks
-		html = html.replace(/\n\n\n/g, "\n");
-		html = html.replace(/\n\n/g, "\n");
-		//return html.replace(/\n/g, '<br/>');
-		return html.split("\n");
-	},
 	getVersionNumber: function() {
 		if (AutocardAnywhereSettings.isSafari) {
 			return safari.extension.displayVersion;

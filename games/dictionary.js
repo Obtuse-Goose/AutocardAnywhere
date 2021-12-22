@@ -480,17 +480,17 @@ Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeR
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("lowprice")[0]) {
-		let lowPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue);
+		let lowPrice = dollarExchangeRate * AutocardAnywhere.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue);
 		pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'TCGplayer', lowPrice, colours['tcg']));
 
-		//let avgPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue);
+		//let avgPrice = dollarExchangeRate * AutocardAnywhere.stripHtml(xmlDoc.getElementsByTagName("avgprice")[0].childNodes[0].nodeValue);
 		//pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Median', avgPrice, colours['tcg']));
 
-		//let hiPrice  = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
+		//let hiPrice  = dollarExchangeRate * AutocardAnywhere.stripHtml(xmlDoc.getElementsByTagName("hiprice")[0].childNodes[0].nodeValue);
 
 		let enableFoil = xmlDoc.getElementsByTagName("foilavgprice")[0] && xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue != '0';
 		if (enableFoil) { 
-			let foilPrice = dollarExchangeRate * AutocardAnywhereSettings.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue);
+			let foilPrice = dollarExchangeRate * AutocardAnywhere.stripHtml(xmlDoc.getElementsByTagName("foilavgprice")[0].childNodes[0].nodeValue);
 			pricesDiv.appendChild(dictionary.createPriceElement(priceLinkHref, 'Foil', foilPrice, colours['foil'])); 
 		}
 	}
@@ -543,13 +543,13 @@ Dictionary.prototype.parseExtraInfo = function(content, section, card) {
 	let re = new RegExp(section.re, "g");
 	let match = re.exec(content);
 	while (match != null) {
-		let strings = AutocardAnywhereSettings.stripHtml(this.parseHtml(match[1]));
+		let strings = AutocardAnywhere.stripHtml(this.parseHtml(match[1]));
 		appendStrings(result, strings);
 		if (match[2]) {
 			let s = match[2];
 			let lastString = strings[strings.length-1];
 			if (!insetting) { s = (lastString.substr(-1) != ':' ? ':' : '&nbsp;') + s; }
-			strings = AutocardAnywhereSettings.stripHtml(this.parseHtml(s)); 
+			strings = AutocardAnywhere.stripHtml(this.parseHtml(s)); 
 			appendStrings(result, strings);
 		}
 		result.appendChild(document.createElement("br"));

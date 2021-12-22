@@ -140,6 +140,25 @@ let AutocardAnywhere = {
 	    }
 	    return text;
 	},
+	parser: new DOMParser(),
+	stripHtml: function(html) {
+		// Removes all html tags from a string.
+		if ((!html) || (typeof(html) !== 'string')) {
+			return html;
+		}
+		// Add a linefeed between blocks of text
+		html = html.replace(/<\/p>/g, "\n");
+		html = html.replace(/<li>/g, "\n");
+		// Remove all other tags
+		let doc = AutocardAnywhere.parser.parseFromString(html, "text/html");
+        html = doc.documentElement.textContent;
+
+		// Replace newlines with html line breaks
+		html = html.replace(/\n\n\n/g, "\n");
+		html = html.replace(/\n\n/g, "\n");
+		//return html.replace(/\n/g, '<br/>');
+		return html.split("\n");
+	},
 	createPricesElement: function(className, text) {
 		let result = document.createElement("div");
 		result.style.marginTop = '5px';
