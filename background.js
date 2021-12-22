@@ -24,7 +24,6 @@ function loadSettings(prefix, settings, callback) {
 	});
 
 	browser.storage.sync.get(requestedSettings, function(data) {
-
 		settings.map(function(setting) {
 			if (setting.resetToDefault) {
 				result[setting.name] = setting.default;
@@ -78,7 +77,7 @@ function loadSettings(prefix, settings, callback) {
 
 		// This next line is a temporary addition to allow a transition to using the storage API without losing user settings.
 		// To be removed once there's been enough time for everyone to upgrade.
-		saveSettings(prefix, settings, false);
+		saveSettings(prefix, result, false);
 
 		callback(result);
 	});
