@@ -1,6 +1,15 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
 let dictionaries = [];
 
+/*
+try {
+	importScripts('settings.js');
+}
+catch (e) {
+	console.error(e);
+}
+*/
+
 function getItem(key) {
 	return window.localStorage.getItem(key);
 }
@@ -11,6 +20,12 @@ function setItem(key, value) {
 	let data = {};
 	data[key] = value;
 	browser.storage.sync.set(data);
+}
+
+function isDefined(value) {
+	if (typeof value === 'undefined') return false;
+	if (value === null) return false;
+	return true;
 }
 
 function loadSettings(prefix, settings, callback) {
@@ -25,16 +40,16 @@ function loadSettings(prefix, settings, callback) {
 
 	browser.storage.sync.get(requestedSettings, function(data) {
 		settings.map(function(setting) {
+			let value = isDefined(data[prefix + setting.name]) ? data[prefix + setting.name] : getItem(prefix + setting.name);
 			if (setting.resetToDefault) {
 				result[setting.name] = setting.default;
 				setItem(prefix + setting.name, setting.default);
 			}
 			else if (setting.type == 'boolean') {
-				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
-				if (value == 'true') {
+				if (value == true) {
 					result[setting.name] = true;
 				}
-				else if (value == 'false') {
+				else if (value == false) {
 					result[setting.name] = false;
 				}
 				else {
@@ -42,7 +57,6 @@ function loadSettings(prefix, settings, callback) {
 				}
 			}
 			else if (setting.type == 'integer') {
-				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
 				if(/^\d+$/.test(value)) {
 				   result[setting.name] = parseInt(value);
 				}
@@ -51,7 +65,6 @@ function loadSettings(prefix, settings, callback) {
 				}
 			}
 			else if (setting.type == 'float') {
-				let value = data[prefix + setting.name] || getItem(prefix + setting.name);
 				if(/^\d*\.?\d+$/.test(value)) {
 					result[setting.name] = parseFloat(value);
 				}
@@ -60,7 +73,8 @@ function loadSettings(prefix, settings, callback) {
 				}
 			}
 			else {
-				let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
+				//let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
+				value = isDefined(value) ? value : setting.default;
 	
 				// Rewrite defunct link targets
 				if (setting.name == 'linkTarget') {
@@ -84,12 +98,16 @@ function loadSettings(prefix, settings, callback) {
 }
 
 function saveSettings(prefix, settings, updateLastSaved) {
+	let data = {};
 	for (let key in settings) {
-		setItem(prefix + key, settings[key]);
+		//setItem(prefix + key, settings[key]);
+		data[prefix + key] = settings[key];
 	}
 	if (updateLastSaved) {
-		setItem(AutocardAnywhereSettings.prefix + 'SettingsLastSaved', new Date());
+		//setItem(AutocardAnywhereSettings.prefix + 'SettingsLastSaved', new Date());
+		data[AutocardAnywhereSettings.prefix + 'SettingsLastSaved'] = new Date();
 	}
+	browser.storage.sync.set(data);
 }
 
 function getURL(filename) {
@@ -158,16 +176,12 @@ function getFile(url, callback) {
 		return;
 	}
 
-	let xmlhttp = new XMLHttpRequest();
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-		    callback(xmlhttp.response);
-		} 
-	} 
-	xmlhttp.open("GET", url, true); 
-	xmlhttp.send();
+	fetch(url)
+    	.then(response => response.text())
+    	.then(callback);
 }
 
+/*
 function headFile(url, callback) {
 	let xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
@@ -178,6 +192,7 @@ function headFile(url, callback) {
 	xmlhttp.open("HEAD", url, true); 
 	xmlhttp.send();
 }
+*/
 
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
@@ -293,7 +308,7 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 }
 */
 
-function getDictionary(port, request) {
+function getDictionary(request, callback) {
 	let gameName = request.game;
 	let gameLanguage = request.language;
 
@@ -303,7 +318,7 @@ function getDictionary(port, request) {
 		if (dictionaries[gameName + gameLanguage]) {
 			console.log(gameName + gameLanguage + ' - found data in memory');
 			
-			port.postMessage({
+			callback({
 				'game': gameName,
 				'language': gameLanguage,
 				'gameData': dictionaries[gameName + gameLanguage].gameData,
@@ -319,7 +334,7 @@ function getDictionary(port, request) {
 				'gameData': storageResponse[gameName],
 				'languageData': storageResponse[gameName + gameLanguage]
 			};
-			port.postMessage({
+			callback({
 				'game': gameName,
 				'language': gameLanguage,
 				'gameData': storageResponse[gameName],
@@ -340,7 +355,7 @@ function getDictionary(port, request) {
 						'gameData': gameData,
 						'languageData': languageData
 					};
-					port.postMessage({
+					callback({
 						'game': request.game,
 						'language': request.language,
 						'gameData': gameData,
@@ -352,6 +367,7 @@ function getDictionary(port, request) {
 	});
 }
 
+/*
 // Handle persistent connections - for getting files on Chrome
 function onConnect(port) {
 	if (port.name != 'autocardanywhere') return;
@@ -369,6 +385,7 @@ function onConnect(port) {
 
 	return true;
 }
+*/
 
 // Handle simple requests
 function onRequest(request, sender, sendResponse) {
@@ -390,31 +407,43 @@ function onRequest(request, sender, sendResponse) {
 			saveSettings(request.prefix, request.settings, true);
 		}
 	}
-	else if (request.name == "getFile") { // Safari only
-		getFile(request.message.url, function(response) {
-			request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
-		});
-	}
-	else if (request.name == "getDictionary") { // Safari only
-		let gameName = request.message.game;
-		let gameLanguage = request.message.language;
-		if (!dictionaries[gameName + gameLanguage]) {
-			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
-				let game = JSON.parse(response);
-				getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
-					let language = JSON.parse(response);
-					dictionaries[gameName + gameLanguage] = {
-						'cardData': game.cardData,
-						'test': language.test,
-						'cardNames': language.cardNames
-					};
-					request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
-				});
+	else if (request.name == "getFile") {
+		if (AutocardAnywhereSettings.isSafari) {
+			getFile(request.message.url, function(response) {
+				request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
 			});
-			return true;
 		}
-		else {
-			request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
+		else { // Chrome, Opera, Firefox or Edge
+			getFile(request.url, (response) => {
+				sendResponse({'url': request.url, 'data': response});
+			});
+		}
+	}
+	else if (request.name == "getDictionary") {
+		if (AutocardAnywhereSettings.isSafari) {
+			let gameName = request.message.game;
+			let gameLanguage = request.message.language;
+			if (!dictionaries[gameName + gameLanguage]) {
+				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
+					let game = JSON.parse(response);
+					getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
+						let language = JSON.parse(response);
+						dictionaries[gameName + gameLanguage] = {
+							'cardData': game.cardData,
+							'test': language.test,
+							'cardNames': language.cardNames
+						};
+						request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
+					});
+				});
+				return true;
+			}
+			else {
+				request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
+			}
+		}
+		else { // Chrome, Opera, Firefox or Edge
+			getDictionary(request, sendResponse);
 		}
 	}
 	else if (request.name == "disableIcon") {
@@ -449,9 +478,9 @@ if (AutocardAnywhereSettings.isSafari) {
 	}, false);
 	
 	loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, function(settings) {
-		if (settings.setupShown != 'true') {
+		if (!settings.setupShown) {
 			openURL(safari.extension.baseURI + 'options.html');
-			setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
+			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
 	});
 }
@@ -459,22 +488,22 @@ else { // Chrome, Opera, Firefox or Edge
 	// Simple messages
 	browser.runtime.onMessage.addListener(onRequest);
 	// Persistent connections
-	browser.runtime.onConnect.addListener(onConnect);
+	//browser.runtime.onConnect.addListener(onConnect);
 
 	// Add the context menu item
-	browser.contextMenus.removeAll(function() {
-		browser.contextMenus.create({
+	browser.contextMenus.removeAll(() => {
+		let menuItem = browser.contextMenus.create({
 			id: 'autocardanywherecontextmenuitem',
 			title: 'AutocardAnywhere Lookup',
-			contexts: ["selection"],
-			onclick: function(info, tab) {
-				browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
-			}
+			contexts: ["selection"]
 		});
+		menuItem.onClicked = function(info, tab) {
+			browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
+		};
 	});
 
 	// On first install open the options page
-	browser.runtime.onInstalled.addListener(function(details) {
+	browser.runtime.onInstalled.addListener((details) => {
 		if (details.reason == 'install') {
 			openURL(browser.runtime.getURL('options.html'));
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);

@@ -38,6 +38,7 @@ AutocardAnywhere.games = {
 					safari.self.tab.dispatchMessage('getDictionary', {'id': messageID, 'game': name, 'language': language});
 				}
 				else  { // Chrome, Opera, Firefox or Edge
+					/*
 					if (!AutocardAnywhere.persistentPort) {
 						AutocardAnywhere.persistentPort = chrome.runtime.connect({name: "autocardanywhere"});
 					}
@@ -57,7 +58,18 @@ AutocardAnywhere.games = {
 					
 					AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
 					AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
-		    	}
+					*/
+					browser.runtime.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}, (response) => {
+						let gameData = JSON.parse(response.gameData);
+						let languageData = JSON.parse(response.languageData);
+
+						messageCallback({
+							'cardData': gameData.cardData,
+							'test': languageData.test,
+							'cardNames': languageData.cardNames
+						});
+					});
+				}
 	    	});
 	    });
 	    

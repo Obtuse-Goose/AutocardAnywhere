@@ -47,6 +47,7 @@ let AutocardAnywhere = {
 			safari.self.tab.dispatchMessage("getFile", {'url': url});
 		}
 		else { // Chrome, Opera, Firefox or Edge
+			/*
 			function messageReceived(response) {
 				if (response.url != url) {return}
 				AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
@@ -54,6 +55,11 @@ let AutocardAnywhere = {
 			}
 			AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
 			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
+			*/
+
+			browser.runtime.sendMessage({'name': 'getFile', 'url': url}, (response) => {
+				callback(response.data);
+			});
 		}
 	},
 	format: function(s, card, dictionary) {
