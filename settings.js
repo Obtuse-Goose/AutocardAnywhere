@@ -186,6 +186,91 @@ AutocardAnywhereSettings = {
 			browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
 		}
 	},
+	
+	format: function(s, card, dictionary) {
+		if (!card || !dictionary) return s;
+		function removeDiacritics(str) {
+		    let lookupLetters = {
+		        "ä": "a", "ö": "o", "ü": "u", "Ä": "A", "Ö": "O", "Ü": "U",
+		        "á": "a", "à": "a", "â": "a", "é": "e", "è": "e", "ê": "e",
+		        "ú": "u", "ù": "u", "û": "u", "ó": "o", "ò": "o", "ô": "o",
+		        "Á": "A", "À": "A", "Â": "A", "É": "E", "È": "E", "Ê": "E",
+		        "Ú": "U", "Ù": "U", "Û": "U", "Ó": "O", "Ò": "O", "Ô": "O",
+		        "ß": "ss", "Æ": "Ae", "æ": "ae"
+		    };
+
+		    let result = '';
+		    for(let i=0; i<str.length; i++) {
+		        result += lookupLetters[str[i]] || str[i];
+		    }
+		    return result;
+		}
+		// Work-out which language the card should be displayed in.
+		let language = AutocardAnywhere.popupLanguage;
+		if (!language || language == '' || language == 'original') {
+			language = card.language;
+		}
+		if (dictionary.game == 'mtg' && card[language]) {
+			card.id = card[language];
+		}
+		
+		// Make specific replacements
+		// Replace <game> with "magic" for mtg and card.game for other games 
+		s = s.replace(/<game>/g, function() {
+			return card.game == 'mtg' ? 'magic' : card.game;
+		});
+		// Use first two characters as folders for Scryfall images.
+		s = s.replace(/<([^>]+):folders>/g, function(match, key) {
+			let id = card[key];
+			return id.substr(0,1) + '/' + id.substr(1,1) + '/' + id;
+		});
+		// Make generic replacements - <key> becomes card[key]
+		// <key>:simple becomes card[key] with diacritics removed.
+		s = s.replace(/<([^>]+):simple:lowercase>/g, function(match, key) {
+			return card[key] ? dictionary.simplify(removeDiacritics(card[key])).toLowerCase() : '';
+		});
+		s = s.replace(/<([^>]+):simple>/g, function(match, key) {
+			return card[key] ? dictionary.simplify(removeDiacritics(card[key])) : '';
+		});
+		s = s.replace(/<([^>]+):hyphenated>/g, function(match, key) {
+			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
+		});
+		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
+			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';
+		});
+		s = s.replace(/<([^>]+)>/g, function(match, key) {
+			return card[key] ? card[key] : '';
+		});
+		if (s.indexOf('?') == -1) {
+			s = s  + '?';
+		}
+		else {
+			s = s  + '&';
+		}
+		// If it's a Cardhoarder url, need to make additional replacements
+		if (s.indexOf('cardhoarder.com') > -1) { 
+			s = s.replace(' // ', '/').replace(/data\[name\]=Ae/, 'data[name]=Æ');
+		}
+		return s;
+	},
+	appendPartnerString: function(url) {
+		let lastChar = url.charAt(url.length-1);
+		if (url.indexOf('?') < 0) url = url + '?';
+		else if (lastChar != '?' && lastChar != '&' ) {
+			url = url + '&';
+		}
+		for (const [key, value] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
+			if (url.indexOf(key) >= 0) url = url + value;
+		}
+		return url;
+	},
+	decodeHTMLEntities: function(text) {
+	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
+	    for (let i in entities) {
+	        text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+	    }
+	    return text;
+	},
 	getVersionNumber: function() {
 		if (AutocardAnywhereSettings.isSafari) {
 			return safari.extension.displayVersion;

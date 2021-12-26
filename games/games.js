@@ -59,7 +59,9 @@ AutocardAnywhere.games = {
 					AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
 					AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
 					*/
-					browser.runtime.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}, (response) => {
+
+					
+					AutocardAnywhere.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}).then((response) => {
 						let gameData = JSON.parse(response.gameData);
 						let languageData = JSON.parse(response.languageData);
 
@@ -1636,13 +1638,14 @@ AutocardAnywhere.games.lotr.en = new LotrDictionary({
 // Magic the Gathering
 //==============================================================================
 function MtgDictionary(config) {
+	this.game = 'mtg';
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
 	this.settings = this.settings.concat(config.settings);
 };
 
 MtgDictionary.prototype = new Dictionary({
-	game: 'mtg',
+	//game: 'mtg',
 	description: 'Magic: The Gathering',
 	// Settings and initialisation
 	settings: [
@@ -1953,9 +1956,9 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let data = JSON.parse(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let euroExchangeRate = currencyExchangeRate.euroExchangeRate;
-	let tcgplayerLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.tcgPlayerURL, card, dictionary));
-	let cardmarketLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardmarketURL, card, dictionary));
-	let cardhoarderLink = AutocardAnywhere.appendPartnerString(AutocardAnywhere.format(dictionary.settings.cardhoarderURL, card, dictionary));
+	let tcgplayerLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.tcgPlayerURL, card, dictionary));
+	let cardmarketLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardmarketURL, card, dictionary));
+	let cardhoarderLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardhoarderURL, card, dictionary));
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
 	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];

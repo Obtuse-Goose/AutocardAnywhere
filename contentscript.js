@@ -26,6 +26,11 @@ let AutocardAnywhere = {
         };
         return d[len1][len2];
     },
+	sendMessage(message) {
+		return new Promise((resolve, reject) => {
+			browser.runtime.sendMessage(message, response => resolve(response));
+		});
+	},
 	ajax: function(url, callback) {
 		// Performs an ajax call in the manner accepted by each browser.
 		if (AutocardAnywhereSettings.isBookmarklet) {
@@ -57,94 +62,10 @@ let AutocardAnywhere = {
 			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
 			*/
 
-			browser.runtime.sendMessage({'name': 'getFile', 'url': url}, (response) => {
+			AutocardAnywhere.sendMessage({'name': 'getFile', 'url': url}).then((response) => {
 				callback(response.data);
 			});
 		}
-	},
-	format: function(s, card, dictionary) {
-		if (!card || !dictionary) return s;
-		function removeDiacritics(str) {
-		    let lookupLetters = {
-		        "ä": "a", "ö": "o", "ü": "u", "Ä": "A", "Ö": "O", "Ü": "U",
-		        "á": "a", "à": "a", "â": "a", "é": "e", "è": "e", "ê": "e",
-		        "ú": "u", "ù": "u", "û": "u", "ó": "o", "ò": "o", "ô": "o",
-		        "Á": "A", "À": "A", "Â": "A", "É": "E", "È": "E", "Ê": "E",
-		        "Ú": "U", "Ù": "U", "Û": "U", "Ó": "O", "Ò": "O", "Ô": "O",
-		        "ß": "ss", "Æ": "Ae", "æ": "ae"
-		    };
-
-		    let result = '';
-		    for(let i=0; i<str.length; i++) {
-		        result += lookupLetters[str[i]] || str[i];
-		    }
-		    return result;
-		}
-		// Work-out which language the card should be displayed in.
-		let language = AutocardAnywhere.popupLanguage;
-		if (!language || language == '' || language == 'original') {
-			language = card.language;
-		}
-		if (dictionary.game == 'mtg' && card[language]) {
-			card.id = card[language];
-		}
-		
-		// Make specific replacements
-		// Replace <game> with "magic" for mtg and card.game for other games 
-		s = s.replace(/<game>/g, function() {
-			return card.game == 'mtg' ? 'magic' : card.game;
-		});
-		// Use first two characters as folders for Scryfall images.
-		s = s.replace(/<([^>]+):folders>/g, function(match, key) {
-			let id = card[key];
-			return id.substr(0,1) + '/' + id.substr(1,1) + '/' + id;
-		});
-		// Make generic replacements - <key> becomes card[key]
-		// <key>:simple becomes card[key] with diacritics removed.
-		s = s.replace(/<([^>]+):simple:lowercase>/g, function(match, key) {
-			return card[key] ? dictionary.simplify(removeDiacritics(card[key])).toLowerCase() : '';
-		});
-		s = s.replace(/<([^>]+):simple>/g, function(match, key) {
-			return card[key] ? dictionary.simplify(removeDiacritics(card[key])) : '';
-		});
-		s = s.replace(/<([^>]+):hyphenated>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
-		});
-		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';
-		});
-		s = s.replace(/<([^>]+)>/g, function(match, key) {
-			return card[key] ? card[key] : '';
-		});
-		if (s.indexOf('?') == -1) {
-			s = s  + '?';
-		}
-		else {
-			s = s  + '&';
-		}
-		// If it's a Cardhoarder url, need to make additional replacements
-		if (s.indexOf('cardhoarder.com') > -1) { 
-			s = s.replace(' // ', '/').replace(/data\[name\]=Ae/, 'data[name]=Æ');
-		}
-		return s;
-	},
-	appendPartnerString: function(url) {
-		let lastChar = url.charAt(url.length-1);
-		if (url.indexOf('?') < 0) url = url + '?';
-		else if (lastChar != '?' && lastChar != '&' ) {
-			url = url + '&';
-		}
-		for (const [key, value] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
-			if (url.indexOf(key) >= 0) url = url + value;
-		}
-		return url;
-	},
-	decodeHTMLEntities: function(text) {
-	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
-	    for (let i in entities) {
-	        text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
-	    }
-	    return text;
 	},
 	parser: new DOMParser(),
 	stripHtml: function(html) {
@@ -214,7 +135,7 @@ let AutocardAnywhere = {
 			safari.self.tab.dispatchMessage('saveSettings', {'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			browser.runtime.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
+			AutocardAnywhere.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 		}
 	},
 	// Main extension code
@@ -428,7 +349,7 @@ let AutocardAnywhere = {
 
 						// Set the image source
 						content.find("img[data-id='" + card.id + '-' + card.face + "']").each(function() {
-							$(this).attr('src', AutocardAnywhere.format(dictionary.settings.imageURL, card, dictionary));
+							$(this).attr('src', AutocardAnywhereSettings.format(dictionary.settings.imageURL, card, dictionary));
 						});
 
 						// If any of the cards are from a dictionary with paginationNumbers turned-on, switch it on for the current carousel
@@ -440,7 +361,7 @@ let AutocardAnywhere = {
 								AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
 									// Get the card price from the location specified in the dictionary...
 									AutocardAnywhere.ajax(
-										AutocardAnywhere.format(dictionary.settings.priceURL, card, dictionary),
+										AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary),
 										function(response) {
 											// Set the content of any matching price divs upon successful retrieval
 											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
@@ -466,7 +387,7 @@ let AutocardAnywhere = {
 								dictionary.extraInfo.map(function(source) {
 									AutocardAnywhere.ajax(
 										// Get the source url and interpolate any card data required
-										AutocardAnywhere.format(source.url, card, dictionary), 
+										AutocardAnywhereSettings.format(source.url, card, dictionary), 
 										function(response) {
 											source.sections.map(function(section) {
 												// Set the content of any matching divs upon successful retrieval
@@ -814,6 +735,7 @@ let AutocardAnywhere = {
 	initialiseContextMenu: function() {
 		function processMessage(message) {
 			if (message.name == 'contextmenuitemclick') { 
+				console.log('contextmenuitemclick');
 				if (!AutocardAnywhereSettings.isTouchInterface) { // No context menu on touch interfaces
 					AutocardAnywhere.contextMenuClick();
 				}
@@ -844,6 +766,12 @@ let AutocardAnywhere = {
 		else { // Chrome, Opera, Firefox or Edge
 			browser.runtime.onMessage.addListener(processMessage);
 		}
+	},
+
+	test: async function(text) {
+		let data = await AutocardAnywhere.sendMessage({name: 'test', data: text}).then((response) => response.data);
+		//console.log(data);
+		return data;
 	},
 	
 	settingsCallback: function(response) {
@@ -896,6 +824,7 @@ let AutocardAnywhere = {
 				}
 			})
 	
+			
 			AutocardAnywhere.ignoredCards = response.ignoredCards;
 			AutocardAnywhere.ignoreList = {};
 			if (response.ignoredCards !== undefined) {
@@ -911,6 +840,7 @@ let AutocardAnywhere = {
 			}
 			// Always ignore the card "Ow"
 			AutocardAnywhere.ignoreList['ow'] = 1;
+			
 			
 			// Generate css based on what link styles the user has set, and inject it into the page
 			AutocardAnywhere.injectCSS(
@@ -953,6 +883,35 @@ let AutocardAnywhere = {
 			}
 
 			// Now load all dictionaries
+			let pluginFunctions = {};
+			AutocardAnywhere.pluginNames = [];
+			pluginFunctions['background'] = function(text) {
+				return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
+			};
+			AutocardAnywhere.pluginNames.push('background');
+
+			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
+			if (AutocardAnywhere.forceLoad) {
+				AutocardAnywhere.contextMenuClick();
+			}
+			// else run on the whole page
+			else {
+				// Replace existing card links
+				if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
+				// Setup the linkify plugin, then run it
+				$.extend($.fn.linkify.plugins, pluginFunctions);
+				$('body').linkify({use: AutocardAnywhere.pluginNames});
+				// Initialise card popups for the base document
+				AutocardAnywhere.initialisePopups(document.body);
+
+				// Setup the mutation observer to pickup any changes to the DOM
+				if (typeof(MutationObserver) !== 'undefined') {
+					AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+					AutocardAnywhere.observeDomChanges();
+				}
+			}
+
+			/*
 			AutocardAnywhere.games.load(dictionaries, function(result) {
 				AutocardAnywhere.dictionaries = result;
 
@@ -981,7 +940,7 @@ let AutocardAnywhere = {
 				dictionaries.map(function(dictionary) {
 					let dictionaryName = dictionary[0] + dictionary[1];
 					pluginFunctions[dictionaryName] = function(text) {
-						return AutocardAnywhere.dictionaries[dictionaryName].run(text);
+						return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
 					};
 					AutocardAnywhere.pluginNames.push(dictionaryName);
 				});
@@ -1054,10 +1013,11 @@ let AutocardAnywhere = {
 					}
 				}
 			});
+			*/
 			AutocardAnywhere.loaded = true;
 		}
 		else { // disabled on this site
-			if (!AutocardAnywhereSettings.isSafari) {browser.runtime.sendMessage({'name': 'disableIcon'})}
+			if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
 		}
 	}
 }
