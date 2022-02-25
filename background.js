@@ -197,7 +197,13 @@ function headFile(url, callback) {
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
 	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}], function(updateInfo) {
-		let lastUpdate = updateInfo.LastDataUpdate ? new Date(updateInfo.LastDataUpdate) : new Date('1970-01-01 00:00');
+		let lastUpdate = new Date('1970-01-01 00:00');
+
+		let timestamp = Date.parse('foo');
+		if (isNaN(timestamp) == false) {
+			lastUpdate = new Date(timestamp);
+		}
+
 		let updateRequired = false;
 		let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86,400,000
 		let now = new Date();
