@@ -198,8 +198,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
 	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}], function(updateInfo) {
 		let lastUpdate = new Date('1970-01-01 00:00');
-
-		let timestamp = Date.parse('foo');
+		let timestamp = Date.parse(updateInfo.LastDataUpdate);
 		if (isNaN(timestamp) == false) {
 			lastUpdate = new Date(timestamp);
 		}
@@ -252,8 +251,8 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 		//	}
 		//});
 		
-		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now}, false);
-		saveSettings(requestPrefix, {'lastDataUpdate': now}, false);
+		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now.toString()}, false);
+		saveSettings(requestPrefix, {'lastDataUpdate': now.toString()}, false);
 	});
 }
 
