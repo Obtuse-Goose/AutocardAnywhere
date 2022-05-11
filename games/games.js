@@ -2326,18 +2326,19 @@ NetrunnerDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://www.cardgamedb.com/index.php/netrunner/android-netrunner-card-spoilers/_/<set>/<en>',
+			'default': 'https://netrunnerdb.com/find/?q=<name:simple>',
+			'resetToDefault': true,
 			'controlType': 'radio',
 			'options': [
-				{name: 'cardgamedb', description: 'CardGame DB', value: 'http://www.cardgamedb.com/index.php/netrunner/android-netrunner-card-spoilers/_/<set>/<en>'},
-				{name: 'netrunnerdb', description: 'Netrunner DB', value: 'http://netrunnerdb.com/find/?q=<name:simple>'},
+				{name: 'netrunnerdb', description: 'Netrunner DB', value: 'https://netrunnerdb.com/en/card/<en>'},
 				{name: 'Custom', description: 'Custom:', value: ''}
 			]
 		},
 		{
 			'name': 'imageURL',
 			'type': 'string',
-			'default': 'http://www.cardgamedb.com/forums/uploads/an/ffg_<image>.png'
+			'resetToDefault': true,
+			'default': 'https://assets.netrunnerdb.com/v1/large/<en>.jpg'
 		},
 		{
 			'name': 'defaultSection',
@@ -2354,22 +2355,17 @@ NetrunnerDictionary.prototype = new Dictionary({
 	],
 	extraInfo: [
 		{
-			'url': 'http://www.cardgamedb.com/index.php/netrunner/android-netrunner-card-spoilers/_/<set>/<en>',
+			'url': 'https://netrunnerdb.com/api/2.0/public/card/<en>',
 			'sections': [
 				{
 					'name': 'cardtext',
 					'description': 'Text',
-					're': '<meta name="description" content="([^"]*)"'
-				},
-				{
-					'name': 'info',
-					'description': 'Info',
-					're': '<br/>[^<]*(<b>(?:Type|Cost|Memory Units|Advancement Cost|Faction|Faction Cost|Strength|Agenda Points|Set|Number|Quantity|Illustrator):</b>[^<]*)'
+					're': '"text":"([^"]*)"'
 				},
 				{
 					'name': 'flavourtext',
 					'description': 'Flavour',
-					're': '(<br/><i>[^<]*</i>)'
+					're': '"flavor":"([^^]*?)",'
 				}
 			]
 		}
@@ -2381,10 +2377,18 @@ NetrunnerDictionary.prototype.simplify = function(s) {
 	return s.replace(/ /g, '+');
 };
 NetrunnerDictionary.prototype.parseHtml = function(html) {
-	html = html.replace(/<span class="icon icon-([^"]*)"><\/span>/g, "$1");
-	return html.replace(/&bull;/g, '<br/>');
+	//html = html.replace(/<span class="icon icon-([^"]*)"><\/span>/g, "$1");
+	html = html.replace(/\\"/g, '');
+	return html.replace(/\\n/g, "\n");
 };
 NetrunnerDictionary.prototype.findCardById = function(cardID, match, isDict) {
+
+	function pad(num, size) {
+		num = num.toString();
+		while (num.length < size) num = "0" + num;
+		return num;
+	}
+
 	let cardData = this.cardData[cardID];
 	if (!cardData) {return}
 	return {
@@ -2392,9 +2396,7 @@ NetrunnerDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'language': this.language,
 		'name': match,
 		'match': match,
-		'en': cardData[0],
-		'set': cardData[1],
-		'image': cardData[2] || cardData[0],
+		'en': pad(cardID, 5),
 		'id': cardID,
 		'isDict': isDict || 0
 	};

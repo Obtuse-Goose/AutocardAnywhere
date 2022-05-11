@@ -507,6 +507,10 @@ Dictionary.prototype.parseExtraInfo = function(content, section, card) {
 	let insetting = false;
 	let insetElement;
 
+	function appendString(element, string) {
+		element.appendChild(document.createTextNode(string));
+	}
+
 	function appendStrings(element, strings) {
 		for (let i in strings) {
 			let string = strings[i];
@@ -520,13 +524,15 @@ Dictionary.prototype.parseExtraInfo = function(content, section, card) {
 				insetting = false;
 			}
 			else if (insetting) {
-				insetElement.appendChild(document.createTextNode(string));
+				appendString(insetElement, string);
 				if (string.substr(-1) != ':') {
 					insetElement.appendChild(document.createElement("br"));
 				}
 			}
 			else {
-				element.appendChild(document.createTextNode(string));
+				appendString(element, string);
+				element.appendChild(document.createElement("br"));
+				element.appendChild(document.createElement("br"));
 			}
 		}
 	}
