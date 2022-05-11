@@ -204,8 +204,13 @@ function headFile(url, callback) {
 
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
-	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}]).then(function(updateInfo) {
-		let lastUpdate = updateInfo.LastDataUpdate ? new Date(updateInfo.LastDataUpdate) : new Date('1970-01-01 00:00');
+	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}], function(updateInfo) {
+		let lastUpdate = new Date('1970-01-01 00:00');
+		let timestamp = Date.parse(updateInfo.LastDataUpdate);
+		if (isNaN(timestamp) == false) {
+			lastUpdate = new Date(timestamp);
+		}
+
 		let updateRequired = false;
 		let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86,400,000
 		let now = new Date();
@@ -254,8 +259,8 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 		//	}
 		//});
 		
-		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now}, false);
-		saveSettings(requestPrefix, {'lastDataUpdate': now}, false);
+		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now.toString()}, false);
+		saveSettings(requestPrefix, {'lastDataUpdate': now.toString()}, false);
 	});
 }
 

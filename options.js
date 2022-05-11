@@ -281,8 +281,14 @@ function loadSettings(response) {
 
 	// About page
 	$('#versionNumber').text(response.versionNumber);
-	if (response.lastDataUpdate == '') response.lastDataUpdate = 'Unknown'; 
-	$('#lastUpdate').text(new Date(response.lastDataUpdate).toLocaleDateString());
+	let lastUpdate = 'Unknown'; 
+
+	let timestamp = Date.parse(response.lastDataUpdate);
+	if (isNaN(timestamp) == false) {
+		lastUpdate = new Date(timestamp).toLocaleDateString();
+	}
+
+	$('#lastUpdate').text(lastUpdate);
 	if (response.dataVersion == '') response.dataVersion = 'Unknown'; 
 	$('#dataVersion').text(response.dataVersion);
 	$('#currentYear').text(new Date().getFullYear());
