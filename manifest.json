@@ -1,5 +1,5 @@
 {
-    "version": "4.8.34",
+    "version": "4.12.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -22,11 +22,6 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
-    "applications": {
-        "gecko": {
-            "id": "autocardanywhere-amo@autocardanywhere.com"
-        }
-    },
     "short_name": "AutocardAnywhere",
     "author": "Obtuse Goose Ltd",
     "manifest_version": 3,
@@ -39,7 +34,7 @@
             "run_at": "document_end",
             "js": [
                 "libs\/jquery-3.6.0.min.js",
-                "jquery.linkify-1.0.js",
+                "libs\/jquery.linkify-1.0-min.js",
                 "libs\/popper-2.10.2.min.js",
                 "libs\/tippy\/tippy-bundle-6.3.2.umd.min.js",
                 "libs\/swiper-bundle-6.8.4.min.js",

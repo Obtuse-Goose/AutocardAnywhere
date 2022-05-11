@@ -768,11 +768,13 @@ let AutocardAnywhere = {
 		}
 	},
 
+	/*
 	test: async function(text) {
 		let data = await AutocardAnywhere.sendMessage({name: 'test', data: text}).then((response) => response.data);
 		//console.log(data);
 		return data;
 	},
+	*/
 	
 	settingsCallback: function(response) {
 		let listType = response.listType;
@@ -883,6 +885,7 @@ let AutocardAnywhere = {
 			}
 
 			// Now load all dictionaries
+			/*
 			let pluginFunctions = {};
 			AutocardAnywhere.pluginNames = [];
 			pluginFunctions['background'] = function(text) {
@@ -911,7 +914,7 @@ let AutocardAnywhere = {
 				}
 			}
 
-			/*
+			*/
 			AutocardAnywhere.games.load(dictionaries, function(result) {
 				AutocardAnywhere.dictionaries = result;
 
@@ -940,7 +943,7 @@ let AutocardAnywhere = {
 				dictionaries.map(function(dictionary) {
 					let dictionaryName = dictionary[0] + dictionary[1];
 					pluginFunctions[dictionaryName] = function(text) {
-						return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
+						return AutocardAnywhere.dictionaries[dictionaryName].run(text);
 					};
 					AutocardAnywhere.pluginNames.push(dictionaryName);
 				});
@@ -1013,7 +1016,6 @@ let AutocardAnywhere = {
 					}
 				}
 			});
-			*/
 			AutocardAnywhere.loaded = true;
 		}
 		else { // disabled on this site

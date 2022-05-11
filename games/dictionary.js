@@ -130,7 +130,6 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 };
 // Functions called when linkifying the page
 Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, href, cardID, isFuzzy) {
-	/*
 	let anchor = document.createElement("a");
 	anchor.href = href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary));
 	anchor.className = 'autocardanywhere-link';
@@ -155,7 +154,7 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	let result = document.createElement('span');
 	result.appendChild(anchor);
 	return result;
-	*/
+	/*
 	let result = 
 		'<span><a href="' + 
 		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
@@ -163,9 +162,10 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 		((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match) + 
 		'</a></span>';
 	return result;
+	*/
 };
 Dictionary.prototype.createLink = function(dictionary, card, linkText, href, cardID, isFuzzy) {
-	return AutocardAnywhereSettings.decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy));
+	return AutocardAnywhereSettings.decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy).innerHTML);
 };
 Dictionary.prototype.run = function(text) {
 	let dictionary = this;
@@ -361,7 +361,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 			pricesDiv.appendChild(dictionary.createPriceElement(tcgplayerLink, 'TCGplayer', 0, colours['tcg']));
 		}
 		if (dictionary.settings.cardmarketURL && dictionary.settings.enableCardmarketPrices !== false) {
-			let cardmarketLink = AutocarAutocardAnywhereSettingsdAnywhere.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardmarketURL, card, dictionary));
+			let cardmarketLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardmarketURL, card, dictionary));
 			pricesDiv.appendChild(dictionary.createPriceElement(cardmarketLink, 'Cardmarket', 0, colours['cardmarket']));
 		}
 

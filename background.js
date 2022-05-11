@@ -2,8 +2,13 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 //let dictionaries = [];
 //let enabledDictionaries = [];
 
+
 try {
-	if (typeof importScripts != 'undefined') importScripts('settings.js', "games/dictionary.js", "games/games.js");
+	if (typeof importScripts != 'undefined') importScripts(
+		'settings.js', 
+		//"games/dictionary.js", 
+		//"games/games.js"
+	);
 }
 catch (e) {
 	console.error(e);
@@ -350,8 +355,6 @@ function getDictionary(request) {
 				
 				resolve(dictionaries[gameName + gameLanguage]);
 			}
-			
-			/*
 			else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 				console.log(gameName + gameLanguage + ' - found data in storage.local');
 				//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
@@ -362,10 +365,9 @@ function getDictionary(request) {
 					'gameData': storageResponse[gameName],
 					'languageData': storageResponse[gameName + gameLanguage]
 				};
-				enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
+				//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
 				resolve(dictionaries[gameName + gameLanguage]);
 			}
-			*/
 			else {
 				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
 					let gameData = response;
@@ -390,6 +392,7 @@ function getDictionary(request) {
 	});
 }
 
+/*
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -503,7 +506,7 @@ function load() {
 						AutocardAnywhere.customNicknameRE = customNicknameRE;
 						AutocardAnywhere.customNicknames = customNicknames;
 					}
-					*/
+					* /
 					
 					await browser.storage.local.set({
 						dictionaries: dictionaries, 
@@ -567,13 +570,14 @@ async function parse(text, sendResponse) {
 				}
 			});
 		}
-		*/
+		* /
 
 		//console.log(text);
 		sendResponse({data: text});
 
 	}));
 }
+*/
 
 /*
 // Handle persistent connections - for getting files on Chrome
@@ -662,9 +666,11 @@ function onRequest(request, sender, sendResponse) {
 			});
 	    });
 	}
+	/*
 	else if (request.name == "parse") {
 		parse(request.data, sendResponse);
 	}
+	*/
 
 	return true;
 };
@@ -721,7 +727,9 @@ else { // Chrome, Opera, Firefox or Edge
 		}
 	});
 
+	/*
 	load().then(() => {
 		console.log('loaded');
 	});
+	*/
 }
