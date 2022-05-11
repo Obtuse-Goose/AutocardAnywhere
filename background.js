@@ -350,28 +350,30 @@ function getDictionary(request) {
 		let gameName = request.game;
 		let gameLanguage = request.language;
 
-		let dictionaries = [];
+		//let dictionaries = [];
 
 		checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
 
 		browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
+			/*
 			if (dictionaries[gameName + gameLanguage]) {
 				console.log(gameName + gameLanguage + ' - found data in memory');
 				
 				resolve(dictionaries[gameName + gameLanguage]);
 			}
-			else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
+			else 
+			*/
+			if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 				console.log(gameName + gameLanguage + ' - found data in storage.local');
 				//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
 				//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
-				dictionaries[gameName + gameLanguage] = {
+				//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
+				resolve({
 					'game': gameName,
 					'language': gameLanguage,
 					'gameData': storageResponse[gameName],
 					'languageData': storageResponse[gameName + gameLanguage]
-				};
-				//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
-				resolve(dictionaries[gameName + gameLanguage]);
+				});
 			}
 			else {
 				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
@@ -382,14 +384,13 @@ function getDictionary(request) {
 						//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
 						console.log(gameName + gameLanguage + ' - found data on disk');
 				
-						dictionaries[gameName + gameLanguage] = {
+						//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
+						resolve({
 							'game': gameName,
 							'language': gameLanguage,
 							'gameData': gameData,
 							'languageData': languageData
-						};
-						//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
-						resolve(dictionaries[gameName + gameLanguage]);
+						});
 					});
 				});
 			}
