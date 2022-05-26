@@ -955,7 +955,7 @@ let AutocardAnywhere = {
 					if (AutocardAnywhereSettings.isM1) {
 						console.log('M1 chip detected');
 						let body = $(document.body);
-						AutocardAnywhere.ajax('http://autocardanywhere.com:8080/', {game: "mtg", language: "en", text: body.html()}).then((response) => {
+						AutocardAnywhere.ajax('https://autocardanywhere.com/m1/', {game: "mtg", language: "en", text: body.html()}).then((response) => {
 							body.html(response);
 							AutocardAnywhere.initialisePopups(document.body);
 						});
