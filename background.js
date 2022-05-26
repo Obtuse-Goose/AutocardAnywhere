@@ -170,15 +170,29 @@ function getExchangeRate(callback) {
 	});
 }
 
-function getFile(url, callback) {
+function getFile(url, callback, body) {
 	if (url == 'exchangeRate') {
 		getExchangeRate(callback);
 		return;
 	}
 
-	fetch(url)
-    	.then(response => response.text())
-    	.then(callback);
+	if (body) {
+		fetch(url, {
+			method: "POST",
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
+		})
+			.then(response => response.text())
+			.then(callback);
+	}
+	else {
+		fetch(url)
+			.then(response => response.text())
+			.then(callback);
+	}
 }
 
 /*
@@ -416,12 +430,12 @@ function onRequest(request, sender, sendResponse) {
 		if (AutocardAnywhereSettings.isSafari) {
 			getFile(request.message.url, function(response) {
 				request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
-			});
+			}, request.body);
 		}
 		else { // Chrome, Opera, Firefox or Edge
 			getFile(request.url, (response) => {
 				sendResponse({'url': request.url, 'data': response});
-			});
+			}, request.body);
 		}
 	}
 	else if (request.name == "getDictionary") {

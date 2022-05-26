@@ -26,41 +26,33 @@ let AutocardAnywhere = {
         };
         return d[len1][len2];
     },
-	ajax: function(url, callback) {
-		// Performs an ajax call in the manner accepted by each browser.
-		if (AutocardAnywhereSettings.isBookmarklet) {
-			let xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState==4) {
-				    callback(xmlhttp.response);
+	ajax: function(url, body) {
+		return new Promise(function(resolve) {
+			// Performs an ajax call in the manner accepted by each browser.
+			if (AutocardAnywhereSettings.isBookmarklet) {
+				let xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState==4) {
+						resolve(xmlhttp.response);
+					} 
 				} 
-			} 
-			xmlhttp.open("GET", url, true); 
-			xmlhttp.send();
-		}
-		else if (AutocardAnywhereSettings.isSafari) {
-			function getResponse(event) {
-				if ((event.name != "getFileCallback") || (event.message.url != url)) {return}
-				callback(event.message.data);
+				xmlhttp.open("GET", url, true); 
+				xmlhttp.send();
 			}
-			safari.self.addEventListener("message", getResponse, false);
-			safari.self.tab.dispatchMessage("getFile", {'url': url});
-		}
-		else { // Chrome, Opera, Firefox or Edge
-			/*
-			function messageReceived(response) {
-				if (response.url != url) {return}
-				AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
-				callback(response.data);
+			else if (AutocardAnywhereSettings.isSafari) {
+				function getResponse(event) {
+					if ((event.name != "getFileCallback") || (event.message.url != url)) {return}
+					resolve(event.message.data);
+				}
+				safari.self.addEventListener("message", getResponse, false);
+				safari.self.tab.dispatchMessage("getFile", {'url': url, 'body' : body});
 			}
-			AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
-			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
-			*/
-
-			browser.runtime.sendMessage({'name': 'getFile', 'url': url}, (response) => {
-				callback(response.data);
-			});
-		}
+			else { // Chrome, Opera, Firefox or Edge
+				browser.runtime.sendMessage({'name': 'getFile', 'url': url, 'body' : body}, (response) => {
+					resolve(response.data);
+				});
+			}
+		});
 	},
 	parser: new DOMParser(),
 	stripHtml: function(html) {
@@ -353,10 +345,9 @@ let AutocardAnywhere = {
 						pricesEnabled = dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
 						if (pricesEnabled) { // An element will only be returned if enablePrices is set on the dictionary
 							if (content.find('.autocardanywhere-prices').length == 0) {
-								AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
+								AutocardAnywhere.ajax('exchangeRate').then(function(exchangeRate) {
 									// Get the card price from the location specified in the dictionary...
-									AutocardAnywhere.ajax(
-										AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary),
+									AutocardAnywhere.ajax(AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary)).then(
 										function(response) {
 											// Set the content of any matching price divs upon successful retrieval
 											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
@@ -380,9 +371,8 @@ let AutocardAnywhere = {
 
 								// Get the extra info data from the configured source(s)
 								dictionary.extraInfo.map(function(source) {
-									AutocardAnywhere.ajax(
-										// Get the source url and interpolate any card data required
-										AutocardAnywhereSettings.format(source.url, card, dictionary), 
+									// Get the source url and interpolate any card data required
+									AutocardAnywhere.ajax(AutocardAnywhereSettings.format(source.url, card, dictionary)).then(
 										function(response) {
 											source.sections.map(function(section) {
 												// Set the content of any matching divs upon successful retrieval
@@ -700,8 +690,12 @@ let AutocardAnywhere = {
 						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 						// Run the regex dictionaries over the new node.
-					    node.linkify({use: AutocardAnywhere.pluginNames});
-					    AutocardAnywhere.initialisePopups(nodes[i]);
+					    node.linkify({
+							use: AutocardAnywhere.pluginNames, 
+							handleLinks: () => {
+								AutocardAnywhere.initialisePopups(nodes[i]);
+							}
+						});
 				}
 			}
 	    });
@@ -957,16 +951,32 @@ let AutocardAnywhere = {
 				else {
 					// Replace existing card links
 					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
-					// Setup the linkify plugin, then run it
-					$.extend($.fn.linkify.plugins, pluginFunctions);
-					$('body').linkify({use: AutocardAnywhere.pluginNames});
-					// Initialise card popups for the base document
-					AutocardAnywhere.initialisePopups(document.body);
 
-					// Setup the mutation observer to pickup any changes to the DOM
-					if (typeof(MutationObserver) !== 'undefined') {
-						AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-						AutocardAnywhere.observeDomChanges();
+					if (AutocardAnywhereSettings.isM1) {
+						console.log('M1 chip detected');
+						let body = $(document.body);
+						AutocardAnywhere.ajax('http://autocardanywhere.com:8080/', {game: "mtg", language: "en", text: body.html()}).then((response) => {
+							body.html(response);
+							AutocardAnywhere.initialisePopups(document.body);
+						});
+					}
+					else {
+						console.log('No M1 chip detected');
+						// Setup the linkify plugin, then run it
+						$.extend($.fn.linkify.plugins, pluginFunctions);
+						$('body').linkify({
+							use: AutocardAnywhere.pluginNames, 
+							handleLinks: (nodes) => {
+								// Initialise card popups for the document
+								AutocardAnywhere.initialisePopups(document.body);
+							}
+						});
+
+						// Setup the mutation observer to pickup any changes to the DOM
+						if (typeof(MutationObserver) !== 'undefined') {
+							AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+							AutocardAnywhere.observeDomChanges();
+						}
 					}
 				}
 			});
