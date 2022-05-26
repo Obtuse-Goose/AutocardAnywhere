@@ -220,7 +220,7 @@ AutocardAnywhereSettings = {
 		    return result;
 		}
 		// Work-out which language the card should be displayed in.
-		let language = AutocardAnywhere.popupLanguage;
+		let language = AutocardAnywhere.settings.popupLanguage;
 		if (!language || language == '' || language == 'original') {
 			language = card.language;
 		}
