@@ -57,7 +57,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	// and that the ignore dictionary words setting is set
 	// and that the card name is a dictionary word 
 	// and that the card name isn't on the "always link" override list.
-	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict  && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
+	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
 	return result;
 };
 Dictionary.prototype.findCardById = function(cardID, match, isDict) {
@@ -165,7 +165,16 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	*/
 };
 Dictionary.prototype.createLink = function(dictionary, card, linkText, href, cardID, isFuzzy) {
-	return AutocardAnywhereSettings.decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy).innerHTML);
+
+	function decodeHTMLEntities(text) {
+	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
+	    for (let i in entities) {
+	        text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+	    }
+	    return text;
+	}
+
+	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy).innerHTML);
 };
 Dictionary.prototype.run = function(text) {
 	let dictionary = this;
