@@ -57,7 +57,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	// and that the ignore dictionary words setting is set
 	// and that the card name is a dictionary word 
 	// and that the card name isn't on the "always link" override list.
-	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict  && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
+	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
 	return result;
 };
 Dictionary.prototype.findCardById = function(cardID, match, isDict) {
