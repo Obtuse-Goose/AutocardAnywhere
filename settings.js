@@ -5,6 +5,11 @@ AutocardAnywhereGuid = function() {
 	    return v.toString(16);
 	});
 };
+
+var w = document.createElement("canvas").getContext("webgl");
+var d = w.getExtension('WEBGL_debug_renderer_info');
+var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
+
 AutocardAnywhereSettings = {
 	// Define some global constants
 	isFirefox: (navigator.userAgent.toLowerCase().indexOf('firefox') > -1),
@@ -14,6 +19,7 @@ AutocardAnywhereSettings = {
 	isEdge: (navigator.userAgent.toLowerCase().indexOf('edge') > -1),
 	isBookmarklet: (typeof(AutocardAnywhereLoader) !== 'undefined'),
 	isTouchInterface: false,//('ontouchstart' in window),
+	isM1: (g.match(/Apple/) && !g.match(/Apple GPU/)),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
 	prefix: 'autocardAnywhere',
 	maxLevenshteinFactor: 1,
