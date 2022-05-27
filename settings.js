@@ -7,7 +7,7 @@ AutocardAnywhereGuid = function() {
 };
 
 var w = document.createElement("canvas").getContext("webgl");
-var d = w.getExtension('WEBGL_debug_renderer_info');
+var d = w && w.getExtension('WEBGL_debug_renderer_info');
 var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
 
 AutocardAnywhereSettings = {
