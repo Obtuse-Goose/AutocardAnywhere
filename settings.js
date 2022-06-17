@@ -1,11 +1,11 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-AutocardAnywhereGuid = function() {
+let AutocardAnywhereGuid = function() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 	    let r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
 	    return v.toString(16);
 	});
 };
-AutocardAnywhereSettings = {
+let AutocardAnywhereSettings = {
 	// Define some global constants
 	isFirefox: (navigator.userAgent.toLowerCase().indexOf('firefox') > -1),
 	isChrome: (navigator.userAgent.toLowerCase().indexOf('chrome') > -1),
@@ -280,81 +280,28 @@ AutocardAnywhereSettings = {
 		}
 		return '';
 	},
-	format: function(s, card, dictionary) {
-		if (!card || !dictionary) return s;
-		function removeDiacritics(str) {
-		    let lookupLetters = {
-		        "ä": "a", "ö": "o", "ü": "u", "Ä": "A", "Ö": "O", "Ü": "U",
-		        "á": "a", "à": "a", "â": "a", "é": "e", "è": "e", "ê": "e",
-		        "ú": "u", "ù": "u", "û": "u", "ó": "o", "ò": "o", "ô": "o",
-		        "Á": "A", "À": "A", "Â": "A", "É": "E", "È": "E", "Ê": "E",
-		        "Ú": "U", "Ù": "U", "Û": "U", "Ó": "O", "Ò": "O", "Ô": "O",
-		        "ß": "ss", "Æ": "Ae", "æ": "ae"
-		    };
-
-		    let result = '';
-		    for(let i=0; i<str.length; i++) {
-		        result += lookupLetters[str[i]] || str[i];
-		    }
-		    return result;
-		}
-		// Work-out which language the card should be displayed in.
-		let language = AutocardAnywhere.popupLanguage;
-		if (!language || language == '' || language == 'original') {
-			language = card.language;
-		}
-		if (dictionary.game == 'mtg' && card[language]) {
-			card.id = card[language];
-		}
-		
-		// Make specific replacements
-		// Replace <game> with "magic" for mtg and card.game for other games 
-		s = s.replace(/<game>/g, function() {
-			return card.game == 'mtg' ? 'magic' : card.game;
-		});
-		// Use first two characters as folders for Scryfall images.
-		s = s.replace(/<([^>]+):folders>/g, function(match, key) {
-			let id = card[key];
-			return id.substr(0,1) + '/' + id.substr(1,1) + '/' + id;
-		});
-		// Make generic replacements - <key> becomes card[key]
-		// <key>:simple becomes card[key] with diacritics removed.
-		s = s.replace(/<([^>]+):simple:lowercase>/g, function(match, key) {
-			return card[key] ? dictionary.simplify(removeDiacritics(card[key])).toLowerCase() : '';
-		});
-		s = s.replace(/<([^>]+):simple>/g, function(match, key) {
-			return card[key] ? dictionary.simplify(removeDiacritics(card[key])) : '';
-		});
-		s = s.replace(/<([^>]+):hyphenated>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
-		});
-		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';
-		});
-		s = s.replace(/<([^>]+)>/g, function(match, key) {
-			return card[key] ? card[key] : '';
-		});
-		if (s.indexOf('?') == -1) {
-			s = s  + '?';
-		}
-		else {
-			s = s  + '&';
-		}
-		// If it's a Cardhoarder url, need to make additional replacements
-		if (s.indexOf('cardhoarder.com') > -1) { 
-			s = s.replace(' // ', '/').replace(/data\[name\]=Ae/, 'data[name]=Æ');
-		}
-		return s;
-	},
-	appendPartnerString: function(url) {
-		let lastChar = url.charAt(url.length-1);
-		if (url.indexOf('?') < 0) url = url + '?';
-		else if (lastChar != '?' && lastChar != '&' ) {
-			url = url + '&';
-		}
-		for (const [key, value] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
-			if (url.indexOf(key) >= 0) url = url + value;
-		}
-		return url;
-	}
+	// Utility functions
+	levenshtein: function(a, b) {
+        if(a == b)return 0;
+        if(!a.length || !b.length)return b.length || a.length;
+        let len1 = a.length,
+            len2 = b.length,
+            I = 0,
+            i = 0,
+            d = [[0]],
+            c, j, J;
+        while(++i <= len2) d[0][i] = i;
+        i = 0;
+        while(++i <= len1) {
+            J = j = 0;
+            c = a[I];
+            d[i] = [i];
+            while(++j <= len2){
+                d[i][j] = Math.min(d[I][j] + 1, d[i][J] + 1, d[I][J] + (c != b[J]));
+                ++J;
+            };
+            ++I;
+        };
+        return d[len1][len2];
+    },
 }

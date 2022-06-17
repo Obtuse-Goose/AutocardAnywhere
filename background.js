@@ -2,12 +2,11 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 //let dictionaries = [];
 //let enabledDictionaries = [];
 
-
 try {
 	if (typeof importScripts != 'undefined') importScripts(
 		'settings.js', 
-		//"games/dictionary.js", 
-		//"games/games.js"
+		"games/dictionary.js", 
+		"games/games.js"
 	);
 }
 catch (e) {
@@ -98,7 +97,7 @@ function loadSettings(prefix, settings, callback) {
 
 			// This next line is a temporary addition to allow a transition to using the storage API without losing user settings.
 			// To be removed once there's been enough time for everyone to upgrade.
-			saveSettings(prefix, result, false);
+			//saveSettings(prefix, result, false);
 
 			resolve(result);
 		});
@@ -367,7 +366,14 @@ function getDictionary(request) {
 				console.log(gameName + gameLanguage + ' - found data in storage.local');
 				//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
 				//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
-				//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
+				/*
+				dictionaries[gameName + gameLanguage] = {
+					'game': gameName,
+					'language': gameLanguage,
+					'gameData': storageResponse[gameName],
+					'languageData': storageResponse[gameName + gameLanguage]
+				};
+				*/
 				resolve({
 					'game': gameName,
 					'language': gameLanguage,
@@ -384,7 +390,14 @@ function getDictionary(request) {
 						//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
 						console.log(gameName + gameLanguage + ' - found data on disk');
 				
-						//enabledDictionaries.push(dictionaries[gameName + gameLanguage]);
+						/*
+						dictionaries[gameName + gameLanguage] = {
+							'game': gameName,
+							'language': gameLanguage,
+							'gameData': gameData,
+							'languageData': languageData
+						};
+						*/
 						resolve({
 							'game': gameName,
 							'language': gameLanguage,
@@ -398,177 +411,164 @@ function getDictionary(request) {
 	});
 }
 
-/*
+
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function load() {
-	console.log('load');
 	return new Promise(async (resolve, reject) => {
 		while (AutocardAnywhere.loading) {
 			await sleep(100);
 		}
 		if (AutocardAnywhere.loaded) {
+			//console.log('already loaded');
 			resolve(AutocardAnywhere.dictionaries);
 			return;
 		}
 		AutocardAnywhere.loaded = 0;
 		AutocardAnywhere.loading = 1;
+		console.log('AutocardAnywhere loading');
 
-		let result = [];
+		AutocardAnywhere.dictionaries = [];
 		let dictionaries = [];
-		browser.storage.local.get([
-			'dictionaries', 'ignoreList', 'unignoreList', 'customNicknameRE', 'customNicknames'
-		], async function(data) {
-			if (!data && data['dictionaries']) {
-				dictionaries = data['dictionaries'];
-				AutocardAnywhere.ignoreList = data['ignoreList'];
-				AutocardAnywhere.unignoreList = data['unignoreList'];
-				//AutocardAnywhere.customNicknameRE = data['customNicknameRE'];
-				//AutocardAnywhere.customNicknames = data['customNicknames'];
-			}
-			else {
-				await loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(async function(settings) {
-					// Ignore and unignore lists
-					AutocardAnywhere.ignoredCards = settings.ignoredCards;
-					AutocardAnywhere.ignoreList = {};
-					if (settings.ignoredCards !== undefined) {
-						settings.ignoredCards.split('|').map(function(ignoredCard) {
-							AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
-						});
-					}
-					AutocardAnywhere.unignoreList = {};
-					if (settings.unignoredCards !== undefined) {
-						settings.unignoredCards.split('|').map(function(unignoredCard) {
-							AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
-						});
-					}
-					// Always ignore the card "Ow"
-					AutocardAnywhere.ignoreList['ow'] = 1;
-					
-					// Enabled card sets
-					let dictionariesHash = {};
-					AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
-						dictionariesHash[dictionary.game + dictionary.language] = dictionary;
-					});
 
-					// First load all the dictionaries specified in the user's settings
-					settings.linkLanguages.split(';').map(function(x) {
-						let linkLanguage = x.split(':');
-						if (linkLanguage.length == 3) {
-							let game = linkLanguage[0];
-							let language = linkLanguage[1];
-							if (linkLanguage[2] == '1') {
-								dictionaries.push({game: game, language: language});
-							}
-							delete dictionariesHash[game + language];
-						}
-					});
-
-					// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
-					// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
-					for (dictionaryName in dictionariesHash) {
-						let dictionary = dictionariesHash[dictionaryName];
-						if (dictionary.default == 1) {
-							dictionaries.push({game: dictionary.game, language: dictionary.language});
-						}
-					}
-
-					for (let i=0; i<dictionaries.length; i++) {
-						let dictionary = dictionaries[i];
-						dictionary = await getDictionaryFromDisk(dictionary).then( (dictionary) => dictionary);
-						dictionary.settings = await loadSettings(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, AutocardAnywhere.games[dictionary.game][dictionary.language].settings).then( (data) => data);
-						dictionaries[i] = dictionary;
-					}
-
-					
-					/*
-					// Nicknames
-					if (settings.customNicknames && (settings.customNicknames != '')) {
-						if (settings.customNicknames.indexOf(';') > -1) {
-							settings.customNicknames = settings.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
-						}
-						let customNicknames = {};
-						let customNicknameRE = '(';
-						settings.customNicknames.split('||').map(function(x) {
-							let nickname = x.split('|');
-							if (nickname.length == 3) {
-								//if (AutocardAnywhere.dictionaries[nickname[0]]) {
-									customNicknames[nickname[1].toLowerCase()] = {
-										dictionary: nickname[0],
-										nickname: nickname[1],
-										fullname: nickname[2]
-									};
-									customNicknameRE += nickname[1] + '|';
-								//}
-							}
-						});
-	
-						if (customNicknameRE.length > 1) {
-							customNicknameRE = customNicknameRE.slice(0,-1);
-						}
-						customNicknameRE += ')';
-						AutocardAnywhere.customNicknameRE = customNicknameRE;
-						AutocardAnywhere.customNicknames = customNicknames;
-					}
-					* /
-					
-					await browser.storage.local.set({
-						dictionaries: dictionaries, 
-						ignoreList: AutocardAnywhere.ignoreList,
-						unignoreList: AutocardAnywhere.unignoreList,
-						customNicknameRE: AutocardAnywhere.customNicknameRE,
-						customNicknames: AutocardAnywhere.customNicknames
-					});
+		loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(async function(settings) {
+			AutocardAnywhere.openInNewTab = settings.newTab;
+			AutocardAnywhere.fuzzyLookup = settings.fuzzyLookup;
+			// Ignore and unignore lists
+			AutocardAnywhere.ignoredCards = settings.ignoredCards;
+			AutocardAnywhere.ignoreList = {};
+			if (settings.ignoredCards !== undefined) {
+				settings.ignoredCards.split('|').map(function(ignoredCard) {
+					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
 				});
+			}
+			AutocardAnywhere.unignoreList = {};
+			if (settings.unignoredCards !== undefined) {
+				settings.unignoredCards.split('|').map(function(unignoredCard) {
+					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
+				});
+			}
+			// Always ignore the card "Ow"
+			AutocardAnywhere.ignoreList['ow'] = 1;
+			
+			// Enabled card sets
+			let dictionariesHash = {};
+			AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
+				dictionariesHash[dictionary.game + dictionary.language] = dictionary;
+			});
+
+			// First load all the dictionaries specified in the user's settings
+			settings.linkLanguages.split(';').map(function(x) {
+				let linkLanguage = x.split(':');
+				if (linkLanguage.length == 3) {
+					let game = linkLanguage[0];
+					let language = linkLanguage[1];
+					if (linkLanguage[2] == '1') {
+						dictionaries.push({game: game, language: language});
+					}
+					delete dictionariesHash[game + language];
+				}
+			});
+
+			// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
+			// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
+			for (dictionaryName in dictionariesHash) {
+				let dictionary = dictionariesHash[dictionaryName];
+				if (dictionary.default == 1) {
+					dictionaries.push({game: dictionary.game, language: dictionary.language});
+				}
 			}
 
 			for (let i=0; i<dictionaries.length; i++) {
+				let data = await getDictionaryFromDisk(dictionaries[i]).then( (data) => data);
+				//const cloneFood = Object.assign({}, food);
 				let dictionary = AutocardAnywhere.games[dictionaries[i].game][dictionaries[i].language];
 				
-				dictionary.test = new RegExp(dictionaries[i].test, "gi");
+				dictionary.test = new RegExp(data.test, "gi");
 				
-				
+				// Run it to force compilation
 				let test = "blah";
 				test.replace(dictionary.test, function() {
 					return '*';
 				});
 				
-				
-				dictionary.cardData = dictionaries[i].cardData;
-				dictionary.cardNames = dictionaries[i].cardNames;
-				dictionary.settings = dictionaries[i].settings;
+				dictionary.cardData = data.cardData;
+				dictionary.cardNames = data.cardNames;
+				dictionary.settings = await loadSettings(AutocardAnywhereSettings.prefix + data.game + data.language, AutocardAnywhere.games[data.game][data.language].options).then( (settings) => settings);
 
-				result.push(dictionary);
+				AutocardAnywhere.dictionaries.push(dictionary);
+			}
+			
+			// Nicknames
+			if (settings.customNicknames && (settings.customNicknames != '')) {
+				if (settings.customNicknames.indexOf(';') > -1) {
+					settings.customNicknames = settings.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
+				}
+				let customNicknames = {};
+				AutocardAnywhere.customNicknameRE = '(';
+				settings.customNicknames.split('||').map(function(x) {
+					let nickname = x.split('|');
+					if (nickname.length == 3) {
+						//if (AutocardAnywhere.dictionaries[nickname[0]]) {
+							customNicknames[nickname[1].toLowerCase()] = {
+								dictionary: nickname[0],
+								nickname: nickname[1],
+								fullname: nickname[2]
+							};
+							AutocardAnywhere.customNicknameRE += nickname[1] + '|';
+						//}
+					}
+				});
+
+				if (AutocardAnywhere.customNicknameRE.length > 1) {
+					AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
+				}
+				AutocardAnywhere.customNicknameRE += ')';
+				AutocardAnywhere.customNicknames = customNicknames;
 			}
 
-			AutocardAnywhere.dictionaries = result;
 			AutocardAnywhere.loaded = 1;
 			AutocardAnywhere.loading = 0;
-			resolve(result);
+			resolve(AutocardAnywhere.dictionaries);
 		});
 	});
 }
 
-async function parse(text, sendResponse) {
+function parse(text, sendResponse) {
+	console.log(text);
 	load().then( (dictionaries => {
-		console.log('parsing: ' + text);
-		AutocardAnywhere.dictionaries.map( (dictionary) => {
-			//console.log(1);
+		// Run all enabled dictionaries
+		dictionaries.map( (dictionary) => {
 			text = dictionary.run(text);
 		});
-		console.log('parsed');
 
-		/*
+		// Card names enclosed in [[]]
+		if (AutocardAnywhere.fuzzyLookup) {
+			text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+				// Do a fuzzy lookup by name in all dictionaries
+				for (let i in AutocardAnywhere.dictionaries) {
+					let dictionary = AutocardAnywhere.dictionaries[i];
+					let cards = dictionary.fuzzyLookup(name);
+					if (cards.length > 0) {
+						return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+					}
+				}
+				return match;
+			});
+		}
+		
+		// Nicknames
 		if (AutocardAnywhere.customNicknameRE != '()') {
 			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
 				let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
-				if (!nickname) {return match}
-				let dictionary = AutocardAnywhere.dictionaries[0];//AutocardAnywhere.dictionaries[nickname.dictionary];
+				if (!nickname) return match;
+				if (!AutocardAnywhere.dictionaries[nickname.dictionary]) return match;
+				let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
 				let card = dictionary.findCard(nickname.fullname);
 				if ((!card) || (AutocardAnywhere.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()])) {return match}
-				if (response.expandNicknames) {
+				if (AutocardAnywhereSettings.settings.expandNicknames) {
 					return f + dictionary.createLink(dictionary, card, nickname.fullname);
 				}
 				else {
@@ -576,20 +576,39 @@ async function parse(text, sendResponse) {
 				}
 			});
 		}
-		* /
+		
 
 		//console.log(text);
 		sendResponse({data: text});
 
 	}));
 }
-*/
 
-/*
-// Handle persistent connections - for getting files on Chrome
+
+
+// Handle persistent connections - keep background alive so that we don't need to reload the regexps on every page.
+function onMessage(msg, port) {
+	//console.log('received', msg, 'from', port.sender);
+	port.postMessage({'data': 'pong'});
+}
+function forceReconnect(port) {
+	deleteTimer(port);
+	port.disconnect();
+}
+function deleteTimer(port) {
+	if (port._timer) {
+		clearTimeout(port._timer);
+		delete port._timer;
+	}
+}
+
 function onConnect(port) {
 	if (port.name != 'autocardanywhere') return;
 
+	port.onMessage.addListener(onMessage);
+	port.onDisconnect.addListener(deleteTimer);
+	port._timer = setTimeout(forceReconnect, 250e3, port);
+	/*
 	port.onMessage.addListener(function(request) {
 		if (request.type == "dictionary") { // Requested a dictionary by name
 			getDictionary(port, request);
@@ -600,10 +619,11 @@ function onConnect(port) {
 			});
 		}
 	});
+	*/
 
 	return true;
 }
-*/
+
 
 // Handle simple requests
 function onRequest(request, sender, sendResponse) {
@@ -620,9 +640,13 @@ function onRequest(request, sender, sendResponse) {
 	else if (request.name == "saveSettings") {
 		if (AutocardAnywhereSettings.isSafari) {
 			saveSettings(request.message.prefix, request.message.settings, true);
+			console.log('unloading');
+			AutocardAnywhere.loaded = false;
 		}
 		else { // Chrome, Opera, Firefox or Edge
 			saveSettings(request.prefix, request.settings, true);
+			console.log('unloading');
+			AutocardAnywhere.loaded = false;
 		}
 	}
 	else if (request.name == "getFile") {
@@ -638,6 +662,7 @@ function onRequest(request, sender, sendResponse) {
 		}
 	}
 	else if (request.name == "getDictionary") {
+		//console.log(AutocardAnywhere.dictionaries);
 		if (AutocardAnywhereSettings.isSafari) {
 			let gameName = request.message.game;
 			let gameLanguage = request.message.language;
@@ -648,7 +673,7 @@ function onRequest(request, sender, sendResponse) {
 						let language = JSON.parse(response);
 						dictionaries[gameName + gameLanguage] = {
 							'cardData': game.cardData,
-							'test': language.test,
+							'test': '',//language.test,
 							'cardNames': language.cardNames
 						};
 						request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
@@ -672,11 +697,9 @@ function onRequest(request, sender, sendResponse) {
 			});
 	    });
 	}
-	/*
 	else if (request.name == "parse") {
 		parse(request.data, sendResponse);
 	}
-	*/
 
 	return true;
 };
@@ -711,7 +734,7 @@ else { // Chrome, Opera, Firefox or Edge
 	// Simple messages
 	browser.runtime.onMessage.addListener(onRequest);
 	// Persistent connections
-	//browser.runtime.onConnect.addListener(onConnect);
+	browser.runtime.onConnect.addListener(onConnect);
 
 	// Add the context menu item
 	browser.contextMenus.removeAll(() => {
@@ -733,9 +756,9 @@ else { // Chrome, Opera, Firefox or Edge
 		}
 	});
 
-	/*
+
 	load().then(() => {
-		console.log('loaded');
+		//console.log('loaded');
 	});
-	*/
+
 }

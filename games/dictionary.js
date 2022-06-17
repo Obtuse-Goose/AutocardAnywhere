@@ -122,7 +122,7 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 	cardname = cardname.toLowerCase();
 	let cards = [];
 	for (let name in this.cardNames) {
-		if (AutocardAnywhere.levenshtein(cardname, name.toLowerCase()) <= AutocardAnywhereSettings.maxLevenshteinFactor) {
+		if (AutocardAnywhereSettings.levenshtein(cardname, name.toLowerCase()) <= AutocardAnywhereSettings.maxLevenshteinFactor) {
 			cards.push(this.findCard(name, true));
 		}
 	}
@@ -130,6 +130,7 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 };
 // Functions called when linkifying the page
 Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, href, cardID, isFuzzy) {
+	/*
 	let anchor = document.createElement("a");
 	anchor.href = href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary));
 	anchor.className = 'autocardanywhere-link';
@@ -154,15 +155,27 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	let result = document.createElement('span');
 	result.appendChild(anchor);
 	return result;
-	/*
-	let result = 
-		'<span><a href="' + 
-		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
-		'" class="autocardanywhere-link">' + 
-		((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match) + 
-		'</a></span>';
-	return result;
 	*/
+
+	let result = 
+		'<span class="autocardanywhere"><a href="' + 
+		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
+		'" class="autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : '') + '" ' +
+		'data-dictionary="' + this.game + this.language + '" ' +
+		(cardID ? 'data-multiverseid="' + cardID + '" ' : 'data-name="' + card.match + '" ') +
+		(isFuzzy ? 'data-fuzzy="1" ' : '') +
+		(card.override ? 'data-override="1" ' : '') +
+		(AutocardAnywhere.openInNewTab ? 'target="_blank" ' : '') +
+		'>' + 
+		(linkText ? linkText : ((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match)) + 
+		'</a></span>';
+
+		if (isFuzzy) {
+			console.log(result);
+		}
+
+	return result;
+	
 };
 Dictionary.prototype.createLink = function(dictionary, card, linkText, href, cardID, isFuzzy) {
 
@@ -174,7 +187,7 @@ Dictionary.prototype.createLink = function(dictionary, card, linkText, href, car
 	    return text;
 	}
 
-	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy).innerHTML);
+	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy));
 };
 Dictionary.prototype.run = function(text) {
 	let dictionary = this;

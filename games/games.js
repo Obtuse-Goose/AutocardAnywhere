@@ -1,3 +1,4 @@
+//import { Dictionary } from './games/dictionary.js';
 if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
 //if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games = {
@@ -60,7 +61,6 @@ AutocardAnywhere.games = {
 					AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
 					*/
 
-					
 					AutocardAnywhere.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}).then((response) => {
 						let gameData = JSON.parse(response.gameData);
 						let languageData = JSON.parse(response.languageData);
@@ -83,7 +83,7 @@ AutocardAnywhere.games = {
 function AgotDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 AgotDictionary.prototype = new Dictionary({
@@ -154,7 +154,7 @@ AutocardAnywhere.games.agot.en = new AgotDictionary({
 function CardfightVanguardDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 CardfightVanguardDictionary.prototype = new Dictionary({
@@ -259,7 +259,7 @@ AutocardAnywhere.games.cardfightvanguard.en = new CardfightVanguardDictionary({
 function ChronicleDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ChronicleDictionary.prototype = new Dictionary({
@@ -328,7 +328,7 @@ AutocardAnywhere.games.chronicle.en = new ChronicleDictionary({
 function CodexDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 CodexDictionary.prototype = new Dictionary({
@@ -399,7 +399,7 @@ AutocardAnywhere.games.codex.en = new CodexDictionary({
 function DbzDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DbzDictionary.prototype = new Dictionary({
@@ -469,7 +469,7 @@ AutocardAnywhere.games.dbz.en = new DbzDictionary({
 function DicemastersDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DicemastersDictionary.prototype = new Dictionary({
@@ -539,7 +539,7 @@ AutocardAnywhere.games.dicemasters.en = new DicemastersDictionary({
 function DominionDictionary(config) {
 	this .description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DominionDictionary.prototype = new Dictionary({
@@ -610,7 +610,7 @@ AutocardAnywhere.games.dominion.en = new DominionDictionary({
 function DoomtownDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DoomtownDictionary.prototype = new Dictionary({
@@ -679,7 +679,7 @@ AutocardAnywhere.games.doomtown.en = new DoomtownDictionary({
 function DuelystDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DuelystDictionary.prototype = new Dictionary({
@@ -748,7 +748,7 @@ AutocardAnywhere.games.duelyst.en = new DuelystDictionary({
 function ElderScrollsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ElderScrollsDictionary.prototype = new Dictionary({
@@ -817,7 +817,7 @@ AutocardAnywhere.games.elderscrolls.en = new ElderScrollsDictionary({
 function EternalDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 EternalDictionary.prototype = new Dictionary({
@@ -889,7 +889,7 @@ AutocardAnywhere.games.eternal.en = new EternalDictionary({
 function FabDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 FabDictionary.prototype = new Dictionary({
@@ -1040,7 +1040,7 @@ AutocardAnywhere.games.fab.en = new FabDictionary({
 function FaeriaDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 FaeriaDictionary.prototype = new Dictionary({
@@ -1109,7 +1109,7 @@ AutocardAnywhere.games.faeria.en = new FaeriaDictionary({
 function ForceOfWillDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ForceOfWillDictionary.prototype = new Dictionary({
@@ -1184,7 +1184,7 @@ AutocardAnywhere.games.forceofwill.en = new ForceOfWillDictionary({
 function GwentDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 GwentDictionary.prototype = new Dictionary({
@@ -1288,7 +1288,7 @@ AutocardAnywhere.games.gwent.en = new GwentDictionary({
 function HearthstoneDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 HearthstoneDictionary.prototype = new Dictionary({
@@ -1394,7 +1394,7 @@ AutocardAnywhere.games.hearthstone.en = new HearthstoneDictionary({
 function HexDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 HexDictionary.prototype = new Dictionary({
@@ -1464,7 +1464,7 @@ AutocardAnywhere.games.hex.en = new HexDictionary({
 function L5rDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 L5rDictionary.prototype = new Dictionary({
@@ -1570,7 +1570,7 @@ AutocardAnywhere.games.l5r.en = new L5rDictionary({
 function LotrDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 LotrDictionary.prototype = new Dictionary({
@@ -1641,7 +1641,7 @@ function MtgDictionary(config) {
 	this.game = 'mtg';
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 MtgDictionary.prototype = new Dictionary({
@@ -2201,7 +2201,7 @@ AutocardAnywhere.games.mtg.ko = new MtgDictionary({
 function MyLittlePonyDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 MyLittlePonyDictionary.prototype = new Dictionary({
@@ -2317,7 +2317,7 @@ AutocardAnywhere.games.mylittlepony.en = new MyLittlePonyDictionary({
 function NetrunnerDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 NetrunnerDictionary.prototype = new Dictionary({
@@ -2435,7 +2435,7 @@ AutocardAnywhere.games.netrunner.en = new NetrunnerDictionary({
 function PokemonDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 PokemonDictionary.prototype = new Dictionary({
@@ -2634,7 +2634,7 @@ AutocardAnywhere.games.pokemon.en = new PokemonDictionary({
 function ScrollsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ScrollsDictionary.prototype = new Dictionary({
@@ -2703,7 +2703,7 @@ AutocardAnywhere.games.scrolls.en = new ScrollsDictionary({
 function SolforgeDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 SolforgeDictionary.prototype = new Dictionary({
@@ -2795,7 +2795,7 @@ AutocardAnywhere.games.solforge.en = new SolforgeDictionary({
 function StarrealmsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 StarrealmsDictionary.prototype = new Dictionary({
@@ -2865,7 +2865,7 @@ AutocardAnywhere.games.starrealms.en = new StarrealmsDictionary({
 function WarframeDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 WarframeDictionary.prototype = new Dictionary({
@@ -2939,7 +2939,7 @@ AutocardAnywhere.games.warframe.en = new WarframeDictionary({
 function WowDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 WowDictionary.prototype = new Dictionary({
@@ -3097,7 +3097,7 @@ AutocardAnywhere.games.wow.en = new WowDictionary({
 function XwingDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 XwingDictionary.prototype = new Dictionary({
@@ -3167,7 +3167,7 @@ AutocardAnywhere.games.xwing.en = new XwingDictionary({
 function YugiohDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 YugiohDictionary.prototype = new Dictionary({

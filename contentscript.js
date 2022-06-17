@@ -2,30 +2,6 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
-	// Utility functions
-	levenshtein: function(a, b) {
-        if(a == b)return 0;
-        if(!a.length || !b.length)return b.length || a.length;
-        let len1 = a.length,
-            len2 = b.length,
-            I = 0,
-            i = 0,
-            d = [[0]],
-            c, j, J;
-        while(++i <= len2) d[0][i] = i;
-        i = 0;
-        while(++i <= len1) {
-            J = j = 0;
-            c = a[I];
-            d[i] = [i];
-            while(++j <= len2){
-                d[i][j] = Math.min(d[I][j] + 1, d[i][J] + 1, d[I][J] + (c != b[J]));
-                ++J;
-            };
-            ++I;
-        };
-        return d[len1][len2];
-    },
 	sendMessage(message) {
 		return new Promise((resolve, reject) => {
 			browser.runtime.sendMessage(message, response => resolve(response));
@@ -699,14 +675,23 @@ let AutocardAnywhere = {
 	    		if ((!/^(a|button|input|textarea|script|style)$/i.test(nodes[i].tagName)) &&
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
+	    			(!node.is("span.autocardanywhere")) &&
 	    			(!nodes[i].isContentEditable)
 	    			) {
 			    		// Linkify the new node and then add popups in it.
 						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 						// Run the regex dictionaries over the new node.
-					    node.linkify({use: AutocardAnywhere.pluginNames});
-					    AutocardAnywhere.initialisePopups(nodes[i]);
+					    node.parent().linkify({
+							use: AutocardAnywhere.pluginNames,
+							handleLinks: function(links) {
+								// Initialise card popups for the added links.
+								links.each((index, link) => {
+									AutocardAnywhere.initialisePopups(link.parentNode);
+								});
+							}
+						});
+						
 				}
 			}
 	    });
@@ -767,14 +752,6 @@ let AutocardAnywhere = {
 			browser.runtime.onMessage.addListener(processMessage);
 		}
 	},
-
-	/*
-	test: async function(text) {
-		let data = await AutocardAnywhere.sendMessage({name: 'test', data: text}).then((response) => response.data);
-		//console.log(data);
-		return data;
-	},
-	*/
 	
 	settingsCallback: function(response) {
 		let listType = response.listType;
@@ -803,7 +780,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.popupHeight = response.popupHeight;
 			AutocardAnywhere.fontSize = Math.max(Math.ceil(AutocardAnywhere.popupHeight / 24), 14);
 			AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
-			AutocardAnywhere.openInNewTab = response.newTab;
+			//AutocardAnywhere.openInNewTab = response.newTab;
 			AutocardAnywhere.enablePopups = response.enablePopups;
 			AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
 			AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
@@ -818,7 +795,7 @@ let AutocardAnywhere = {
 			AutocardAnywhere.theme = response.theme;
 
 			AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
-			AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
+			//AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
 
 			AutocardAnywhereSettings.currencies.map(function(currency) {
 				if (currency.value == response.currency) {
@@ -826,7 +803,7 @@ let AutocardAnywhere = {
 				}
 			})
 	
-			
+			/*
 			AutocardAnywhere.ignoredCards = response.ignoredCards;
 			AutocardAnywhere.ignoreList = {};
 			if (response.ignoredCards !== undefined) {
@@ -842,6 +819,7 @@ let AutocardAnywhere = {
 			}
 			// Always ignore the card "Ow"
 			AutocardAnywhere.ignoreList['ow'] = 1;
+			*/
 			
 			
 			// Generate css based on what link styles the user has set, and inject it into the page
@@ -854,6 +832,7 @@ let AutocardAnywhere = {
 				response.linkStyleDashed
 			);
 
+			
 			// Build an array of dictionaries that are switched on
 			let dictionaries = [];
 
@@ -883,9 +862,8 @@ let AutocardAnywhere = {
 					dictionaries.push([dictionary.game, dictionary.language]);
 				}
 			}
-
+			
 			// Now load all dictionaries
-			/*
 			let pluginFunctions = {};
 			AutocardAnywhere.pluginNames = [];
 			pluginFunctions['background'] = function(text) {
@@ -893,107 +871,8 @@ let AutocardAnywhere = {
 			};
 			AutocardAnywhere.pluginNames.push('background');
 
-			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
-			if (AutocardAnywhere.forceLoad) {
-				AutocardAnywhere.contextMenuClick();
-			}
-			// else run on the whole page
-			else {
-				// Replace existing card links
-				if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
-				// Setup the linkify plugin, then run it
-				$.extend($.fn.linkify.plugins, pluginFunctions);
-				$('body').linkify({use: AutocardAnywhere.pluginNames});
-				// Initialise card popups for the base document
-				AutocardAnywhere.initialisePopups(document.body);
-
-				// Setup the mutation observer to pickup any changes to the DOM
-				if (typeof(MutationObserver) !== 'undefined') {
-					AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-					AutocardAnywhere.observeDomChanges();
-				}
-			}
-
-			*/
 			AutocardAnywhere.games.load(dictionaries, function(result) {
 				AutocardAnywhere.dictionaries = result;
-
-				let pluginFunctions = {};
-				AutocardAnywhere.pluginNames = [];
-				
-				// Card names enclosed in [[]]
-				if (AutocardAnywhere.fuzzyLookup) {
-					pluginFunctions['bracketed'] = function(text) {
-						return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
-							// Do a fuzzy lookup by name in all dictionaries
-							for (let i in AutocardAnywhere.dictionaries) {
-								let dictionary = AutocardAnywhere.dictionaries[i];
-								let cards = dictionary.fuzzyLookup(name);
-								if (cards.length > 0) {
-									return dictionary.createLink(dictionary, cards[0], name, null, null, true);
-								}
-							}
-							return match;
-						});
-					};
-					AutocardAnywhere.pluginNames.push('bracketed');
-				}
-				
-				// Standard card sets
-				dictionaries.map(function(dictionary) {
-					let dictionaryName = dictionary[0] + dictionary[1];
-					pluginFunctions[dictionaryName] = function(text) {
-						return AutocardAnywhere.dictionaries[dictionaryName].run(text);
-					};
-					AutocardAnywhere.pluginNames.push(dictionaryName);
-				});
-
-				// Custom nickname list
-				if (response.customNicknames && (response.customNicknames != '')) {
-					if (response.customNicknames.indexOf(';') > -1) {
-						response.customNicknames = response.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
-					}
-					let customNicknames = {};
-					let customNicknameRE = '(';
-					response.customNicknames.split('||').map(function(x) {
-						let nickname = x.split('|');
-						if (nickname.length == 3) {
-							if (AutocardAnywhere.dictionaries[nickname[0]]) {
-								customNicknames[nickname[1].toLowerCase()] = {
-									dictionary: nickname[0],
-									nickname: nickname[1],
-									fullname: nickname[2]
-								};
-								customNicknameRE += nickname[1] + '|';
-							}
-						}
-					});
-
-					if (customNicknameRE.length > 1) {
-						customNicknameRE = customNicknameRE.slice(0,-1);
-					}
-					customNicknameRE += ')';
-
-					if (customNicknameRE != '()') {
-						customNicknameRE = "([^a-zA-Z_0-9-'])" + customNicknameRE + "(?=[^a-zA-Z_0-9-'])";
-						pluginFunctions['nicknames'] = function(text) {
-							return text.replace(new RegExp(customNicknameRE, "gi"), function(match, f, s) {
-								let nickname = customNicknames[s.toLowerCase()];
-								if (!nickname) {return match}
-								let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
-								let card = dictionary.findCard(nickname.fullname);
-								if ((!card) || (AutocardAnywhere.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()])) {return match}
-								if (response.expandNicknames) {
-									return f + dictionary.createLink(dictionary, card, nickname.fullname);
-								}
-								else {
-									return f + dictionary.createLink(dictionary, card, nickname.nickname);
-								}
-							});
-						};
-						AutocardAnywhere.pluginNames.push('nicknames');
-					}
-				}
 
 				// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
 				if (AutocardAnywhere.forceLoad) {
@@ -1003,17 +882,22 @@ let AutocardAnywhere = {
 				else {
 					// Replace existing card links
 					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
+
 					// Setup the linkify plugin, then run it
 					$.extend($.fn.linkify.plugins, pluginFunctions);
-					$('body').linkify({use: AutocardAnywhere.pluginNames});
-					// Initialise card popups for the base document
-					AutocardAnywhere.initialisePopups(document.body);
+					$('body').linkify({
+						use: AutocardAnywhere.pluginNames,
+						handleLinks: function(linkedNodes) {
+							// Initialise card popups for the base document
+							AutocardAnywhere.initialisePopups(document.body);
 
-					// Setup the mutation observer to pickup any changes to the DOM
-					if (typeof(MutationObserver) !== 'undefined') {
-						AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-						AutocardAnywhere.observeDomChanges();
-					}
+							// Setup the mutation observer to pickup any changes to the DOM
+							if (typeof(MutationObserver) !== 'undefined') {
+								AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+								AutocardAnywhere.observeDomChanges();
+							}
+						}
+					});
 				}
 			});
 			AutocardAnywhere.loaded = true;
@@ -1025,6 +909,20 @@ let AutocardAnywhere = {
 }
 
 if (!AutocardAnywhereSettings.isBookmarklet) {
+	function connect() {
+		//console.log('(re)connecting...');
+		AutocardAnywhere.persistentPort = chrome.runtime.connect({name: 'autocardanywhere'});
+		AutocardAnywhere.persistentPort.onDisconnect.addListener(connect);
+		/*
+		AutocardAnywhere.persistentPort.onMessage.addListener(msg => {
+			console.log('received', msg, 'from bg');
+		});
+		*/
+		//AutocardAnywhere.persistentPort.postMessage({'data': 'ping'});
+	}
+	connect();
+
+
 	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
 	// Setup handler for context menu item click
 	AutocardAnywhere.initialiseContextMenu();
