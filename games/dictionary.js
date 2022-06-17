@@ -7,7 +7,7 @@ function Dictionary(config) {
 
 Dictionary.prototype.load = function(callback) {
 	let dictionary = this;
-	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.settings, function(data) {
+	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options, function(data) {
 		dictionary.settings = data;
 		callback(dictionary);
 	});
