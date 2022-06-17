@@ -33,7 +33,7 @@ function isDefined(value) {
 	return true;
 }
 
-function loadSettings(prefix, settings, callback) {
+function loadSettings(prefix, settings) {
 	return new Promise((resolve, reject) => {
 		// Load specified settings
 		let result = {};
