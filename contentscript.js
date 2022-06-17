@@ -7,41 +7,43 @@ let AutocardAnywhere = {
 			browser.runtime.sendMessage(message, response => resolve(response));
 		});
 	},
-	ajax: function(url, callback) {
-		// Performs an ajax call in the manner accepted by each browser.
-		if (AutocardAnywhereSettings.isBookmarklet) {
-			let xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState==4) {
-				    callback(xmlhttp.response);
+	ajax: function(url) {
+		return new Promise((resolve, reject) => {
+			// Performs an ajax call in the manner accepted by each browser.
+			if (AutocardAnywhereSettings.isBookmarklet) {
+				let xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState==4) {
+						resolve(xmlhttp.response);
+					} 
 				} 
-			} 
-			xmlhttp.open("GET", url, true); 
-			xmlhttp.send();
-		}
-		else if (AutocardAnywhereSettings.isSafari) {
-			function getResponse(event) {
-				if ((event.name != "getFileCallback") || (event.message.url != url)) {return}
-				callback(event.message.data);
+				xmlhttp.open("GET", url, true); 
+				xmlhttp.send();
 			}
-			safari.self.addEventListener("message", getResponse, false);
-			safari.self.tab.dispatchMessage("getFile", {'url': url});
-		}
-		else { // Chrome, Opera, Firefox or Edge
-			/*
-			function messageReceived(response) {
-				if (response.url != url) {return}
-				AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
-				callback(response.data);
+			else if (AutocardAnywhereSettings.isSafari) {
+				function getResponse(event) {
+					if ((event.name != "getFileCallback") || (event.message.url != url)) {return}
+					resolve(event.message.data);
+				}
+				safari.self.addEventListener("message", getResponse, false);
+				safari.self.tab.dispatchMessage("getFile", {'url': url});
 			}
-			AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
-			AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
-			*/
+			else { // Chrome, Opera, Firefox or Edge
+				/*
+				function messageReceived(response) {
+					if (response.url != url) {return}
+					AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
+					resolve(response.data);
+				}
+				AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
+				AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
+				*/
 
-			AutocardAnywhere.sendMessage({'name': 'getFile', 'url': url}).then((response) => {
-				callback(response.data);
-			});
-		}
+				AutocardAnywhere.sendMessage({'name': 'getFile', 'url': url}).then((response) => {
+					resolve(response.data);
+				});
+			}
+		});
 	},
 	parser: new DOMParser(),
 	stripHtml: function(html) {
@@ -334,17 +336,18 @@ let AutocardAnywhere = {
 						pricesEnabled = dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
 						if (pricesEnabled) { // An element will only be returned if enablePrices is set on the dictionary
 							if (content.find('.autocardanywhere-prices').length == 0) {
-								AutocardAnywhere.ajax('exchangeRate', function(exchangeRate) {
-									// Get the card price from the location specified in the dictionary...
-									AutocardAnywhere.ajax(
-										AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary),
-										function(response) {
-											// Set the content of any matching price divs upon successful retrieval
-											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
-											checkIfLoadComplete();
-										}
-									);
-								});
+								AutocardAnywhere.ajax('exchangeRate').then(
+									function(exchangeRate) {
+										// Get the card price from the location specified in the dictionary...
+										AutocardAnywhere.ajax(AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary)).then(
+											function(response) {
+												// Set the content of any matching price divs upon successful retrieval
+												$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
+												checkIfLoadComplete();
+											}
+										);
+									}
+								);
 							}
 						}
 
@@ -361,9 +364,8 @@ let AutocardAnywhere = {
 
 								// Get the extra info data from the configured source(s)
 								dictionary.extraInfo.map(function(source) {
-									AutocardAnywhere.ajax(
-										// Get the source url and interpolate any card data required
-										AutocardAnywhereSettings.format(source.url, card, dictionary), 
+									// Get the source url and interpolate any card data required
+									AutocardAnywhere.ajax(AutocardAnywhereSettings.format(source.url, card, dictionary)).then(
 										function(response) {
 											source.sections.map(function(section) {
 												// Set the content of any matching divs upon successful retrieval
