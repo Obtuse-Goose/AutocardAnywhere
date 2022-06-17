@@ -740,14 +740,16 @@ else { // Chrome, Opera, Firefox or Edge
 
 	// Add the context menu item
 	browser.contextMenus.removeAll(() => {
+		let id = 'autocardanywherecontextmenuitem'
 		let menuItem = browser.contextMenus.create({
-			id: 'autocardanywherecontextmenuitem',
+			id: id,
 			title: 'AutocardAnywhere Lookup',
 			contexts: ["selection"]
 		});
-		menuItem.onClicked = function(info, tab) {
+		browser.contextMenus.onClicked.addListener(function(info, tab) {
+			if (info.menuItemId != id) return;
 			browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
-		};
+		});
 	});
 
 	// On first install open the options page

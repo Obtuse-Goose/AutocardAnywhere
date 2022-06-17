@@ -85,9 +85,10 @@ let AutocardAnywhere = {
 	replaceSelection: function(element) {
 	    if (window.getSelection && window.getSelection().getRangeAt) {
 	    	let range = window.getSelection().getRangeAt(0);
-	        AutocardAnywhere.initialisePopups(element);
+			let newNode = $.parseHTML(element)[0];
+	        AutocardAnywhere.initialisePopups(newNode);
 	        range.deleteContents();
-	        range.insertNode(element);
+	        range.insertNode(newNode);
 	    }
 	},
 	getURL: function(filename) {
@@ -720,23 +721,25 @@ let AutocardAnywhere = {
 	},
 
 	initialiseContextMenu: function() {
-		function processMessage(message) {
-			if (message.name == 'contextmenuitemclick') { 
-				console.log('contextmenuitemclick');
+		function processMessage(message, sender, sendResponse) {
+			if (message.name == 'contextmenuitemclick') {
 				if (!AutocardAnywhereSettings.isTouchInterface) { // No context menu on touch interfaces
 					AutocardAnywhere.contextMenuClick();
 				}
+				sendResponse({message: "ack"});
 			}
 			else if (message.name == 'enableSite') {
 				// Reload the extension
 				//AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
 				alert("AutocardAnywhere is now enabled on this site.\nLinks will be added to the current page when you next reload.");
+				sendResponse({message: "ack"});
 			}
 			else if (message.name == 'disableSite') {
 				// Remove all links added by AutocardAnywhere
 				$(document.body).find('a.autocardanywhere-link').replaceWith(function() {
 					return $(this).text();
 				});
+				sendResponse({message: "ack"});
 			}
 		}
 

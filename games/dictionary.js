@@ -172,10 +172,6 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 		(linkText ? linkText : ((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match)) + 
 		'</a></span>';
 
-		if (isFuzzy) {
-			console.log(result);
-		}
-
 	return result;
 	
 };
