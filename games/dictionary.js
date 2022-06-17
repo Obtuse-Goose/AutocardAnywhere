@@ -5,7 +5,7 @@ function Dictionary(config) {
 	this.extraInfo = config.extraInfo;
 }
 
-Dictionary.prototype.load = function(callback) {
+Dictionary.prototype.load = function() {
 	return new Promise((resolve, reject) => {
 		let dictionary = this;
 		AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options).then(function(data) {
