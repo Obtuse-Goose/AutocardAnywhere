@@ -156,36 +156,40 @@ AutocardAnywhereSettings = {
 		{'name': 'GBP2', 'value': 'GBP', 'description': 'United Kingdom Pound Sterling', 'locale': 'en'},
 		{'name': 'USD', 'value': 'USD', 'description': 'United States Dollar', 'locale': 'en'}
 	],
-	load: function(prefix, settings, callback) {
-		if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
-			AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
-			let response = {};
-			settings.map(function(setting) {
-				if (setting.name == 'linkLanguages') {
-					response[setting.name] = 'mtg:en:1;';
-				}
-				else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
-					response[setting.name] = false;
-				}
-				else {
-					response[setting.name] = setting.default;
-				}
-			});
-			callback(response);
-		}
-		else if (AutocardAnywhereSettings.isSafari) {
-			let messageID = AutocardAnywhereGuid();
-			function getResponse(event) {
-				if (event.name === messageID) {
-					callback(event.message);
-				}
+	load: function(prefix, settings) {
+		return new Promise((resolve, reject) => {
+			if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
+				AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
+				let response = {};
+				settings.map(function(setting) {
+					if (setting.name == 'linkLanguages') {
+						response[setting.name] = 'mtg:en:1;';
+					}
+					else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
+						response[setting.name] = false;
+					}
+					else {
+						response[setting.name] = setting.default;
+					}
+				});
+				resolve(response);
 			}
-			safari.self.addEventListener("message", getResponse, false);
-			safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': prefix, 'settings': settings});
-		}
-		else { // Chrome, Opera, Firefox or Edge
-			browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
-		}
+			else if (AutocardAnywhereSettings.isSafari) {
+				let messageID = AutocardAnywhereGuid();
+				function getResponse(event) {
+					if (event.name === messageID) {
+						resolve(event.message);
+					}
+				}
+				safari.self.addEventListener("message", getResponse, false);
+				safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': prefix, 'settings': settings});
+			}
+			else { // Chrome, Opera, Firefox or Edge
+				browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, function(response) {
+					resolve(response);
+				});
+			}
+		});
 	},
 	
 	format: function(s, card, dictionary) {

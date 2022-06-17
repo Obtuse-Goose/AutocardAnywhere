@@ -6,10 +6,12 @@ function Dictionary(config) {
 }
 
 Dictionary.prototype.load = function(callback) {
-	let dictionary = this;
-	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options, function(data) {
-		dictionary.settings = data;
-		callback(dictionary);
+	return new Promise((resolve, reject) => {
+		let dictionary = this;
+		AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options).then(function(data) {
+			dictionary.settings = data;
+			resolve(dictionary);
+		});
 	});
 }
 // Utility functions

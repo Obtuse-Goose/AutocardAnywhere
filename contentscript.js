@@ -715,7 +715,7 @@ let AutocardAnywhere = {
 		}
 		else {
 			AutocardAnywhere.forceLoad = true;
-			AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+			AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);
 		}
 	},
 
@@ -873,7 +873,7 @@ let AutocardAnywhere = {
 			};
 			AutocardAnywhere.pluginNames.push('background');
 
-			AutocardAnywhere.games.load(dictionaries, function(result) {
+			AutocardAnywhere.games.load(dictionaries).then(function(result) {
 				AutocardAnywhere.dictionaries = result;
 
 				// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
@@ -925,7 +925,7 @@ if (!AutocardAnywhereSettings.isBookmarklet) {
 	connect();
 
 
-	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);
 	// Setup handler for context menu item click
 	AutocardAnywhere.initialiseContextMenu();
 }
