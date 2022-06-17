@@ -177,29 +177,15 @@ function getExchangeRate(callback) {
 	});
 }
 
-function getFile(url, callback, body) {
+function getFile(url, callback) {
 	if (url == 'exchangeRate') {
 		getExchangeRate(callback);
 		return;
 	}
 
-	if (body) {
-		fetch(url, {
-			method: "POST",
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(body)
-		})
-			.then(response => response.text())
-			.then(callback);
-	}
-	else {
-		fetch(url)
-			.then(response => response.text())
-			.then(callback);
-	}
+	fetch(url)
+    	.then(response => response.text())
+    	.then(callback);
 }
 
 /*
@@ -551,7 +537,7 @@ function load() {
 }
 
 function parse(text, sendResponse) {
-	console.log(text);
+	//console.log(text);
 	load().then( (dictionaries => {
 		// Run all enabled dictionaries
 		dictionaries.map( (dictionary) => {
@@ -667,12 +653,12 @@ function onRequest(request, sender, sendResponse) {
 		if (AutocardAnywhereSettings.isSafari) {
 			getFile(request.message.url, function(response) {
 				request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
-			}, request.body);
+			});
 		}
 		else { // Chrome, Opera, Firefox or Edge
 			getFile(request.url, (response) => {
 				sendResponse({'url': request.url, 'data': response});
-			}, request.body);
+			});
 		}
 	}
 	else if (request.name == "getDictionary") {
