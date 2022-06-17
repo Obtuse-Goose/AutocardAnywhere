@@ -5,7 +5,8 @@ let AutocardAnywhereGuid = function() {
 	    return v.toString(16);
 	});
 };
-let AutocardAnywhereSettings = {
+
+AutocardAnywhereSettings = {
 	// Define some global constants
 	isFirefox: (navigator.userAgent.toLowerCase().indexOf('firefox') > -1),
 	isChrome: (navigator.userAgent.toLowerCase().indexOf('chrome') > -1),

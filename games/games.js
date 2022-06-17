@@ -983,7 +983,7 @@ FabDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		div.appendChild(line);
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let data = JSON.parse(content);
@@ -1860,7 +1860,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
@@ -1961,7 +1961,7 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let cardhoarderLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardhoarderURL, card, dictionary));
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
-	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
+	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.settings.theme];
 
 	if (data.prices) {
 		if (dictionary.settings.enableTcgPrices) {
@@ -2576,7 +2576,7 @@ PokemonDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
@@ -3301,7 +3301,7 @@ YugiohDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
