@@ -1,14 +1,10 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-AutocardAnywhereGuid = function() {
+let AutocardAnywhereGuid = function() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 	    let r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
 	    return v.toString(16);
 	});
 };
-
-var w = document.createElement("canvas").getContext("webgl");
-var d = w && w.getExtension('WEBGL_debug_renderer_info');
-var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
 
 AutocardAnywhereSettings = {
 	// Define some global constants
@@ -19,7 +15,6 @@ AutocardAnywhereSettings = {
 	isEdge: (navigator.userAgent.toLowerCase().indexOf('edge') > -1),
 	isBookmarklet: (typeof(AutocardAnywhereLoader) !== 'undefined'),
 	isTouchInterface: false,//('ontouchstart' in window),
-	isM1: (g.match(/Apple/) && !g.match(/Apple GPU/)),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
 	prefix: 'autocardAnywhere',
 	maxLevenshteinFactor: 1,
@@ -161,46 +156,42 @@ AutocardAnywhereSettings = {
 		{'name': 'GBP2', 'value': 'GBP', 'description': 'United Kingdom Pound Sterling', 'locale': 'en'},
 		{'name': 'USD', 'value': 'USD', 'description': 'United States Dollar', 'locale': 'en'}
 	],
-	load: function(prefix, settings, callback) {
-		if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
-			AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
-			let response = {};
-			settings.map(function(setting) {
-				if (setting.name == 'linkLanguages') {
-					response[setting.name] = 'mtg:en:1;';
-				}
-				else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
-					response[setting.name] = false;
-				}
-				else {
-					response[setting.name] = setting.default;
-				}
-			});
-			callback(response);
-		}
-		else if (AutocardAnywhereSettings.isSafari) {
-			let messageID = AutocardAnywhereGuid();
-			function getResponse(event) {
-				if (event.name === messageID) {
-					callback(event.message);
-				}
+	load: function(prefix, settings) {
+		return new Promise((resolve, reject) => {
+			if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
+				AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
+				let response = {};
+				settings.map(function(setting) {
+					if (setting.name == 'linkLanguages') {
+						response[setting.name] = 'mtg:en:1;';
+					}
+					else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
+						response[setting.name] = false;
+					}
+					else {
+						response[setting.name] = setting.default;
+					}
+				});
+				resolve(response);
 			}
-			safari.self.addEventListener("message", getResponse, false);
-			safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': prefix, 'settings': settings});
-		}
-		else { // Chrome, Opera, Firefox or Edge
-			browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, callback);
-		}
+			else if (AutocardAnywhereSettings.isSafari) {
+				let messageID = AutocardAnywhereGuid();
+				function getResponse(event) {
+					if (event.name === messageID) {
+						resolve(event.message);
+					}
+				}
+				safari.self.addEventListener("message", getResponse, false);
+				safari.self.tab.dispatchMessage('loadSettings', {'id': messageID, 'prefix': prefix, 'settings': settings});
+			}
+			else { // Chrome, Opera, Firefox or Edge
+				browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': settings}, function(response) {
+					resolve(response);
+				});
+			}
+		});
 	},
-	getVersionNumber: function() {
-		if (AutocardAnywhereSettings.isSafari) {
-			return safari.extension.displayVersion;
-		}
-		else if (!AutocardAnywhereSettings.isBookmarklet) { // Chrome, Opera, Firefox or Edge
-			return browser.runtime.getManifest().version;
-		}
-		return '';
-	},
+	
 	format: function(s, card, dictionary) {
 		if (!card || !dictionary) return s;
 		function removeDiacritics(str) {
@@ -220,7 +211,7 @@ AutocardAnywhereSettings = {
 		    return result;
 		}
 		// Work-out which language the card should be displayed in.
-		let language = AutocardAnywhere.settings.popupLanguage;
+		let language = AutocardAnywhere.popupLanguage;
 		if (!language || language == '' || language == 'original') {
 			language = card.language;
 		}
@@ -277,5 +268,45 @@ AutocardAnywhereSettings = {
 			if (url.indexOf(key) >= 0) url = url + value;
 		}
 		return url;
-	}
+	},
+	decodeHTMLEntities: function(text) {
+	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
+	    for (let i in entities) {
+	        text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+	    }
+	    return text;
+	},
+	getVersionNumber: function() {
+		if (AutocardAnywhereSettings.isSafari) {
+			return safari.extension.displayVersion;
+		}
+		else if (!AutocardAnywhereSettings.isBookmarklet) { // Chrome, Opera, Firefox or Edge
+			return browser.runtime.getManifest().version;
+		}
+		return '';
+	},
+	// Utility functions
+	levenshtein: function(a, b) {
+        if(a == b)return 0;
+        if(!a.length || !b.length)return b.length || a.length;
+        let len1 = a.length,
+            len2 = b.length,
+            I = 0,
+            i = 0,
+            d = [[0]],
+            c, j, J;
+        while(++i <= len2) d[0][i] = i;
+        i = 0;
+        while(++i <= len1) {
+            J = j = 0;
+            c = a[I];
+            d[i] = [i];
+            while(++j <= len2){
+                d[i][j] = Math.min(d[I][j] + 1, d[i][J] + 1, d[I][J] + (c != b[J]));
+                ++J;
+            };
+            ++I;
+        };
+        return d[len1][len2];
+    },
 }

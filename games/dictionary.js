@@ -5,11 +5,13 @@ function Dictionary(config) {
 	this.extraInfo = config.extraInfo;
 }
 
-Dictionary.prototype.load = function(callback) {
-	let dictionary = this;
-	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.settings, function(data) {
-		dictionary.settings = data;
-		callback(dictionary);
+Dictionary.prototype.load = function() {
+	return new Promise((resolve, reject) => {
+		let dictionary = this;
+		AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options).then(function(data) {
+			dictionary.settings = data;
+			resolve(dictionary);
+		});
 	});
 }
 // Utility functions
@@ -46,7 +48,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	let result = {};
 	result.match = link[0] || lookup;
 
-	if (AutocardAnywhere.settings.caseSensitive && (result.match != cardname)) {return}
+	if (AutocardAnywhere.caseSensitive && (result.match != cardname)) {return}
 
 	result.cardIDs = link[1];
 	result.isDict = (link[2] == 1);
@@ -57,7 +59,7 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	// and that the ignore dictionary words setting is set
 	// and that the card name is a dictionary word 
 	// and that the card name isn't on the "always link" override list.
-	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict && !AutocardAnywhere.settings.unignoreList[cardname.toLowerCase()]) {return}
+	if (!overrideIgnoreDictionaryWords && dictionary.settings.ignoreDictionaryWords && result.isDict && !AutocardAnywhere.unignoreList[cardname.toLowerCase()]) {return}
 	return result;
 };
 Dictionary.prototype.findCardById = function(cardID, match, isDict) {
@@ -122,7 +124,7 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 	cardname = cardname.toLowerCase();
 	let cards = [];
 	for (let name in this.cardNames) {
-		if (AutocardAnywhere.levenshtein(cardname, name.toLowerCase()) <= AutocardAnywhereSettings.maxLevenshteinFactor) {
+		if (AutocardAnywhereSettings.levenshtein(cardname, name.toLowerCase()) <= AutocardAnywhereSettings.maxLevenshteinFactor) {
 			cards.push(this.findCard(name, true));
 		}
 	}
@@ -130,6 +132,7 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 };
 // Functions called when linkifying the page
 Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, href, cardID, isFuzzy) {
+	/*
 	let anchor = document.createElement("a");
 	anchor.href = href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary));
 	anchor.className = 'autocardanywhere-link';
@@ -141,7 +144,7 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	else {
 		anchor.dataset.name = card.match;
 	}
-	if (AutocardAnywhere.settings.openInNewTab) { anchor.target = '_blank'; }
+	if (AutocardAnywhere.openInNewTab) { anchor.target = '_blank'; }
 	if (isFuzzy) { anchor.dataset.fuzzy = '1'; }
 	if (card.override) { anchor.dataset.override = '1'; }
 	if (linkText) {
@@ -154,6 +157,23 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	let result = document.createElement('span');
 	result.appendChild(anchor);
 	return result;
+	*/
+
+	let result = 
+		'<span class="autocardanywhere"><a href="' + 
+		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
+		'" class="autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : '') + '" ' +
+		'data-dictionary="' + this.game + this.language + '" ' +
+		(cardID ? 'data-multiverseid="' + cardID + '" ' : 'data-name="' + card.match + '" ') +
+		(isFuzzy ? 'data-fuzzy="1" ' : '') +
+		(card.override ? 'data-override="1" ' : '') +
+		(AutocardAnywhere.openInNewTab ? 'target="_blank" ' : '') +
+		'>' + 
+		(linkText ? linkText : ((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match)) + 
+		'</a></span>';
+
+	return result;
+	
 };
 Dictionary.prototype.createLink = function(dictionary, card, linkText, href, cardID, isFuzzy) {
 
@@ -165,18 +185,18 @@ Dictionary.prototype.createLink = function(dictionary, card, linkText, href, car
 	    return text;
 	}
 
-	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy).innerHTML);
+	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy));
 };
 Dictionary.prototype.run = function(text) {
 	let dictionary = this;
 	text = ' ' + text.replace(/\u00a0/g, " ") + ' ';
 	text = text.replace(dictionary.test, function (match, f, s, suffix, t) {
-		if (AutocardAnywhere.settings.ignoreList[s.toLowerCase()]) {return match}
+		if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {return match}
 		
 		// Get the first card in the array
 		let card = dictionary.findCard(s, ((f == '[') && (t == ']')));
 		// If no card was found, or we don't want to link this card then return the text unchanged
-		if ((!card) || (AutocardAnywhere.settings.ignoreList[card.name.toLowerCase()])) {return match}
+		if ((!card) || (AutocardAnywhere.ignoreList[card.name.toLowerCase()])) {return match}
 		
 		return f + dictionary.createLink(dictionary, card);
 	});
@@ -194,21 +214,21 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 
 	let cardDiv = document.createElement("div");
 	cardDiv.className = 'autocardanywhere-loading';
-	cardDiv.style.height = AutocardAnywhere.settings.popupHeight + 'px';
-	cardDiv.style.width = AutocardAnywhere.settings.popupWidth + 'px';
+	cardDiv.style.height = AutocardAnywhere.popupHeight + 'px';
+	cardDiv.style.width = AutocardAnywhere.popupWidth + 'px';
 	let cardImg = document.createElement("img");
-	cardImg.style.height = AutocardAnywhere.settings.popupHeight + 'px';
-	cardImg.style.width = AutocardAnywhere.settings.popupWidth + 'px';
+	cardImg.style.height = AutocardAnywhere.popupHeight + 'px';
+	cardImg.style.width = AutocardAnywhere.popupWidth + 'px';
 	cardImg.dataset.id = card.id + '-' + card.face;
 	//cardImg.style.mixBlendMode = 'multiply';
 
 	if (card.ratio == 'square') {
-		cardDiv.style.width = AutocardAnywhere.settings.popupHeight + 'px';
-		cardImg.style.width = AutocardAnywhere.settings.popupHeight + 'px';
+		cardDiv.style.width = AutocardAnywhere.popupHeight + 'px';
+		cardImg.style.width = AutocardAnywhere.popupHeight + 'px';
 	}
 
-	let overlayWidth = AutocardAnywhere.settings.popupWidth;
-	let overlayHeight = AutocardAnywhere.settings.popupHeight;
+	let overlayWidth = AutocardAnywhere.popupWidth;
+	let overlayHeight = AutocardAnywhere.popupHeight;
 
 	// If we have rotation set at 360 and are using Scryfall as the image target, then change rotation to 90.
 	if ((card.rotate == 360) && (dictionary.settings.imageURL.indexOf('api.scryfall.com') > -1)) {
@@ -217,15 +237,15 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 
 	// Rotation 90 - split cards
 	if (card.rotate == 90) {
-		let left = (AutocardAnywhere.settings.popupHeight - AutocardAnywhere.settings.popupWidth) / 2;
+		let left = (AutocardAnywhere.popupHeight - AutocardAnywhere.popupWidth) / 2;
 		//if (linkCount == 1) {
 			//left += 10;
 		//}
-		let top = (AutocardAnywhere.settings.popupWidth - AutocardAnywhere.settings.popupHeight) / 2;
+		let top = (AutocardAnywhere.popupWidth - AutocardAnywhere.popupHeight) / 2;
 
 		cardDiv.style.marginRight = '5px';
-		cardDiv.style.height = AutocardAnywhere.settings.popupWidth + 'px';
-		cardDiv.style.width = AutocardAnywhere.settings.popupHeight + 'px';
+		cardDiv.style.height = AutocardAnywhere.popupWidth + 'px';
+		cardDiv.style.width = AutocardAnywhere.popupHeight + 'px';
 
 		cardImg.style.transform = "rotate(90deg)";
 		cardImg.style.webkitTransform = "rotate(90deg)";
@@ -233,8 +253,8 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		cardImg.style.left = left + 'px';
 		cardImg.style.top = top + 'px';
 
-		overlayWidth = AutocardAnywhere.settings.popupHeight;
-		overlayHeight = AutocardAnywhere.settings.popupWidth;
+		overlayWidth = AutocardAnywhere.popupHeight;
+		overlayHeight = AutocardAnywhere.popupWidth;
 	}
 	// Rotation 180 - flip cards
 	else if (card.rotate == 180) {
@@ -244,20 +264,20 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	// Rotation 360 - Plane or Phenomenon
 	else if (card.rotate == 360) {
 		cardDiv.style.marginRight = '5px';
-		cardDiv.style.height = AutocardAnywhere.settings.popupWidth + 'px';
-		cardDiv.style.width = AutocardAnywhere.settings.popupHeight + 'px';
+		cardDiv.style.height = AutocardAnywhere.popupWidth + 'px';
+		cardDiv.style.width = AutocardAnywhere.popupHeight + 'px';
 
-		cardImg.style.height = AutocardAnywhere.settings.popupWidth + 'px';
-		cardImg.style.width = AutocardAnywhere.settings.popupHeight + 'px';
+		cardImg.style.height = AutocardAnywhere.popupWidth + 'px';
+		cardImg.style.width = AutocardAnywhere.popupHeight + 'px';
 
-		overlayWidth = AutocardAnywhere.settings.popupHeight;
-		overlayHeight = AutocardAnywhere.settings.popupWidth;
+		overlayWidth = AutocardAnywhere.popupHeight;
+		overlayHeight = AutocardAnywhere.popupWidth;
 	}
 	cardDiv.appendChild(cardImg);
 
 	// If the extra info setting is enabled and this game type has extra info sources defined
 	let extraInfoDiv = '';
-	if (AutocardAnywhere.settings.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0)) {
+	if (AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0)) {
 		let extraInfoDiv = document.createElement("div");
 		let textBoxHeight = overlayHeight - 43;
 
@@ -279,9 +299,9 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 		if (dictionary.settings.extraInfoBorderRadius) {
 			extraInfoDiv.style.borderRadius = dictionary.settings.extraInfoBorderRadius + 'px';
 		}
-		extraInfoDiv.style.fontSize = AutocardAnywhere.settings.fontSize + 'px';
+		extraInfoDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
 		//extraInfoDiv.style.fontFamily = AutocardAnywhereSettings.font;
-		extraInfoDiv.style.lineHeight = AutocardAnywhere.settings.lineHeight + 'px';
+		extraInfoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 		extraInfoDiv.style.left = '0px';
 		extraInfoDiv.style.top = '0px';
 
@@ -301,8 +321,8 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 				sourceButton.style.border = '3px solid #4A6594';
 				sourceButton.style.color = '#ffffff';
 				//sourceButton.style.fontFamily = AutocardAnywhereSettings.font;
-				sourceButton.style.fontSize = AutocardAnywhere.settings.fontSize + 'px';
-				sourceButton.style.lineHeight = AutocardAnywhere.settings.lineHeight + 'px';
+				sourceButton.style.fontSize = AutocardAnywhere.fontSize + 'px';
+				sourceButton.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 				sourceButton.style.float = 'left';
 				sourceButton.style.width = buttonWidth + '%';
 				sourceButton.style.textTransform = 'none';
@@ -320,8 +340,8 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 				infoDiv.className = 'autocardanywhere-data-section autocardanywhere-' + section.name;
 				infoDiv.style.color = '#ffffff';
 				//infoDiv.style.fontFamily = AutocardAnywhereSettings.font;
-				infoDiv.style.fontSize = AutocardAnywhere.settings.fontSize + 'px';
-				infoDiv.style.lineHeight = AutocardAnywhere.settings.lineHeight + 'px';
+				infoDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
+				infoDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 				infoDiv.style.float = 'left';
 				infoDiv.style.textTransform = 'none';
 				infoDiv.style.height = textBoxHeight + 'px';
@@ -354,7 +374,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	if (dictionary.settings.tcgPlayerURL || dictionary.settings.cardmarketURL) {
 		let outerDiv = createOuterPriceDiv();
 		let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices-' + card.id);
-		let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.settings.theme];
+		let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
 		if (dictionary.settings.tcgPlayerURL && dictionary.settings.enableTcgPrices !== false) {
 			let tcgplayerLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.tcgPlayerURL, card, dictionary));
@@ -377,14 +397,14 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	return result;
 };
 Dictionary.prototype.formatCurrency = function(value) {
-	let result = value.toLocaleString(AutocardAnywhere.settings.currency.locale, {style: 'currency', currency: AutocardAnywhere.settings.currency.value});
-	if (AutocardAnywhere.settings.currency.symbol) {
+	let result = value.toLocaleString(AutocardAnywhere.currency.locale, {style: 'currency', currency: AutocardAnywhere.currency.value});
+	if (AutocardAnywhere.currency.symbol) {
 		result = result.replace(/[^\d\.]/g, '');
-		if (AutocardAnywhere.settings.currency.suffix && AutocardAnywhere.settings.currency.suffix == 1) {
-			result = result + ' ' + AutocardAnywhere.settings.currency.symbol;
+		if (AutocardAnywhere.currency.suffix && AutocardAnywhere.currency.suffix == 1) {
+			result = result + ' ' + AutocardAnywhere.currency.symbol;
 		}
 		else { // Prefix
-			result = AutocardAnywhere.settings.currency.symbol + result;
+			result = AutocardAnywhere.currency.symbol + result;
 		}
 	}
 	return result;
@@ -393,7 +413,7 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	let dictionary = this;
 	let result = document.createElement("a");
 	result.href = href;
-	if (AutocardAnywhere.settings.openInNewTab) { result.target = "_blank"; }
+	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
 
 	let priceDiv = document.createElement("div");
 	let left = document.createElement("div");
@@ -416,7 +436,7 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	//priceDiv.style.setProperty('background-color', colour, 'important');
 	priceDiv.style.height = '20px';
 	priceDiv.style.marginTop = '2px';
-	priceDiv.style.fontSize = AutocardAnywhere.settings.fontSize + 'px';
+	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
 	priceDiv.style.lineHeight = '20px';
 	priceDiv.style.overflow = 'hidden';
 	priceDiv.style.whiteSpace = 'nowrap';
@@ -433,10 +453,10 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	priceDiv.style.borderColor = colour;
 	priceDiv.style.borderWidth = '1px';
 	priceDiv.style.borderStyle = 'solid';
-	//priceDiv.style.fontFamily = AutocardAnywhereSettings.settings.priceFont;
+	//priceDiv.style.fontFamily = AutocardAnywhereSettings.priceFont;
 	
 	$(priceDiv).on('mouseover', function() {
-		this.style.backgroundColor = AutocardAnywhereSettings.themes[AutocardAnywhere.settings.theme]['mouseover'];
+		this.style.backgroundColor = AutocardAnywhereSettings.themes[AutocardAnywhere.theme]['mouseover'];
 		//this.style.color = '#000000';
 	});
 	$(priceDiv).on('mouseout', function() {
@@ -447,13 +467,46 @@ Dictionary.prototype.createPriceElement = function(href, text, price, colour) {
 	result.appendChild(priceDiv);
 	return result;
 };
+/*
+Dictionary.prototype.createPriceElement = function(href, text1, text2, colour, position, count) {
+	let result = document.createElement("a");
+	result.href = href;
+	if (AutocardAnywhere.openInNewTab) { result.target = "_blank"; }
+
+	let priceDiv = document.createElement("div");
+	priceDiv.appendChild(document.createTextNode(text1));
+	priceDiv.appendChild(document.createElement('br'));
+	priceDiv.appendChild(document.createTextNode(text2));
+	priceDiv.style.setProperty('background-color', colour, 'important');
+	priceDiv.style.marginTop = '5px';
+	priceDiv.style.fontSize = AutocardAnywhere.fontSize + 'px';
+	priceDiv.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
+	priceDiv.style.textAlign = 'center';
+	priceDiv.style.color = '#414DD3';
+	priceDiv.style.fontWeight = 'normal';
+	priceDiv.style.float = 'left';
+	priceDiv.style.width = (Math.floor(100 / count)) + '%';
+	priceDiv.style.padding = '5px 0 5px 0';
+	priceDiv.style.borderRadius = count == 1 ? '10px' : (position == 'left' ? '10px 0 0 10px' : (position == 'right' ? '0 10px 10px 0' : ''));
+	priceDiv.style.fontFamily = AutocardAnywhereSettings.font;
+	priceDiv.addEventListener('mouseover', function() {
+		this.style.textDecoration="underline";
+	});
+	priceDiv.addEventListener('mouseout', function() {
+		this.style.textDecoration="none";
+	});
+
+	result.appendChild(priceDiv);
+	return result;
+};
+*/
 Dictionary.prototype.parsePriceData = function(card, response, currencyExchangeRate) {
 	let dictionary = this;
 	let xmlDoc = $.parseXML(response);
 	let dollarExchangeRate = currencyExchangeRate.dollarExchangeRate;
 	let priceLinkHref = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.tcgPlayerURL, card, dictionary));
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
-	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.settings.theme];
+	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
 	if (xmlDoc && xmlDoc.getElementsByTagName("lowprice")[0]) {
 		let lowPrice = dollarExchangeRate * AutocardAnywhere.stripHtml(xmlDoc.getElementsByTagName("lowprice")[0].childNodes[0].nodeValue);
@@ -515,7 +568,7 @@ Dictionary.prototype.parseExtraInfo = function(content, section, card) {
 
 	// Parses the returned content using the specified regexp
 	let result = document.createElement("div");
-	let width = AutocardAnywhere.settings.popupWidth - 20;
+	let width = AutocardAnywhere.popupWidth - 20;
 	result.style.setProperty('width', width + 'px');
 	
 	if (!content) {

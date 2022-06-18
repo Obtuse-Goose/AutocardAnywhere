@@ -1,21 +1,26 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-let dictionaries = [];
+//let dictionaries = [];
+//let enabledDictionaries = [];
 
-/*
 try {
-	importScripts('settings.js');
+	if (typeof importScripts != 'undefined') importScripts(
+		'settings.js', 
+		"games/dictionary.js", 
+		"games/games.js"
+	);
 }
 catch (e) {
 	console.error(e);
 }
-*/
+
 
 function getItem(key) {
-	return window.localStorage.getItem(key);
+	//return window.localStorage.getItem(key);
+	return;
 }
 
 function setItem(key, value) {
-	window.localStorage.removeItem(key);
+	//window.localStorage.removeItem(key);
 	//window.localStorage.setItem(key, value);
 	let data = {};
 	data[key] = value;
@@ -28,72 +33,74 @@ function isDefined(value) {
 	return true;
 }
 
-function loadSettings(prefix, settings, callback) {
-	// Load specified settings
-	let result = {};
-	result.versionNumber = AutocardAnywhereSettings.getVersionNumber();
+function loadSettings(prefix, settings) {
+	return new Promise((resolve, reject) => {
+		// Load specified settings
+		let result = {};
+		result.versionNumber = AutocardAnywhereSettings.getVersionNumber();
 
-	let requestedSettings = [];
-	settings.map(function(setting) {
-		requestedSettings.push(prefix + setting.name);
-	});
-
-	browser.storage.sync.get(requestedSettings, function(data) {
+		let requestedSettings = [];
 		settings.map(function(setting) {
-			let value = isDefined(data[prefix + setting.name]) ? data[prefix + setting.name] : getItem(prefix + setting.name);
-			if (setting.resetToDefault) {
-				result[setting.name] = setting.default;
-				setItem(prefix + setting.name, setting.default);
-			}
-			else if (setting.type == 'boolean') {
-				if (value == true) {
-					result[setting.name] = true;
-				}
-				else if (value == false) {
-					result[setting.name] = false;
-				}
-				else {
-					result[setting.name] = setting.default;
-				}
-			}
-			else if (setting.type == 'integer') {
-				if(/^\d+$/.test(value)) {
-				   result[setting.name] = parseInt(value);
-				}
-				else {
-					result[setting.name] = setting.default;
-				}
-			}
-			else if (setting.type == 'float') {
-				if(/^\d*\.?\d+$/.test(value)) {
-					result[setting.name] = parseFloat(value);
-				}
-				else {
-					result[setting.name] = setting.default;
-				}
-			}
-			else {
-				//let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
-				value = isDefined(value) ? value : setting.default;
-	
-				// Rewrite defunct link targets
-				if (setting.name == 'linkTarget') {
-					if (value == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
-						value = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
-					}
-					else if (value == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
-						value = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
-					}
-				}
-				result[setting.name] = value;
-			}
+			requestedSettings.push(prefix + setting.name);
 		});
 
-		// This next line is a temporary addition to allow a transition to using the storage API without losing user settings.
-		// To be removed once there's been enough time for everyone to upgrade.
-		saveSettings(prefix, result, false);
+		browser.storage.sync.get(requestedSettings, function(data) {
+			settings.map(function(setting) {
+				let value = isDefined(data[prefix + setting.name]) ? data[prefix + setting.name] : getItem(prefix + setting.name);
+				if (setting.resetToDefault) {
+					result[setting.name] = setting.default;
+					setItem(prefix + setting.name, setting.default);
+				}
+				else if (setting.type == 'boolean') {
+					if (value == true) {
+						result[setting.name] = true;
+					}
+					else if (value == false) {
+						result[setting.name] = false;
+					}
+					else {
+						result[setting.name] = setting.default;
+					}
+				}
+				else if (setting.type == 'integer') {
+					if(/^\d+$/.test(value)) {
+					result[setting.name] = parseInt(value);
+					}
+					else {
+						result[setting.name] = setting.default;
+					}
+				}
+				else if (setting.type == 'float') {
+					if(/^\d*\.?\d+$/.test(value)) {
+						result[setting.name] = parseFloat(value);
+					}
+					else {
+						result[setting.name] = setting.default;
+					}
+				}
+				else {
+					//let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
+					value = isDefined(value) ? value : setting.default;
+		
+					// Rewrite defunct link targets
+					if (setting.name == 'linkTarget') {
+						if (value == 'http://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>') {
+							value = 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>';
+						}
+						else if (value == 'https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=<id>') {
+							value = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]';
+						}
+					}
+					result[setting.name] = value;
+				}
+			});
 
-		callback(result);
+			// This next line is a temporary addition to allow a transition to using the storage API without losing user settings.
+			// To be removed once there's been enough time for everyone to upgrade.
+			//saveSettings(prefix, result, false);
+
+			resolve(result);
+		});
 	});
 }
 
@@ -129,64 +136,52 @@ function openURL(url) {
 	}
 }
 
-function getExchangeRate(callback) {
-	loadSettings(AutocardAnywhereSettings.prefix, [
-		{'name': 'currency', 'type': 'string', 'default': 'USD'},
-		{'name': 'dollarExchangeRate', 'type': 'float', 'default': 1.0},
-		{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
-		{'name': 'exchangeRateLastUpdatedv4', 'type': 'string', 'default': ''}
-	], function(currencyInfo) {
+function getExchangeRate() {
+	return new Promise((resolve, reject) => {
+		loadSettings(AutocardAnywhereSettings.prefix, [
+			{'name': 'currency', 'type': 'string', 'default': 'USD'},
+			{'name': 'dollarExchangeRate', 'type': 'float', 'default': 1.0},
+			{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
+			{'name': 'exchangeRateLastUpdatedv4', 'type': 'string', 'default': ''}
+		]).then(function(currencyInfo) {
 
-		let now = new Date();
-		let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
-		let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
-		updateRequired = ((now - lastUpdate) > updateInterval);
+			let now = new Date();
+			let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
+			let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
+			updateRequired = ((now - lastUpdate) > updateInterval);
 
-		if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
-			callback(currencyInfo);
-		}
-
-		// Update is required
-		getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
-			data = JSON.parse(data);
-			let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
-			if (dollarExchangeRate) {
-
-				getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
-					data = JSON.parse(data);
-					let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
-					if (euroExchangeRate) {
-						let exchangeRate = {
-							dollarExchangeRate: dollarExchangeRate,
-							euroExchangeRate: euroExchangeRate,
-							exchangeRateLastUpdatedv4: now
-						};
-						saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
-						callback(exchangeRate);
-					}
-				});
+			if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
+				resolve(currencyInfo);
 			}
+
+			// Update is required
+			getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+				data = JSON.parse(data);
+				let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
+				if (dollarExchangeRate) {
+
+					getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+						data = JSON.parse(data);
+						let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
+						if (euroExchangeRate) {
+							let exchangeRate = {
+								dollarExchangeRate: dollarExchangeRate,
+								euroExchangeRate: euroExchangeRate,
+								exchangeRateLastUpdatedv4: now
+							};
+							saveSettings(AutocardAnywhereSettings.prefix, exchangeRate, true);
+							resolve(exchangeRate);
+						}
+					});
+				}
+			});
 		});
 	});
 }
 
-function getFile(url, callback, body) {
+function getFile(url, callback) {
 	if (url == 'exchangeRate') {
-		getExchangeRate(callback);
-		return;
-	}
-
-	if (body) {
-		fetch(url, {
-			method: "POST",
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(body)
-		})
-			.then(response => response.text())
-			.then(callback);
+		getExchangeRate().then(callback);
 	}
 	else {
 		fetch(url)
@@ -327,70 +322,301 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 }
 */
 
-function getDictionary(request, callback) {
-	let gameName = request.game;
-	let gameLanguage = request.language;
+/*
+function getDictionaryFromDisk(dictionary) {
+	//console.log(request);
+	return new Promise((resolve, reject) => {
+		//let dictionary = AutocardAnywhere.games[request.game][request.language];
+		//console.log(dictionary);
 
-	checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
+		getFile(getURL("games/" + dictionary.game + "/" + dictionary.game + "-data.json"), function(response) {
+			let gameData = JSON.parse(response);
+			getFile(getURL("games/" + dictionary.game + "/" + dictionary.language + "-data.json"), function(response) {
+				let languageData = JSON.parse(response);
+				//let decoded = JSON.parse(languageData);
+				//console.log(dictionary.game + dictionary.language + ' - found data on disk, version ' + decoded.version);
+				console.log(dictionary.game + dictionary.language + ' - found data on disk');
 
-	browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
-		if (dictionaries[gameName + gameLanguage]) {
-			console.log(gameName + gameLanguage + ' - found data in memory');
-			
-			callback({
-				'game': gameName,
-				'language': gameLanguage,
-				'gameData': dictionaries[gameName + gameLanguage].gameData,
-				'languageData': dictionaries[gameName + gameLanguage].languageData
+				dictionary.test = languageData.test;
+				dictionary.cardNames = languageData.cardNames;
+				dictionary.cardData = gameData.cardData;
+
+				resolve(dictionary);
 			});
-		}
-		
-		else if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
-			console.log(gameName + gameLanguage + ' - found data in storage.local');
-			//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
-			//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
-			dictionaries[gameName + gameLanguage] = {
-				'gameData': storageResponse[gameName],
-				'languageData': storageResponse[gameName + gameLanguage]
-			};
-			callback({
-				'game': gameName,
-				'language': gameLanguage,
-				'gameData': storageResponse[gameName],
-				'languageData': storageResponse[gameName + gameLanguage]
-			});
-		}
-		
-		else {
-			getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
-				let gameData = response;
-				getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
-					let languageData = response;
-					//let decoded = JSON.parse(languageData);
-					//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
-					console.log(gameName + gameLanguage + ' - found data on disk');
-			
-					dictionaries[gameName + gameLanguage] = {
-						'gameData': gameData,
-						'languageData': languageData
-					};
-					callback({
-						'game': request.game,
-						'language': request.language,
-						'gameData': gameData,
-						'languageData': languageData
+		});
+	});
+}
+*/
+
+function getDictionary(dictionary) {
+	return new Promise((resolve, reject) => {
+		let gameName = dictionary.game;
+		let gameLanguage = dictionary.language;
+
+		//let dictionaries = [];
+
+		checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
+
+		browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
+			/*
+			if (dictionaries[gameName + gameLanguage]) {
+				console.log(gameName + gameLanguage + ' - found data in memory');
+				
+				resolve(dictionaries[gameName + gameLanguage]);
+			}
+			else 
+			*/
+			if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
+				console.log(gameName + gameLanguage + ' - found data in storage.local');
+				//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
+				//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
+				/*
+				dictionaries[gameName + gameLanguage] = {
+					'game': gameName,
+					'language': gameLanguage,
+					'gameData': storageResponse[gameName],
+					'languageData': storageResponse[gameName + gameLanguage]
+				};
+				*/
+				resolve({
+					'game': gameName,
+					'language': gameLanguage,
+					'gameData': storageResponse[gameName],
+					'languageData': storageResponse[gameName + gameLanguage]
+				});
+			}
+			else {
+				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
+					let gameData = response;
+					getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
+						let languageData = response;
+						//let decoded = JSON.parse(languageData);
+						//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
+						console.log(gameName + gameLanguage + ' - found data on disk');
+				
+						/*
+						dictionaries[gameName + gameLanguage] = {
+							'game': gameName,
+							'language': gameLanguage,
+							'gameData': gameData,
+							'languageData': languageData
+						};
+						*/
+						resolve({
+							'game': gameName,
+							'language': gameLanguage,
+							'gameData': gameData,
+							'languageData': languageData
+						});
 					});
 				});
-			});
-		}
+			}
+		});
 	});
 }
 
-/*
-// Handle persistent connections - for getting files on Chrome
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function load() {
+	return new Promise(async (resolve, reject) => {
+		while (AutocardAnywhere.loading) {
+			await sleep(100);
+		}
+		if (AutocardAnywhere.loaded) {
+			//console.log('already loaded');
+			resolve(AutocardAnywhere.dictionaries);
+			return;
+		}
+		AutocardAnywhere.loaded = 0;
+		AutocardAnywhere.loading = 1;
+		console.log('AutocardAnywhere loading');
+
+		AutocardAnywhere.dictionaries = [];
+		let dictionaries = [];
+
+		loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(async function(settings) {
+			AutocardAnywhere.openInNewTab = settings.newTab;
+			AutocardAnywhere.fuzzyLookup = settings.fuzzyLookup;
+			// Ignore and unignore lists
+			AutocardAnywhere.ignoredCards = settings.ignoredCards;
+			AutocardAnywhere.ignoreList = {};
+			if (settings.ignoredCards !== undefined) {
+				settings.ignoredCards.split('|').map(function(ignoredCard) {
+					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
+				});
+			}
+			AutocardAnywhere.unignoreList = {};
+			if (settings.unignoredCards !== undefined) {
+				settings.unignoredCards.split('|').map(function(unignoredCard) {
+					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
+				});
+			}
+			// Always ignore the card "Ow"
+			AutocardAnywhere.ignoreList['ow'] = 1;
+			
+			// Enabled card sets
+			let dictionariesHash = {};
+			AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
+				dictionariesHash[dictionary.game + dictionary.language] = dictionary;
+			});
+
+			// First load all the dictionaries specified in the user's settings
+			settings.linkLanguages.split(';').map(function(x) {
+				let linkLanguage = x.split(':');
+				if (linkLanguage.length == 3) {
+					let game = linkLanguage[0];
+					let language = linkLanguage[1];
+					if (linkLanguage[2] == '1') {
+						dictionaries.push({game: game, language: language});
+					}
+					delete dictionariesHash[game + language];
+				}
+			});
+
+			// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
+			// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
+			for (dictionaryName in dictionariesHash) {
+				let dictionary = dictionariesHash[dictionaryName];
+				if (dictionary.default == 1) {
+					dictionaries.push({game: dictionary.game, language: dictionary.language});
+				}
+			}
+
+			for (let i=0; i<dictionaries.length; i++) {
+				//let data = await getDictionaryFromDisk(dictionaries[i]).then( (data) => data);
+				let data = await getDictionary(dictionaries[i]).then( (data) => data);
+				//data.gameData = JSON.parse(data.gameData);
+				data.languageData = JSON.parse(data.languageData);
+				let dictionary = AutocardAnywhere.games[dictionaries[i].game][dictionaries[i].language];
+				
+				dictionary.test = new RegExp(data.languageData.test, "gi");
+				dictionary.cardNames = data.languageData.cardNames;
+				dictionary.cardData = JSON.parse(data.gameData).cardData;
+				dictionary.settings = await loadSettings(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, AutocardAnywhere.games[dictionary.game][dictionary.language].options).then( (settings) => settings);
+
+				//console.log(dictionary);
+
+				// Run it to force compilation
+				/*
+				console.log('compiling regex');
+				let text = "Pyromancer Ascension";
+				text = dictionary.run(text);
+				console.log(text);
+				*/
+				
+
+				AutocardAnywhere.dictionaries.push(dictionary);
+			}
+			
+			// Nicknames
+			if (settings.customNicknames && (settings.customNicknames != '')) {
+				if (settings.customNicknames.indexOf(';') > -1) {
+					settings.customNicknames = settings.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
+				}
+				let customNicknames = {};
+				AutocardAnywhere.customNicknameRE = '(';
+				settings.customNicknames.split('||').map(function(x) {
+					let nickname = x.split('|');
+					if (nickname.length == 3) {
+						//if (AutocardAnywhere.dictionaries[nickname[0]]) {
+							customNicknames[nickname[1].toLowerCase()] = {
+								dictionary: nickname[0],
+								nickname: nickname[1],
+								fullname: nickname[2]
+							};
+							AutocardAnywhere.customNicknameRE += nickname[1] + '|';
+						//}
+					}
+				});
+
+				if (AutocardAnywhere.customNicknameRE.length > 1) {
+					AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
+				}
+				AutocardAnywhere.customNicknameRE += ')';
+				AutocardAnywhere.customNicknames = customNicknames;
+			}
+
+			AutocardAnywhere.loaded = 1;
+			AutocardAnywhere.loading = 0;
+			resolve(AutocardAnywhere.dictionaries);
+		});
+	});
+}
+
+function parse(text, sendResponse) {
+	//console.log(text);
+	load().then( (dictionaries => {
+		// Run all enabled dictionaries
+		dictionaries.map( (dictionary) => {
+			text = dictionary.run(text);
+		});
+
+		// Card names enclosed in [[]]
+		if (AutocardAnywhere.fuzzyLookup) {
+			text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+				// Do a fuzzy lookup by name in all dictionaries
+				for (let i in AutocardAnywhere.dictionaries) {
+					let dictionary = AutocardAnywhere.dictionaries[i];
+					let cards = dictionary.fuzzyLookup(name);
+					if (cards.length > 0) {
+						return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+					}
+				}
+				return match;
+			});
+		}
+		
+		// Nicknames
+		if (AutocardAnywhere.customNicknameRE != '()') {
+			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
+				let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
+				if (!nickname) return match;
+				if (!AutocardAnywhere.dictionaries[nickname.dictionary]) return match;
+				let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
+				let card = dictionary.findCard(nickname.fullname);
+				if ((!card) || (AutocardAnywhere.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()])) {return match}
+				if (AutocardAnywhereSettings.settings.expandNicknames) {
+					return f + dictionary.createLink(dictionary, card, nickname.fullname);
+				}
+				else {
+					return f + dictionary.createLink(dictionary, card, nickname.nickname);
+				}
+			});
+		}
+		
+		//console.log(text);
+		sendResponse({data: text});
+	}));
+}
+
+
+
+// Handle persistent connections - keep background alive so that we don't need to reload the regexps on every page.
+function onMessage(msg, port) {
+	//console.log('received', msg, 'from', port.sender);
+	port.postMessage({'data': 'pong'});
+}
+function forceReconnect(port) {
+	deleteTimer(port);
+	port.disconnect();
+}
+function deleteTimer(port) {
+	if (port._timer) {
+		clearTimeout(port._timer);
+		delete port._timer;
+	}
+}
+
 function onConnect(port) {
 	if (port.name != 'autocardanywhere') return;
 
+	port.onMessage.addListener(onMessage);
+	port.onDisconnect.addListener(deleteTimer);
+	port._timer = setTimeout(forceReconnect, 250e3, port);
+	/*
 	port.onMessage.addListener(function(request) {
 		if (request.type == "dictionary") { // Requested a dictionary by name
 			getDictionary(port, request);
@@ -401,44 +627,50 @@ function onConnect(port) {
 			});
 		}
 	});
+	*/
 
 	return true;
 }
-*/
+
 
 // Handle simple requests
 function onRequest(request, sender, sendResponse) {
 	if (request.name == "loadSettings") {
 		if (AutocardAnywhereSettings.isSafari) {
-			loadSettings(request.message.prefix, request.message.settings, function(settings) {
+			loadSettings(request.message.prefix, request.message.settings).then(function(settings) {
 				request.target.page.dispatchMessage(request.message.id, settings);
 			});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			loadSettings(request.prefix, request.settings, sendResponse);
+			loadSettings(request.prefix, request.settings).then(sendResponse);
 		}
 	}
 	else if (request.name == "saveSettings") {
 		if (AutocardAnywhereSettings.isSafari) {
 			saveSettings(request.message.prefix, request.message.settings, true);
+			console.log('unloading');
+			AutocardAnywhere.loaded = false;
 		}
 		else { // Chrome, Opera, Firefox or Edge
 			saveSettings(request.prefix, request.settings, true);
+			console.log('unloading');
+			AutocardAnywhere.loaded = false;
 		}
 	}
 	else if (request.name == "getFile") {
 		if (AutocardAnywhereSettings.isSafari) {
 			getFile(request.message.url, function(response) {
 				request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
-			}, request.body);
+			});
 		}
 		else { // Chrome, Opera, Firefox or Edge
 			getFile(request.url, (response) => {
 				sendResponse({'url': request.url, 'data': response});
-			}, request.body);
+			});
 		}
 	}
 	else if (request.name == "getDictionary") {
+		//console.log(AutocardAnywhere.dictionaries);
 		if (AutocardAnywhereSettings.isSafari) {
 			let gameName = request.message.game;
 			let gameLanguage = request.message.language;
@@ -449,7 +681,7 @@ function onRequest(request, sender, sendResponse) {
 						let language = JSON.parse(response);
 						dictionaries[gameName + gameLanguage] = {
 							'cardData': game.cardData,
-							'test': language.test,
+							'test': '',//language.test,
 							'cardNames': language.cardNames
 						};
 						request.target.page.dispatchMessage(request.message.id, dictionaries[gameName + gameLanguage]);
@@ -462,7 +694,7 @@ function onRequest(request, sender, sendResponse) {
 			}
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			getDictionary(request, sendResponse);
+			getDictionary(request).then(sendResponse);
 		}
 	}
 	else if (request.name == "disableIcon") {
@@ -472,6 +704,9 @@ function onRequest(request, sender, sendResponse) {
 				'tabId': tabs[0].id
 			});
 	    });
+	}
+	else if (request.name == "parse") {
+		parse(request.data, sendResponse);
 	}
 
 	return true;
@@ -496,7 +731,7 @@ if (AutocardAnywhereSettings.isSafari) {
 		}
 	}, false);
 	
-	loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, function(settings) {
+	loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(function(settings) {
 		if (!settings.setupShown) {
 			openURL(safari.extension.baseURI + 'options.html');
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
@@ -507,18 +742,20 @@ else { // Chrome, Opera, Firefox or Edge
 	// Simple messages
 	browser.runtime.onMessage.addListener(onRequest);
 	// Persistent connections
-	//browser.runtime.onConnect.addListener(onConnect);
+	browser.runtime.onConnect.addListener(onConnect);
 
 	// Add the context menu item
 	browser.contextMenus.removeAll(() => {
+		let id = 'autocardanywherecontextmenuitem'
 		let menuItem = browser.contextMenus.create({
-			id: 'autocardanywherecontextmenuitem',
+			id: id,
 			title: 'AutocardAnywhere Lookup',
 			contexts: ["selection"]
 		});
-		menuItem.onClicked = function(info, tab) {
+		browser.contextMenus.onClicked.addListener(function(info, tab) {
+			if (info.menuItemId != id) return;
 			browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
-		};
+		});
 	});
 
 	// On first install open the options page
@@ -527,5 +764,9 @@ else { // Chrome, Opera, Firefox or Edge
 			openURL(browser.runtime.getURL('options.html'));
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
+	});
+
+	load().then(() => {
+		//console.log('loaded');
 	});
 }

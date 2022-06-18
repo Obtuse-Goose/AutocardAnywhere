@@ -2,32 +2,13 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
-	// Utility functions
-	levenshtein: function(a, b) {
-        if(a == b)return 0;
-        if(!a.length || !b.length)return b.length || a.length;
-        let len1 = a.length,
-            len2 = b.length,
-            I = 0,
-            i = 0,
-            d = [[0]],
-            c, j, J;
-        while(++i <= len2) d[0][i] = i;
-        i = 0;
-        while(++i <= len1) {
-            J = j = 0;
-            c = a[I];
-            d[i] = [i];
-            while(++j <= len2){
-                d[i][j] = Math.min(d[I][j] + 1, d[i][J] + 1, d[I][J] + (c != b[J]));
-                ++J;
-            };
-            ++I;
-        };
-        return d[len1][len2];
-    },
-	ajax: function(url, body) {
-		return new Promise(function(resolve) {
+	sendMessage(message) {
+		return new Promise((resolve, reject) => {
+			browser.runtime.sendMessage(message, response => resolve(response));
+		});
+	},
+	ajax: function(url) {
+		return new Promise((resolve, reject) => {
 			// Performs an ajax call in the manner accepted by each browser.
 			if (AutocardAnywhereSettings.isBookmarklet) {
 				let xmlhttp = new XMLHttpRequest();
@@ -45,10 +26,20 @@ let AutocardAnywhere = {
 					resolve(event.message.data);
 				}
 				safari.self.addEventListener("message", getResponse, false);
-				safari.self.tab.dispatchMessage("getFile", {'url': url, 'body' : body});
+				safari.self.tab.dispatchMessage("getFile", {'url': url});
 			}
 			else { // Chrome, Opera, Firefox or Edge
-				browser.runtime.sendMessage({'name': 'getFile', 'url': url, 'body' : body}, (response) => {
+				/*
+				function messageReceived(response) {
+					if (response.url != url) {return}
+					AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
+					resolve(response.data);
+				}
+				AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
+				AutocardAnywhere.persistentPort.postMessage({'type': 'file', 'url': url});
+				*/
+
+				AutocardAnywhere.sendMessage({'name': 'getFile', 'url': url}).then((response) => {
 					resolve(response.data);
 				});
 			}
@@ -76,8 +67,8 @@ let AutocardAnywhere = {
 	createPricesElement: function(className, text) {
 		let result = document.createElement("div");
 		result.style.marginTop = '5px';
-		result.style.fontSize = AutocardAnywhere.settings.fontSize + 'px';
-		result.style.lineHeight = AutocardAnywhere.settings.lineHeight + 'px';
+		result.style.fontSize = AutocardAnywhere.fontSize + 'px';
+		result.style.lineHeight = AutocardAnywhere.lineHeight + 'px';
 		//result.style.fontFamily = AutocardAnywhereSettings.font;
 		//result.style.textAlign = 'center';
 		//result.style.color = '#000000';
@@ -94,9 +85,10 @@ let AutocardAnywhere = {
 	replaceSelection: function(element) {
 	    if (window.getSelection && window.getSelection().getRangeAt) {
 	    	let range = window.getSelection().getRangeAt(0);
-	        AutocardAnywhere.initialisePopups(element);
+			let newNode = $.parseHTML(element)[0];
+	        AutocardAnywhere.initialisePopups(newNode);
 	        range.deleteContents();
-	        range.insertNode(element);
+	        range.insertNode(newNode);
 	    }
 	},
 	getURL: function(filename) {
@@ -122,13 +114,13 @@ let AutocardAnywhere = {
 			safari.self.tab.dispatchMessage('saveSettings', {'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 		}
 		else { // Chrome, Opera, Firefox or Edge
-			browser.runtime.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
+			AutocardAnywhere.sendMessage({'name': 'saveSettings', 'prefix': AutocardAnywhereSettings.prefix, 'settings': settings});
 		}
 	},
 	// Main extension code
 	initialisePopups: function(node) {
 		// Searches node for any autocard anywhere links and adds a popup.
-		if (!AutocardAnywhere.settings.enablePopups) return;
+		if (!AutocardAnywhere.enablePopups) return;
 		
 		function escape(s) {
 			if (!s) {return ''}
@@ -222,10 +214,10 @@ let AutocardAnywhere = {
 				result.appendChild(cardsElement);
 				// If there are multiple cards to display, use a carousel...
 				if (cards.length > 1) {
-					let width = AutocardAnywhere.settings.popupWidth;
+					let width = AutocardAnywhere.popupWidth;
 					cards.map(function(card) {
 						if (card.rotate == 90 || card.rotate == 360) {
-							width = AutocardAnywhere.settings.popupHeight;
+							width = AutocardAnywhere.popupHeight;
 						}
 					});
 					cardsElement.className = 'swiper-wrapper';
@@ -235,11 +227,11 @@ let AutocardAnywhere = {
 					paginationElement.className = 'swiper-pagination';
 					paginationElement.style.position = 'static';
 					paginationElement.style.marginTop = '5px';
-					paginationElement.style.width = AutocardAnywhere.settings.popupWidth;
+					paginationElement.style.width = AutocardAnywhere.popupWidth;
 					result.appendChild(paginationElement);
 				}
 				
-				if (AutocardAnywhere.settings.enableIgnoreCardLink) {
+				if (AutocardAnywhere.enableIgnoreCardLink) {
 					let ignore = document.createElement("a");
 					ignore.href = '#';
 					ignore.style.marginTop = '2px';
@@ -256,7 +248,7 @@ let AutocardAnywhere = {
 							return $(this).text();
 						});
 						// Add the card name to the ignored cards list
-						let newIgnoredCards = AutocardAnywhere.settings.ignoredCards + '|' + text;
+						let newIgnoredCards = AutocardAnywhere.ignoredCards + '|' + text;
 						AutocardAnywhere.saveSettings({
 							ignoredCards: newIgnoredCards
 						});
@@ -294,9 +286,9 @@ let AutocardAnywhere = {
 				interactiveBorder: 30,
 				//interactiveDebounce: 75,
 				hideOnClick: false,
-				theme: AutocardAnywhere.settings.theme == 'dark' ? 'material' : 'light',
-				animation: AutocardAnywhere.settings.popupAnimation, // scale, perspective, shift-away, shift-toward
-				duration: [AutocardAnywhere.settings.popupShowDuration, AutocardAnywhere.settings.popupHideDuration],
+				theme: AutocardAnywhere.theme == 'dark' ? 'material' : 'light',
+				animation: AutocardAnywhere.popupAnimation, // scale, perspective, shift-away, shift-toward
+				duration: [AutocardAnywhere.popupShowDuration, AutocardAnywhere.popupHideDuration],
 				inertia: true,
 				appendTo: () => document.body,
 				content: popupContent,
@@ -305,13 +297,13 @@ let AutocardAnywhere = {
 					// Hide all other tips
 					tippy.hideAll({duration: 300});
 					// If there is a carousel in this tip, start it playing.
-					if (swiper && AutocardAnywhere.settings.carouselAutoPlay) {
+					if (swiper && AutocardAnywhere.carouselAutoPlay) {
 						swiper.autoplay.start();
 					}
 				},
 				onHide() {
 					// If there is a carousel in this tip, stop it playing.
-					if (swiper && AutocardAnywhere.settings.carouselAutoPlay) {
+					if (swiper && AutocardAnywhere.carouselAutoPlay) {
 						swiper.autoplay.stop();
 					}
 				},
@@ -345,21 +337,23 @@ let AutocardAnywhere = {
 						pricesEnabled = dictionary.settings.enableTcgPrices || dictionary.settings.enableCardmarketPrices || dictionary.settings.enableOnlinePrices;
 						if (pricesEnabled) { // An element will only be returned if enablePrices is set on the dictionary
 							if (content.find('.autocardanywhere-prices').length == 0) {
-								AutocardAnywhere.ajax('exchangeRate').then(function(exchangeRate) {
-									// Get the card price from the location specified in the dictionary...
-									AutocardAnywhere.ajax(AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary)).then(
-										function(response) {
-											// Set the content of any matching price divs upon successful retrieval
-											$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
-											checkIfLoadComplete();
-										}
-									);
-								});
+								AutocardAnywhere.ajax('exchangeRate').then(
+									function(exchangeRate) {
+										// Get the card price from the location specified in the dictionary...
+										AutocardAnywhere.ajax(AutocardAnywhereSettings.format(dictionary.settings.priceURL, card, dictionary)).then(
+											function(response) {
+												// Set the content of any matching price divs upon successful retrieval
+												$('.autocardanywhere-prices-' + card.id).replaceWith(dictionary.parsePriceData(card, response, exchangeRate));
+												checkIfLoadComplete();
+											}
+										);
+									}
+								);
 							}
 						}
 
 						// Fill-in the extra info data if extra info is enabled and any is configured for this game...
-						extraInfoEnabled = AutocardAnywhere.settings.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0);
+						extraInfoEnabled = AutocardAnywhere.enableExtraInfo && dictionary.extraInfo && (dictionary.extraInfo.length > 0);
 						if (extraInfoEnabled) {
 							let dataDivClass = '.autocardanywhere-data-' + dictionary.game + dictionary.language + '-' + card.id;
 							if (content.find(dataDivClass + '.autocardanywhere-loaded').length == 0) {
@@ -396,8 +390,8 @@ let AutocardAnywhere = {
 							//allowSlidePrev: false,
 							loop: true,
 							speed: 500,
-							effect: AutocardAnywhere.settings.carouselAnimation, // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
-							autoplay: (AutocardAnywhere.settings.carouselAutoPlay ? {
+							effect: AutocardAnywhere.carouselAnimation, // 'slide' | 'fade' | 'cube' | 'coverflow' | 'flip'
+							autoplay: (AutocardAnywhere.carouselAutoPlay ? {
 								delay: 2000,
 								disableOnInteraction: false,
 								pauseOnMouseEnter: true
@@ -675,53 +669,32 @@ let AutocardAnywhere = {
 		// Respond to a dom change
 		// Stop observing so as to avoid picking-up on the popup node being inserted
 		AutocardAnywhere.unobserveDomChanges();
-	    mutations.map(async function(mutation) {
+	    mutations.map(function(mutation) {
 	    	// Only interested in nodes being added.
 		    let nodes = mutation.addedNodes;
-			//console.log(nodes);
 		    for (let i=0; i<nodes.length; i++) {
 	    		let node = $(nodes[i]);
 	    		// Check the new node is not a script, a stylesheet, a textarea, an input or part of an AutocardAnywhere popup...
 	    		if ((!/^(a|button|input|textarea|script|style)$/i.test(nodes[i].tagName)) &&
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
+	    			(!node.is("span.autocardanywhere")) &&
 	    			(!nodes[i].isContentEditable)
 	    			) {
 			    		// Linkify the new node and then add popups in it.
 						// Replace any existing card links in the new node.
-					    if (AutocardAnywhere.settings.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
-
-						//console.log(node);
+					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 						// Run the regex dictionaries over the new node.
-						if (AutocardAnywhereSettings.isM1) {
-							console.log('M1 chip detected');
-							for (let i=0; i<AutocardAnywhere.pluginNames.length; i++) {
-								let plugin = AutocardAnywhere.pluginNames[i];
-								if (plugin == 'nicknames') continue;
-
-								console.log(node.text());
-								let response = await AutocardAnywhere.ajax('https://autocardanywhere.com/m1/', {
-									plugin: plugin,
-									ignoreList: AutocardAnywhere.settings.ignoreList,
-									unignoreList: AutocardAnywhere.settings.unignoreList,
-									settings: AutocardAnywhere.dictionaries[plugin].settings,
-									text: node.text()
+					    node.parent().linkify({
+							use: AutocardAnywhere.pluginNames,
+							handleLinks: function(links) {
+								// Initialise card popups for the added links.
+								links.each((index, link) => {
+									AutocardAnywhere.initialisePopups(link.parentNode);
 								});
-								console.log(response);
-								//node.text('*');
-								$(nodes[i]).text('*');
-								//AutocardAnywhere.initialisePopups(nodes[i]);
 							}
-						}
-						else {
-							console.log('No M1 chip detected');
-							node.linkify({
-								use: AutocardAnywhere.pluginNames, 
-								handleLinks: () => {
-									AutocardAnywhere.initialisePopups(nodes[i]);
-								}
-							});
-						}
+						});
+						
 				}
 			}
 	    });
@@ -743,27 +716,30 @@ let AutocardAnywhere = {
 		}
 		else {
 			AutocardAnywhere.forceLoad = true;
-			AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+			AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);
 		}
 	},
 
 	initialiseContextMenu: function() {
-		function processMessage(message) {
-			if (message.name == 'contextmenuitemclick') { 
+		function processMessage(message, sender, sendResponse) {
+			if (message.name == 'contextmenuitemclick') {
 				if (!AutocardAnywhereSettings.isTouchInterface) { // No context menu on touch interfaces
 					AutocardAnywhere.contextMenuClick();
 				}
+				sendResponse({message: "ack"});
 			}
 			else if (message.name == 'enableSite') {
 				// Reload the extension
 				//AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
 				alert("AutocardAnywhere is now enabled on this site.\nLinks will be added to the current page when you next reload.");
+				sendResponse({message: "ack"});
 			}
 			else if (message.name == 'disableSite') {
 				// Remove all links added by AutocardAnywhere
 				$(document.body).find('a.autocardanywhere-link').replaceWith(function() {
 					return $(this).text();
 				});
+				sendResponse({message: "ack"});
 			}
 		}
 
@@ -783,6 +759,10 @@ let AutocardAnywhere = {
 	},
 	
 	settingsCallback: function(response) {
+		if (!response) {
+			console.error('Load settings failed');
+			return;
+		}
 		let listType = response.listType;
 		let thisSiteListed = false;
 		AutocardAnywhere.url = AutocardAnywhere.getCurrentUrl();
@@ -804,52 +784,52 @@ let AutocardAnywhere = {
 		// If we are clear to run on this website
 		if ((listType != 'whitelist' && !thisSiteListed) || (listType == 'whitelist' && thisSiteListed) || AutocardAnywhere.forceLoad) {
 			// Load settings
-			AutocardAnywhere.settings = {
-				popupLanguage: response.popupLanguage,
-				popupWidth: response.popupWidth,
-				popupHeight: response.popupHeight,
-				openInNewTab: response.newTab,
-				enablePopups: response.enablePopups,
-				enableIgnoreCardLink: response.enableIgnoreCardLink,
-				enableExtraInfo: response.enableExtraInfo,
-				caseSensitive: response.caseSensitive,
-	
-				popupAnimation: response.popupAnimation,
-				popupShowDuration: response.popupShowDuration,
-				popupHideEffect: response.popupHideEffect,
-				popupHideDuration: response.popupHideDuration,
-				carouselAnimation: response.carouselAnimation,
-				carouselAutoPlay: response.carouselAutoPlay,
-				theme: response.theme,
-	
-				replaceExistingLinks: response.replaceExistingLinks,
-				fuzzyLookup: response.fuzzyLookup
-			}
-			AutocardAnywhere.settings.fontSize = Math.max(Math.ceil(AutocardAnywhere.settings.popupHeight / 24), 14);
-			AutocardAnywhere.settings.lineHeight = AutocardAnywhere.settings.fontSize + 1;
+			AutocardAnywhere.popupLanguage = response.popupLanguage;
+			AutocardAnywhere.popupWidth = response.popupWidth;
+			AutocardAnywhere.popupHeight = response.popupHeight;
+			AutocardAnywhere.fontSize = Math.max(Math.ceil(AutocardAnywhere.popupHeight / 24), 14);
+			AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
+			//AutocardAnywhere.openInNewTab = response.newTab;
+			AutocardAnywhere.enablePopups = response.enablePopups;
+			AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
+			AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
+			AutocardAnywhere.caseSensitive = response.caseSensitive;
 
+			AutocardAnywhere.popupAnimation = response.popupAnimation;
+			AutocardAnywhere.popupShowDuration = response.popupShowDuration;
+			AutocardAnywhere.popupHideEffect = response.popupHideEffect;
+			AutocardAnywhere.popupHideDuration = response.popupHideDuration;
+			AutocardAnywhere.carouselAnimation = response.carouselAnimation;
+			AutocardAnywhere.carouselAutoPlay = response.carouselAutoPlay;
+			AutocardAnywhere.theme = response.theme;
+
+			AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
+			//AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
 
 			AutocardAnywhereSettings.currencies.map(function(currency) {
 				if (currency.value == response.currency) {
-					AutocardAnywhere.settings.currency = currency;
+					AutocardAnywhere.currency = currency;
 				}
 			})
 	
-			AutocardAnywhere.settings.ignoredCards = response.ignoredCards;
-			AutocardAnywhere.settings.ignoreList = {};
+			/*
+			AutocardAnywhere.ignoredCards = response.ignoredCards;
+			AutocardAnywhere.ignoreList = {};
 			if (response.ignoredCards !== undefined) {
 				response.ignoredCards.split('|').map(function(ignoredCard) {
-					AutocardAnywhere.settings.ignoreList[ignoredCard.toLowerCase()] = 1;
+					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
 				});
 			}
-			AutocardAnywhere.settings.unignoreList = {};
+			AutocardAnywhere.unignoreList = {};
 			if (response.unignoredCards !== undefined) {
 				response.unignoredCards.split('|').map(function(unignoredCard) {
-					AutocardAnywhere.settings.unignoreList[unignoredCard.toLowerCase()] = 1;
+					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
 				});
 			}
 			// Always ignore the card "Ow"
-			AutocardAnywhere.settings.ignoreList['ow'] = 1;
+			AutocardAnywhere.ignoreList['ow'] = 1;
+			*/
+			
 			
 			// Generate css based on what link styles the user has set, and inject it into the page
 			AutocardAnywhere.injectCSS(
@@ -861,6 +841,7 @@ let AutocardAnywhere = {
 				response.linkStyleDashed
 			);
 
+			
 			// Build an array of dictionaries that are switched on
 			let dictionaries = [];
 
@@ -890,87 +871,17 @@ let AutocardAnywhere = {
 					dictionaries.push([dictionary.game, dictionary.language]);
 				}
 			}
-
+			
 			// Now load all dictionaries
-			AutocardAnywhere.games.load(dictionaries, async function(result) {
+			let pluginFunctions = {};
+			AutocardAnywhere.pluginNames = [];
+			pluginFunctions['background'] = function(text) {
+				return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
+			};
+			AutocardAnywhere.pluginNames.push('background');
+
+			AutocardAnywhere.games.load(dictionaries).then(function(result) {
 				AutocardAnywhere.dictionaries = result;
-
-				let pluginFunctions = {};
-				AutocardAnywhere.pluginNames = [];
-				
-				// Card names enclosed in [[]]
-				if (AutocardAnywhere.settings.fuzzyLookup) {
-					pluginFunctions['bracketed'] = function(text) {
-						return text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
-							// Do a fuzzy lookup by name in all dictionaries
-							for (let i in AutocardAnywhere.dictionaries) {
-								let dictionary = AutocardAnywhere.dictionaries[i];
-								let cards = dictionary.fuzzyLookup(name);
-								if (cards.length > 0) {
-									return dictionary.createLink(dictionary, cards[0], name, null, null, true);
-								}
-							}
-							return match;
-						});
-					};
-					AutocardAnywhere.pluginNames.push('bracketed');
-				}
-				
-				// Standard card sets
-				dictionaries.map(function(dictionary) {
-					let dictionaryName = dictionary[0] + dictionary[1];
-					pluginFunctions[dictionaryName] = function(text) {
-						return AutocardAnywhere.dictionaries[dictionaryName].run(text);
-					};
-					AutocardAnywhere.pluginNames.push(dictionaryName);
-				});
-
-				// Custom nickname list
-				if (response.customNicknames && (response.customNicknames != '')) {
-					if (response.customNicknames.indexOf(';') > -1) {
-						response.customNicknames = response.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
-					}
-					let customNicknames = {};
-					let customNicknameRE = '(';
-					response.customNicknames.split('||').map(function(x) {
-						let nickname = x.split('|');
-						if (nickname.length == 3) {
-							if (AutocardAnywhere.dictionaries[nickname[0]]) {
-								customNicknames[nickname[1].toLowerCase()] = {
-									dictionary: nickname[0],
-									nickname: nickname[1],
-									fullname: nickname[2]
-								};
-								customNicknameRE += nickname[1] + '|';
-							}
-						}
-					});
-
-					if (customNicknameRE.length > 1) {
-						customNicknameRE = customNicknameRE.slice(0,-1);
-					}
-					customNicknameRE += ')';
-
-					if (customNicknameRE != '()') {
-						customNicknameRE = "([^a-zA-Z_0-9-'])" + customNicknameRE + "(?=[^a-zA-Z_0-9-'])";
-						pluginFunctions['nicknames'] = function(text) {
-							return text.replace(new RegExp(customNicknameRE, "gi"), function(match, f, s) {
-								let nickname = customNicknames[s.toLowerCase()];
-								if (!nickname) {return match}
-								let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
-								let card = dictionary.findCard(nickname.fullname);
-								if ((!card) || (AutocardAnywhere.settings.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.settings.ignoreList[nickname.fullname.toLowerCase()])) {return match}
-								if (response.expandNicknames) {
-									return f + dictionary.createLink(dictionary, card, nickname.fullname);
-								}
-								else {
-									return f + dictionary.createLink(dictionary, card, nickname.nickname);
-								}
-							});
-						};
-						AutocardAnywhere.pluginNames.push('nicknames');
-					}
-				}
 
 				// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
 				if (AutocardAnywhere.forceLoad) {
@@ -979,58 +890,49 @@ let AutocardAnywhere = {
 				// else run on the whole page
 				else {
 					// Replace existing card links
-					if (AutocardAnywhere.settings.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
+					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
 
-					if (AutocardAnywhereSettings.isM1) {
-						console.log('M1 chip detected');
-						for (let i=0; i<AutocardAnywhere.pluginNames.length; i++) {
-							let plugin = AutocardAnywhere.pluginNames[i];
-							if (plugin == 'nicknames') continue;
-
-							let body = $(document.body);
-
-							console.log(AutocardAnywhere);
-
-							let response = await AutocardAnywhere.ajax('https://autocardanywhere.com/m1/', {
-								plugin: plugin,
-								settings: AutocardAnywhere.settings,
-								pluginSettings: AutocardAnywhere.dictionaries[plugin].settings,
-								text: body.html()
-							});
-							body.html(response);
+					// Setup the linkify plugin, then run it
+					$.extend($.fn.linkify.plugins, pluginFunctions);
+					$('body').linkify({
+						use: AutocardAnywhere.pluginNames,
+						handleLinks: function(linkedNodes) {
+							// Initialise card popups for the base document
 							AutocardAnywhere.initialisePopups(document.body);
-						}
-					}
-					else {
-						console.log('No M1 chip detected');
-						// Setup the linkify plugin, then run it
-						$.extend($.fn.linkify.plugins, pluginFunctions);
-						$('body').linkify({
-							use: AutocardAnywhere.pluginNames, 
-							handleLinks: (nodes) => {
-								// Initialise card popups for the document
-								AutocardAnywhere.initialisePopups(document.body);
-							}
-						});
-					}
 
-					// Setup the mutation observer to pickup any changes to the DOM
-					if (typeof(MutationObserver) !== 'undefined') {
-						AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-						AutocardAnywhere.observeDomChanges();
-					}
+							// Setup the mutation observer to pickup any changes to the DOM
+							if (typeof(MutationObserver) !== 'undefined') {
+								AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+								AutocardAnywhere.observeDomChanges();
+							}
+						}
+					});
 				}
 			});
 			AutocardAnywhere.loaded = true;
 		}
 		else { // disabled on this site
-			if (!AutocardAnywhereSettings.isSafari) {browser.runtime.sendMessage({'name': 'disableIcon'})}
+			if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
 		}
 	}
 }
 
 if (!AutocardAnywhereSettings.isBookmarklet) {
-	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings, AutocardAnywhere.settingsCallback);
+	function connect() {
+		//console.log('(re)connecting...');
+		AutocardAnywhere.persistentPort = chrome.runtime.connect({name: 'autocardanywhere'});
+		AutocardAnywhere.persistentPort.onDisconnect.addListener(connect);
+		/*
+		AutocardAnywhere.persistentPort.onMessage.addListener(msg => {
+			console.log('received', msg, 'from bg');
+		});
+		*/
+		//AutocardAnywhere.persistentPort.postMessage({'data': 'ping'});
+	}
+	connect();
+
+
+	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);
 	// Setup handler for context menu item click
 	AutocardAnywhere.initialiseContextMenu();
 }

@@ -1,50 +1,68 @@
+//import { Dictionary } from './games/dictionary.js';
 if (typeof(AutocardAnywhere) == 'undefined') {AutocardAnywhere = {};}
 //if (typeof(AutocardAnywhere.games) == 'undefined') {AutocardAnywhere.games = {};}
 AutocardAnywhere.games = {
-	load: function(games, callback) {
-		let result = {};
-	    games.map(function(game) {
-	    	let name = game[0];
-	    	let language = game[1];
+	load: function(games) {
+		return new Promise((resolve, reject) => {
+			let result = {};
+			games.map(function(game) {
+				let name = game[0];
+				let language = game[1];
 
-	    	AutocardAnywhere.games[name][language].load(function(dictionary) {
-	    		function messageCallback(response) {
-	    			dictionary.test = new RegExp(response.test, "gi");
-	    			dictionary.cardNames = response.cardNames;
-	    			dictionary.cardData = response.cardData;
-	    			result[name + language] = dictionary;
+				AutocardAnywhere.games[name][language].load().then(function(dictionary) {
+					function messageCallback(response) {
+						dictionary.test = new RegExp(response.test, "gi");
+						dictionary.cardNames = response.cardNames;
+						dictionary.cardData = response.cardData;
+						result[name + language] = dictionary;
 
-		    		// Once all the dictionaries are loaded, call the callback
-		    		if (Object.keys(result).length == games.length) {
-			    		callback(result);
-			    	}
-				};
-
-				if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
-					messageCallback({
-						'cardData': [],
-						'test': AutocardAnywhereLoader[name + language].test,
-						'cardNames': AutocardAnywhereLoader[name + language].cardNames
-					});
-				}
-				else if (AutocardAnywhereSettings.isSafari) {
-					let messageID = AutocardAnywhereGuid();
-					function getResponse(event) {
-						if (event.name === messageID) {
-							messageCallback(event.message);
+						// Once all the dictionaries are loaded, resolve the promise
+						if (Object.keys(result).length == games.length) {
+							resolve(result);
 						}
+					};
+
+					if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
+						messageCallback({
+							'cardData': [],
+							'test': AutocardAnywhereLoader[name + language].test,
+							'cardNames': AutocardAnywhereLoader[name + language].cardNames
+						});
 					}
-					safari.self.addEventListener("message", getResponse, false);
-					safari.self.tab.dispatchMessage('getDictionary', {'id': messageID, 'game': name, 'language': language});
-				}
-				else  { // Chrome, Opera, Firefox or Edge
-					/*
-					if (!AutocardAnywhere.persistentPort) {
-						AutocardAnywhere.persistentPort = chrome.runtime.connect({name: "autocardanywhere"});
+					else if (AutocardAnywhereSettings.isSafari) {
+						let messageID = AutocardAnywhereGuid();
+						function getResponse(event) {
+							if (event.name === messageID) {
+								messageCallback(event.message);
+							}
+						}
+						safari.self.addEventListener("message", getResponse, false);
+						safari.self.tab.dispatchMessage('getDictionary', {'id': messageID, 'game': name, 'language': language});
 					}
-					function messageReceived(response) {
-						if (response.game == name && response.language == language) {
-							AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
+					else  { // Chrome, Opera, Firefox or Edge
+						/*
+						if (!AutocardAnywhere.persistentPort) {
+							AutocardAnywhere.persistentPort = chrome.runtime.connect({name: "autocardanywhere"});
+						}
+						function messageReceived(response) {
+							if (response.game == name && response.language == language) {
+								AutocardAnywhere.persistentPort.onMessage.removeListener(messageReceived);
+								let gameData = JSON.parse(response.gameData);
+								let languageData = JSON.parse(response.languageData);
+
+								messageCallback({
+									'cardData': gameData.cardData,
+									'test': languageData.test,
+									'cardNames': languageData.cardNames
+								});
+							}
+						}
+						
+						AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
+						AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
+						*/
+
+						AutocardAnywhere.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}).then((response) => {
 							let gameData = JSON.parse(response.gameData);
 							let languageData = JSON.parse(response.languageData);
 
@@ -53,26 +71,11 @@ AutocardAnywhere.games = {
 								'test': languageData.test,
 								'cardNames': languageData.cardNames
 							});
-						}
-					}
-					
-					AutocardAnywhere.persistentPort.onMessage.addListener(messageReceived);
-					AutocardAnywhere.persistentPort.postMessage({'type': 'dictionary', 'game': name, 'language': language});
-					*/
-					browser.runtime.sendMessage({'name': 'getDictionary', 'game': name, 'language': language}, (response) => {
-						let gameData = JSON.parse(response.gameData);
-						let languageData = JSON.parse(response.languageData);
-
-						messageCallback({
-							'cardData': gameData.cardData,
-							'test': languageData.test,
-							'cardNames': languageData.cardNames
 						});
-					});
-				}
-	    	});
-	    });
-	    
+					}
+				});
+			});
+		});
 	}
 };
 //==============================================================================
@@ -81,7 +84,7 @@ AutocardAnywhere.games = {
 function AgotDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 AgotDictionary.prototype = new Dictionary({
@@ -152,7 +155,7 @@ AutocardAnywhere.games.agot.en = new AgotDictionary({
 function CardfightVanguardDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 CardfightVanguardDictionary.prototype = new Dictionary({
@@ -257,7 +260,7 @@ AutocardAnywhere.games.cardfightvanguard.en = new CardfightVanguardDictionary({
 function ChronicleDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ChronicleDictionary.prototype = new Dictionary({
@@ -326,7 +329,7 @@ AutocardAnywhere.games.chronicle.en = new ChronicleDictionary({
 function CodexDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 CodexDictionary.prototype = new Dictionary({
@@ -397,7 +400,7 @@ AutocardAnywhere.games.codex.en = new CodexDictionary({
 function DbzDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DbzDictionary.prototype = new Dictionary({
@@ -467,7 +470,7 @@ AutocardAnywhere.games.dbz.en = new DbzDictionary({
 function DicemastersDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DicemastersDictionary.prototype = new Dictionary({
@@ -537,7 +540,7 @@ AutocardAnywhere.games.dicemasters.en = new DicemastersDictionary({
 function DominionDictionary(config) {
 	this .description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DominionDictionary.prototype = new Dictionary({
@@ -608,7 +611,7 @@ AutocardAnywhere.games.dominion.en = new DominionDictionary({
 function DoomtownDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DoomtownDictionary.prototype = new Dictionary({
@@ -677,7 +680,7 @@ AutocardAnywhere.games.doomtown.en = new DoomtownDictionary({
 function DuelystDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 DuelystDictionary.prototype = new Dictionary({
@@ -746,7 +749,7 @@ AutocardAnywhere.games.duelyst.en = new DuelystDictionary({
 function ElderScrollsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ElderScrollsDictionary.prototype = new Dictionary({
@@ -815,7 +818,7 @@ AutocardAnywhere.games.elderscrolls.en = new ElderScrollsDictionary({
 function EternalDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 EternalDictionary.prototype = new Dictionary({
@@ -887,7 +890,7 @@ AutocardAnywhere.games.eternal.en = new EternalDictionary({
 function FabDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 FabDictionary.prototype = new Dictionary({
@@ -981,7 +984,7 @@ FabDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		div.appendChild(line);
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let data = JSON.parse(content);
@@ -1038,7 +1041,7 @@ AutocardAnywhere.games.fab.en = new FabDictionary({
 function FaeriaDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 FaeriaDictionary.prototype = new Dictionary({
@@ -1107,7 +1110,7 @@ AutocardAnywhere.games.faeria.en = new FaeriaDictionary({
 function ForceOfWillDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ForceOfWillDictionary.prototype = new Dictionary({
@@ -1182,7 +1185,7 @@ AutocardAnywhere.games.forceofwill.en = new ForceOfWillDictionary({
 function GwentDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 GwentDictionary.prototype = new Dictionary({
@@ -1286,7 +1289,7 @@ AutocardAnywhere.games.gwent.en = new GwentDictionary({
 function HearthstoneDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 HearthstoneDictionary.prototype = new Dictionary({
@@ -1392,7 +1395,7 @@ AutocardAnywhere.games.hearthstone.en = new HearthstoneDictionary({
 function HexDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 HexDictionary.prototype = new Dictionary({
@@ -1462,7 +1465,7 @@ AutocardAnywhere.games.hex.en = new HexDictionary({
 function L5rDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 L5rDictionary.prototype = new Dictionary({
@@ -1568,7 +1571,7 @@ AutocardAnywhere.games.l5r.en = new L5rDictionary({
 function LotrDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 LotrDictionary.prototype = new Dictionary({
@@ -1636,13 +1639,14 @@ AutocardAnywhere.games.lotr.en = new LotrDictionary({
 // Magic the Gathering
 //==============================================================================
 function MtgDictionary(config) {
+	this.game = 'mtg';
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 MtgDictionary.prototype = new Dictionary({
-	game: 'mtg',
+	//game: 'mtg',
 	description: 'Magic: The Gathering',
 	// Settings and initialisation
 	settings: [
@@ -1857,7 +1861,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
@@ -1958,7 +1962,7 @@ MtgDictionary.prototype.parsePriceData = function(card, response, currencyExchan
 	let cardhoarderLink = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.cardhoarderURL, card, dictionary));
 	
 	let pricesDiv = AutocardAnywhere.createPricesElement('autocardanywhere-prices');
-	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.settings.theme];
+	let colours = AutocardAnywhereSettings.themes[AutocardAnywhere.theme];
 
 	if (data.prices) {
 		if (dictionary.settings.enableTcgPrices) {
@@ -2198,7 +2202,7 @@ AutocardAnywhere.games.mtg.ko = new MtgDictionary({
 function MyLittlePonyDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 MyLittlePonyDictionary.prototype = new Dictionary({
@@ -2314,7 +2318,7 @@ AutocardAnywhere.games.mylittlepony.en = new MyLittlePonyDictionary({
 function NetrunnerDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 NetrunnerDictionary.prototype = new Dictionary({
@@ -2432,7 +2436,7 @@ AutocardAnywhere.games.netrunner.en = new NetrunnerDictionary({
 function PokemonDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 PokemonDictionary.prototype = new Dictionary({
@@ -2573,7 +2577,7 @@ PokemonDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
@@ -2631,7 +2635,7 @@ AutocardAnywhere.games.pokemon.en = new PokemonDictionary({
 function ScrollsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 ScrollsDictionary.prototype = new Dictionary({
@@ -2700,7 +2704,7 @@ AutocardAnywhere.games.scrolls.en = new ScrollsDictionary({
 function SolforgeDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 SolforgeDictionary.prototype = new Dictionary({
@@ -2792,7 +2796,7 @@ AutocardAnywhere.games.solforge.en = new SolforgeDictionary({
 function StarrealmsDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 StarrealmsDictionary.prototype = new Dictionary({
@@ -2862,7 +2866,7 @@ AutocardAnywhere.games.starrealms.en = new StarrealmsDictionary({
 function WarframeDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 WarframeDictionary.prototype = new Dictionary({
@@ -2936,7 +2940,7 @@ AutocardAnywhere.games.warframe.en = new WarframeDictionary({
 function WowDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 WowDictionary.prototype = new Dictionary({
@@ -3094,7 +3098,7 @@ AutocardAnywhere.games.wow.en = new WowDictionary({
 function XwingDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 XwingDictionary.prototype = new Dictionary({
@@ -3164,7 +3168,7 @@ AutocardAnywhere.games.xwing.en = new XwingDictionary({
 function YugiohDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
-	this.settings = this.settings.concat(config.settings);
+	this.options = this.settings.concat(config.settings);
 };
 
 YugiohDictionary.prototype = new Dictionary({
@@ -3298,7 +3302,7 @@ YugiohDictionary.prototype.parseExtraInfo = function(content, section, card) {
 		}
 	}
 
-	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.settings.popupHeight - 20 : AutocardAnywhere.settings.popupWidth - 20;
+	let overlayWidth = card.rotate == 90 ? AutocardAnywhere.popupHeight - 20 : AutocardAnywhere.popupWidth - 20;
 
 	// Parses the returned content for the specified section
 	let list = JSON.parse(content);
