@@ -759,6 +759,10 @@ let AutocardAnywhere = {
 	},
 	
 	settingsCallback: function(response) {
+		if (!response) {
+			console.error('Load settings failed');
+			return;
+		}
 		let listType = response.listType;
 		let thisSiteListed = false;
 		AutocardAnywhere.url = AutocardAnywhere.getCurrentUrl();

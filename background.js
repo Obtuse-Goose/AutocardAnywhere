@@ -322,6 +322,7 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 }
 */
 
+/*
 function getDictionaryFromDisk(dictionary) {
 	//console.log(request);
 	return new Promise((resolve, reject) => {
@@ -345,11 +346,12 @@ function getDictionaryFromDisk(dictionary) {
 		});
 	});
 }
+*/
 
-function getDictionary(request) {
+function getDictionary(dictionary) {
 	return new Promise((resolve, reject) => {
-		let gameName = request.game;
-		let gameLanguage = request.language;
+		let gameName = dictionary.game;
+		let gameLanguage = dictionary.language;
 
 		//let dictionaries = [];
 
@@ -484,21 +486,27 @@ function load() {
 			}
 
 			for (let i=0; i<dictionaries.length; i++) {
-				let data = await getDictionaryFromDisk(dictionaries[i]).then( (data) => data);
-				//const cloneFood = Object.assign({}, food);
+				//let data = await getDictionaryFromDisk(dictionaries[i]).then( (data) => data);
+				let data = await getDictionary(dictionaries[i]).then( (data) => data);
+				//data.gameData = JSON.parse(data.gameData);
+				data.languageData = JSON.parse(data.languageData);
 				let dictionary = AutocardAnywhere.games[dictionaries[i].game][dictionaries[i].language];
 				
-				dictionary.test = new RegExp(data.test, "gi");
-				
+				dictionary.test = new RegExp(data.languageData.test, "gi");
+				dictionary.cardNames = data.languageData.cardNames;
+				dictionary.cardData = JSON.parse(data.gameData).cardData;
+				dictionary.settings = await loadSettings(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, AutocardAnywhere.games[dictionary.game][dictionary.language].options).then( (settings) => settings);
+
+				//console.log(dictionary);
+
 				// Run it to force compilation
-				let test = "blah";
-				test.replace(dictionary.test, function() {
-					return '*';
-				});
+				/*
+				console.log('compiling regex');
+				let text = "Pyromancer Ascension";
+				text = dictionary.run(text);
+				console.log(text);
+				*/
 				
-				dictionary.cardData = data.cardData;
-				dictionary.cardNames = data.cardNames;
-				dictionary.settings = await loadSettings(AutocardAnywhereSettings.prefix + data.game + data.language, AutocardAnywhere.games[data.game][data.language].options).then( (settings) => settings);
 
 				AutocardAnywhere.dictionaries.push(dictionary);
 			}
@@ -579,10 +587,8 @@ function parse(text, sendResponse) {
 			});
 		}
 		
-
 		//console.log(text);
 		sendResponse({data: text});
-
 	}));
 }
 
@@ -760,9 +766,7 @@ else { // Chrome, Opera, Firefox or Edge
 		}
 	});
 
-
 	load().then(() => {
 		//console.log('loaded');
 	});
-
 }
