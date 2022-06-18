@@ -551,7 +551,20 @@ function parse(text, sendResponse) {
 	load().then( (dictionaries => {
 		// Run all enabled dictionaries
 		dictionaries.map( (dictionary) => {
+			// Run the current dictionary.
 			text = dictionary.run(text);
+
+			// Sometimes a dictionary might link text within an earlier link...
+			// Run until there are no double AA links found.
+			let replacementMade = true;
+			while (replacementMade) {
+				replacementMade = false;
+				text = text.replace(/(<span class="autocardanywhere"><a[^<]*)<span class="autocardanywhere"><a[^>]*>([^<]*)<\/a><\/span>(.*<\/a><\/span>)/, function(match, f, s, t) {
+					replacementMade = true;
+					return f+s+t;
+				});
+			}
+			//console.log(text);
 		});
 
 		// Card names enclosed in [[]]

@@ -180,11 +180,13 @@ let AutocardAnywhere = {
 				cards.push(dictionary.findCardById(target.data('multiverseid')));
 			}
 
+			if (cards.length === 0) return;
+
 			// Create the tip for this link
 			// Get the matched text
 			let text = this.childNodes[0];
 			// If the linked node just contains text, display it's nodeValue...
-			if (text.nodeType == 3) {
+			if (text && text.nodeType == 3) {
 				text = text.nodeValue.trim();
 			}
 			// ...else use jQuery to get the amalgamated text contents of all child nodes
