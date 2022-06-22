@@ -162,7 +162,7 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 	let result = 
 		'<span class="autocardanywhere"><a href="' + 
 		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
-		'" class="autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : '') + '" ' +
+		'" class="autocardanywhere-popup autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : '') + '" ' +
 		'data-dictionary="' + this.game + this.language + '" ' +
 		(cardID ? 'data-multiverseid="' + cardID + '" ' : 'data-name="' + card.match + '" ') +
 		(isFuzzy ? 'data-fuzzy="1" ' : '') +

@@ -137,9 +137,9 @@ let AutocardAnywhere = {
 			return false;
 		}
 
-		$(node).find('a.autocardanywhere-link').each(function() {
+		$(node).find('a.autocardanywhere-popup').each(function() {
 			let target = $(this);
-			if (target.data('popup')) return;
+			//if (target.data('popup')) return;
 			let cards = new Array();
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
@@ -311,7 +311,8 @@ let AutocardAnywhere = {
 				},
 				onTrigger() {
 					// If this tooltip has already been rendered, do nothing
-					if (target.data('popup')) return;
+					//if (target.data('popup')) return;
+					if (!target.is('a.autocardanywhere-popup')) return;
 
 					//let paginationNumbers = false;
 					let extraInfoEnabled = false;
@@ -320,7 +321,8 @@ let AutocardAnywhere = {
 					function checkIfLoadComplete() {
 						if ((!extraInfoEnabled || content.find('.autocardanywhere-loaded').length > 0) &&
 							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
-								target.data('popup', 1);
+								//target.data('popup', 1);
+								target.removeClass('autocardanywhere-popup');
 							}
 					}
 
@@ -680,28 +682,56 @@ let AutocardAnywhere = {
 	    		if ((!/^(a|button|input|textarea|script|style)$/i.test(nodes[i].tagName)) &&
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
-	    			(!node.is("span.autocardanywhere")) &&
+	    			(node.children('span.autocardanywhere').length === 0) &&
+	    			//(!node.is("span.autocardanywhere")) &&
 	    			(!nodes[i].isContentEditable)
 	    			) {
 			    		// Linkify the new node and then add popups in it.
 						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
-						// Run the regex dictionaries over the new node.
-					    node.parent().linkify({
-							use: AutocardAnywhere.pluginNames,
-							handleLinks: function(links) {
-								// Initialise card popups for the added links.
-								links.each((index, link) => {
-									AutocardAnywhere.initialisePopups(link.parentNode);
-								});
-							}
+
+						// Traverse the new node.						
+						node.each((index, child) =>{
+							AutocardAnywhere.traverse(child.parentNode);
 						});
-						
 				}
 			}
 	    });
 	    // Restart the observer
 	    AutocardAnywhere.observeDomChanges();
+	},
+
+	backgroundRunner: function(text) {
+		return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
+	},
+
+	// Function to traverse the DOM to find any text nodes.
+	traverse(node) {
+		//console.log(node);
+		let children = node.childNodes;
+		if (!children) return;
+		for (let i=0; i<children.length; i++) {
+			let n = children[i];
+			if (!n) continue;
+			if (n.nodeType == 1  &&  !/^(a|button|textarea|style|script)$/i.test(n.tagName) ) {
+				AutocardAnywhere.traverse(n);
+			}
+			else if (n.nodeType == 3) {
+				let html = n.nodeValue;
+				if (html.length>1 && /\S/.test(html)) {
+					//console.log(html);
+					AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
+						if (newHtml == html) return;
+
+						let newNode = $('<span>' + newHtml + '</span>');
+						AutocardAnywhere.initialisePopups(newNode);
+						newNode.insertAfter(n);
+						n.remove();
+					});
+					
+				}
+			}
+		}
 	},
 
 	contextMenuClick: function() {
@@ -812,26 +842,7 @@ let AutocardAnywhere = {
 				if (currency.value == response.currency) {
 					AutocardAnywhere.currency = currency;
 				}
-			})
-	
-			/*
-			AutocardAnywhere.ignoredCards = response.ignoredCards;
-			AutocardAnywhere.ignoreList = {};
-			if (response.ignoredCards !== undefined) {
-				response.ignoredCards.split('|').map(function(ignoredCard) {
-					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
-				});
-			}
-			AutocardAnywhere.unignoreList = {};
-			if (response.unignoredCards !== undefined) {
-				response.unignoredCards.split('|').map(function(unignoredCard) {
-					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
-				});
-			}
-			// Always ignore the card "Ow"
-			AutocardAnywhere.ignoreList['ow'] = 1;
-			*/
-			
+			});			
 			
 			// Generate css based on what link styles the user has set, and inject it into the page
 			AutocardAnywhere.injectCSS(
@@ -842,12 +853,11 @@ let AutocardAnywhere = {
 				response.showIcon, 
 				response.linkStyleDashed
 			);
-
 			
 			// Build an array of dictionaries that are switched on
 			let dictionaries = [];
-
 			let dictionariesHash = {};
+
 			AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
 				dictionariesHash[dictionary.game + dictionary.language] = dictionary;
 			});
@@ -875,14 +885,7 @@ let AutocardAnywhere = {
 			}
 			
 			// Now load all dictionaries
-			let pluginFunctions = {};
-			AutocardAnywhere.pluginNames = [];
-			pluginFunctions['background'] = function(text) {
-				return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
-			};
-			AutocardAnywhere.pluginNames.push('background');
-
-			AutocardAnywhere.games.load(dictionaries).then(function(result) {
+			AutocardAnywhere.games.load(dictionaries).then((result) => {
 				AutocardAnywhere.dictionaries = result;
 
 				// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
@@ -894,21 +897,15 @@ let AutocardAnywhere = {
 					// Replace existing card links
 					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
 
-					// Setup the linkify plugin, then run it
-					$.extend($.fn.linkify.plugins, pluginFunctions);
-					$('body').linkify({
-						use: AutocardAnywhere.pluginNames,
-						handleLinks: function(linkedNodes) {
-							// Initialise card popups for the base document
-							AutocardAnywhere.initialisePopups(document.body);
-
-							// Setup the mutation observer to pickup any changes to the DOM
-							if (typeof(MutationObserver) !== 'undefined') {
-								AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-								AutocardAnywhere.observeDomChanges();
-							}
-						}
-					});
+					// Traverse the DOM looking for text nodes to linkify
+					$('body').each((index, node) => {
+						AutocardAnywhere.traverse(node);
+					})
+					// Setup the mutation observer to pickup any changes to the DOM
+					if (typeof(MutationObserver) !== 'undefined') {
+						AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+						AutocardAnywhere.observeDomChanges();
+					}
 				}
 			});
 			AutocardAnywhere.loaded = true;
