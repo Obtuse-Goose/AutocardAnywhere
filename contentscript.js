@@ -708,6 +708,7 @@ let AutocardAnywhere = {
 	// Function to traverse the DOM to find any text nodes.
 	traverse(node) {
 		//console.log(node);
+		if (!node) return;
 		let children = node.childNodes;
 		if (!children) return;
 		for (let i=0; i<children.length; i++) {
@@ -725,7 +726,7 @@ let AutocardAnywhere = {
 
 						let newNode = $('<span>' + newHtml + '</span>');
 						AutocardAnywhere.initialisePopups(newNode);
-						newNode.insertAfter(n);
+						n.after(newNode);
 						n.remove();
 					});
 					
@@ -896,6 +897,7 @@ let AutocardAnywhere = {
 				else {
 					// Replace existing card links
 					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
+					AutocardAnywhere.initialisePopups(document.body);
 
 					// Traverse the DOM looking for text nodes to linkify
 					$('body').each((index, node) => {
