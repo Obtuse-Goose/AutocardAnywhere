@@ -726,7 +726,7 @@ let AutocardAnywhere = {
 
 						let newNode = $('<span>' + newHtml + '</span>');
 						AutocardAnywhere.initialisePopups(newNode);
-						n.after(newNode);
+						n.after(newNode.get(0));
 						n.remove();
 					});
 					
