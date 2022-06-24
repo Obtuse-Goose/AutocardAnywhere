@@ -801,7 +801,8 @@ let AutocardAnywhere = {
 		AutocardAnywhere.url = AutocardAnywhere.getCurrentUrl();
 		if (response.listedSites) {
 			// boardgamearena tables explicitly disabled to avoid issue with links. 
-			let listedSites = response.listedSites + ";boardgamearena.com;";
+			let listedSites = response.listedSites;
+			if (listType != 'whitelist') listedSites += ";boardgamearena.com;";
 			listedSites.split(";").map(function(site) {
 				if ((site.length > 0) && (AutocardAnywhere.url.indexOf(site) != -1)) {
 					thisSiteListed = true;
@@ -814,107 +815,108 @@ let AutocardAnywhere = {
 			$('#settings').val(JSON.stringify(response, null, '  '));
 		}
 		
-		// If we are clear to run on this website
-		if ((listType != 'whitelist' && !thisSiteListed) || (listType == 'whitelist' && thisSiteListed) || AutocardAnywhere.forceLoad) {
-			// Load settings
-			AutocardAnywhere.popupLanguage = response.popupLanguage;
-			AutocardAnywhere.popupWidth = response.popupWidth;
-			AutocardAnywhere.popupHeight = response.popupHeight;
-			AutocardAnywhere.fontSize = Math.max(Math.ceil(AutocardAnywhere.popupHeight / 24), 14);
-			AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
-			//AutocardAnywhere.openInNewTab = response.newTab;
-			AutocardAnywhere.enablePopups = response.enablePopups;
-			AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
-			AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
-			AutocardAnywhere.caseSensitive = response.caseSensitive;
+		// Check we are clear to run on this website
+		if (((listType != 'whitelist' && thisSiteListed) || (listType == 'whitelist' && !thisSiteListed)) && !AutocardAnywhere.forceLoad) {
+			// disabled on this site
+			//if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
+			return;
+		}
 
-			AutocardAnywhere.popupAnimation = response.popupAnimation;
-			AutocardAnywhere.popupShowDuration = response.popupShowDuration;
-			AutocardAnywhere.popupHideEffect = response.popupHideEffect;
-			AutocardAnywhere.popupHideDuration = response.popupHideDuration;
-			AutocardAnywhere.carouselAnimation = response.carouselAnimation;
-			AutocardAnywhere.carouselAutoPlay = response.carouselAutoPlay;
-			AutocardAnywhere.theme = response.theme;
+		// Load settings
+		AutocardAnywhere.popupLanguage = response.popupLanguage;
+		AutocardAnywhere.popupWidth = response.popupWidth;
+		AutocardAnywhere.popupHeight = response.popupHeight;
+		AutocardAnywhere.fontSize = Math.max(Math.ceil(AutocardAnywhere.popupHeight / 24), 14);
+		AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
+		//AutocardAnywhere.openInNewTab = response.newTab;
+		AutocardAnywhere.enablePopups = response.enablePopups;
+		AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
+		AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
+		AutocardAnywhere.caseSensitive = response.caseSensitive;
 
-			AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
-			//AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
+		AutocardAnywhere.popupAnimation = response.popupAnimation;
+		AutocardAnywhere.popupShowDuration = response.popupShowDuration;
+		AutocardAnywhere.popupHideEffect = response.popupHideEffect;
+		AutocardAnywhere.popupHideDuration = response.popupHideDuration;
+		AutocardAnywhere.carouselAnimation = response.carouselAnimation;
+		AutocardAnywhere.carouselAutoPlay = response.carouselAutoPlay;
+		AutocardAnywhere.theme = response.theme;
 
-			AutocardAnywhereSettings.currencies.map(function(currency) {
-				if (currency.value == response.currency) {
-					AutocardAnywhere.currency = currency;
+		AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
+		//AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
+
+		AutocardAnywhereSettings.currencies.map(function(currency) {
+			if (currency.value == response.currency) {
+				AutocardAnywhere.currency = currency;
+			}
+		});			
+		
+		// Generate css based on what link styles the user has set, and inject it into the page
+		AutocardAnywhere.injectCSS(
+			response.linkStyleBold, 
+			response.linkStyleItalic, 
+			response.linkStyleUnderline, 
+			(response.linkStyleFontColourInherit ? 'inherit' : response.linkStyleFontColour), 
+			response.showIcon, 
+			response.linkStyleDashed
+		);
+		
+		// Build an array of dictionaries that are switched on
+		let dictionaries = [];
+		let dictionariesHash = {};
+
+		AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
+			dictionariesHash[dictionary.game + dictionary.language] = dictionary;
+		});
+
+		// First load all the dictionaries specified in the user's settings
+		response.linkLanguages.split(';').map(function(x) {
+			let linkLanguage = x.split(':');
+			if (linkLanguage.length == 3) {
+				let game = linkLanguage[0];
+				let language = linkLanguage[1];
+				if (linkLanguage[2] == '1') {
+					dictionaries.push([game, language]);
 				}
-			});			
-			
-			// Generate css based on what link styles the user has set, and inject it into the page
-			AutocardAnywhere.injectCSS(
-				response.linkStyleBold, 
-				response.linkStyleItalic, 
-				response.linkStyleUnderline, 
-				(response.linkStyleFontColourInherit ? 'inherit' : response.linkStyleFontColour), 
-				response.showIcon, 
-				response.linkStyleDashed
-			);
-			
-			// Build an array of dictionaries that are switched on
-			let dictionaries = [];
-			let dictionariesHash = {};
+				delete dictionariesHash[game + language];
+			}
+		});
 
-			AutocardAnywhereSettings.dictionaries.map(function(dictionary) {
-				dictionariesHash[dictionary.game + dictionary.language] = dictionary;
-			});
+		// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
+		// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
+		for (dictionaryName in dictionariesHash) {
+			let dictionary = dictionariesHash[dictionaryName];
+			if (dictionary.default == 1) {
+				dictionaries.push([dictionary.game, dictionary.language]);
+			}
+		}
+		
+		// Now load all dictionaries
+		AutocardAnywhere.games.load(dictionaries).then((result) => {
+			AutocardAnywhere.dictionaries = result;
 
-			// First load all the dictionaries specified in the user's settings
-			response.linkLanguages.split(';').map(function(x) {
-				let linkLanguage = x.split(':');
-				if (linkLanguage.length == 3) {
-					let game = linkLanguage[0];
-					let language = linkLanguage[1];
-					if (linkLanguage[2] == '1') {
-						dictionaries.push([game, language]);
-					}
-					delete dictionariesHash[game + language];
-				}
-			});
+			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
+			if (AutocardAnywhere.forceLoad) {
+				AutocardAnywhere.contextMenuClick();
+			}
+			// else run on the whole page
+			else {
+				// Replace existing card links
+				if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
+				AutocardAnywhere.initialisePopups(document.body);
 
-			// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
-			// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
-			for (dictionaryName in dictionariesHash) {
-				let dictionary = dictionariesHash[dictionaryName];
-				if (dictionary.default == 1) {
-					dictionaries.push([dictionary.game, dictionary.language]);
+				// Traverse the DOM looking for text nodes to linkify
+				$('body').each((index, node) => {
+					AutocardAnywhere.traverse(node);
+				})
+				// Setup the mutation observer to pickup any changes to the DOM
+				if (typeof(MutationObserver) !== 'undefined') {
+					AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
+					AutocardAnywhere.observeDomChanges();
 				}
 			}
-			
-			// Now load all dictionaries
-			AutocardAnywhere.games.load(dictionaries).then((result) => {
-				AutocardAnywhere.dictionaries = result;
-
-				// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
-				if (AutocardAnywhere.forceLoad) {
-					AutocardAnywhere.contextMenuClick();
-				}
-				// else run on the whole page
-				else {
-					// Replace existing card links
-					if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
-					AutocardAnywhere.initialisePopups(document.body);
-
-					// Traverse the DOM looking for text nodes to linkify
-					$('body').each((index, node) => {
-						AutocardAnywhere.traverse(node);
-					})
-					// Setup the mutation observer to pickup any changes to the DOM
-					if (typeof(MutationObserver) !== 'undefined') {
-						AutocardAnywhere.domObserver = new MutationObserver(AutocardAnywhere.domChangeCallback);
-						AutocardAnywhere.observeDomChanges();
-					}
-				}
-			});
-			AutocardAnywhere.loaded = true;
-		}
-		else { // disabled on this site
-			if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
-		}
+		});
+		AutocardAnywhere.loaded = true;
 	}
 }
 

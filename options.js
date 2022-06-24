@@ -311,8 +311,8 @@ function loadSettings(response) {
 	$(".dictionarySettings button").click(function() {
 		let game = $(this).parents('li').data('game');
 		let lang = $(this).parents('li').data('language');
-		let settings = AutocardAnywhere.games[game].settings || [];
-		settings = settings.concat(AutocardAnywhere.games[game][lang].settings || []);
+		let settings = AutocardAnywhere.games[game].options || [];
+		settings = settings.concat(AutocardAnywhere.games[game][lang].options || []);
 		loadCardlistSettings(settings, game, lang);
 	});
 

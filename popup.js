@@ -4,13 +4,9 @@ let isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navi
 let listedSites = '';
 let isWhiteList = false;
 
-function setListedSites(s) {
-	if (isSafari) {
-		safari.extension.globalPage.contentWindow.localStorage.autocardAnywherelistedSites = s;
-	}
-	else {  // Chrome, Opera, Firefox or Edge
-		window.localStorage.autocardAnywherelistedSites = s;
-	}
+function setListedSites(siteList) {
+	// Save setting
+	browser.runtime.sendMessage({'name': 'saveSettings', 'prefix': prefix, 'settings': {'listedSites': siteList}});
 }
 
 function getSettingsURL() {
@@ -120,38 +116,30 @@ function settingsClick() {
 	}
 }
 
-/*
-function showGoogleDialog() {
-	window.open(
-		"https://plus.google.com/share?url=https://browser.google.com/webstore/detail/eobkhgkgoejnjaiofdmphhkemmomfabg", 
-		'', 
-		'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=550,width=400'
-	);
-	return false;
-}
-*/
-
 //==============================================================================
 // Event listeners
 function onShow() {
-	if (window.localStorage.autocardAnywheretheme == 'dark') {
+	// Setup event handlers
+	document.getElementById('site-enabled-checkbox').addEventListener('change', enableChange);
+	document.getElementById('options-btn').addEventListener('click', settingsClick);
+	
+	// Load settings
+	browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': [
+		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
+		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
+		{'name': 'theme', 'type': 'string', 'default': 'light'}
+	]}, loadSettings);
+}
+
+function loadSettings(settings) {
+	if (settings.theme == 'dark') {
 		let body = document.body;
 		body.setAttribute('style','background-color:#505355; color:white;');
 	}
+	listedSites = settings.listedSites || '';
+	isWhiteList = (settings.listType == 'whitelist');
 
-	document.getElementById('site-enabled-checkbox').addEventListener('change', enableChange);
-	document.getElementById('options-btn').addEventListener('click', settingsClick);
-	//document.getElementById('google-share-button').addEventListener('click', showGoogleDialog);
 	getCurrentHost(function(host) {
-		// Load settings
-		if (isSafari) { // Chrome
-			listedSites = safari.extension.globalPage.contentWindow.localStorage.autocardAnywherelistedSites || '';
-			isWhiteList = (safari.extension.globalPage.contentWindow.localStorage.autocardAnywherelistType == 'whitelist');
-		}
-		else { // Chrome, Opera, Firefox or Edge
-			listedSites = window.localStorage.autocardAnywherelistedSites || '';
-			isWhiteList = (window.localStorage.autocardAnywherelistType == 'whitelist');
-		}
 		let listed = isListed(host);
 		let isEnabled = ((!isWhiteList && !listed) || (isWhiteList && listed))
 		document.getElementById('site-enabled-checkbox').checked = isEnabled;
