@@ -434,7 +434,7 @@ function load() {
 		AutocardAnywhere.loading = 1;
 		console.log('AutocardAnywhere loading');
 
-		AutocardAnywhere.dictionaries = [];
+		AutocardAnywhere.dictionaries = {};
 		let dictionaries = [];
 
 		loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(async function(settings) {
@@ -508,7 +508,8 @@ function load() {
 				*/
 				
 
-				AutocardAnywhere.dictionaries.push(dictionary);
+				//AutocardAnywhere.dictionaries.push(dictionary);
+				AutocardAnywhere.dictionaries[dictionary.game + dictionary.language] = dictionary;
 			}
 			
 			// Nicknames
@@ -516,19 +517,17 @@ function load() {
 				if (settings.customNicknames.indexOf(';') > -1) {
 					settings.customNicknames = settings.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
 				}
-				let customNicknames = {};
+				AutocardAnywhere.customNicknames = {};
 				AutocardAnywhere.customNicknameRE = '(';
 				settings.customNicknames.split('||').map(function(x) {
 					let nickname = x.split('|');
 					if (nickname.length == 3) {
-						//if (AutocardAnywhere.dictionaries[nickname[0]]) {
-							customNicknames[nickname[1].toLowerCase()] = {
-								dictionary: nickname[0],
-								nickname: nickname[1],
-								fullname: nickname[2]
-							};
-							AutocardAnywhere.customNicknameRE += nickname[1] + '|';
-						//}
+						AutocardAnywhere.customNicknames[nickname[1].toLowerCase()] = {
+							dictionary: nickname[0],
+							nickname: nickname[1],
+							fullname: nickname[2]
+						};
+						AutocardAnywhere.customNicknameRE += nickname[1] + '|';
 					}
 				});
 
@@ -536,7 +535,6 @@ function load() {
 					AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
 				}
 				AutocardAnywhere.customNicknameRE += ')';
-				AutocardAnywhere.customNicknames = customNicknames;
 			}
 
 			AutocardAnywhere.loaded = 1;
@@ -550,38 +548,24 @@ function parse(text, sendResponse) {
 	//console.log(text);
 	load().then( (dictionaries => {
 		// Run all enabled dictionaries
-		dictionaries.map( (dictionary) => {
+		Object.keys(dictionaries).map( (key) => {
 			// Run the current dictionary.
+			let dictionary = dictionaries[key];
 			text = dictionary.run(text);
 
-			// Sometimes a dictionary might link text within an earlier link...
-			// Run until there are no double AA links found.
-			let replacementMade = true;
-			while (replacementMade) {
-				replacementMade = false;
-				text = text.replace(/(<span class="autocardanywhere"><a[^<]*)<span class="autocardanywhere"><a[^>]*>([^<]*)<\/a><\/span>(.*<\/a><\/span>)/, function(match, f, s, t) {
-					replacementMade = true;
-					return f+s+t;
-				});
-			}
-			//console.log(text);
-		});
-
-		// Card names enclosed in [[]]
-		if (AutocardAnywhere.fuzzyLookup) {
-			text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
-				// Do a fuzzy lookup by name in all dictionaries
-				for (let i in AutocardAnywhere.dictionaries) {
-					let dictionary = AutocardAnywhere.dictionaries[i];
+			// Card names enclosed in [[]]
+			if (AutocardAnywhere.fuzzyLookup) {
+				text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+					// Do a fuzzy lookup by name
 					let cards = dictionary.fuzzyLookup(name);
 					if (cards.length > 0) {
 						return dictionary.createLink(dictionary, cards[0], name, null, null, true);
 					}
-				}
-				return match;
-			});
-		}
-		
+					return match;
+				});
+			}
+		});
+
 		// Nicknames
 		if (AutocardAnywhere.customNicknameRE != '()') {
 			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
@@ -599,6 +583,18 @@ function parse(text, sendResponse) {
 				}
 			});
 		}
+
+		// Sometimes a dictionary might link text within an earlier link...
+		// Run until there are no double AA links found.
+		let replacementMade = true;
+		while (replacementMade) {
+			replacementMade = false;
+			text = text.replace(/(<span class="autocardanywhere"><a[^<]*)<span class="autocardanywhere"><a[^>]*>([^<]*)<\/a><\/span>(.*<\/a><\/span>)/, function(match, f, s, t) {
+				replacementMade = true;
+				return f+s+t;
+			});
+		}
+		//console.log(text);
 		
 		//console.log(text);
 		sendResponse({data: text});
