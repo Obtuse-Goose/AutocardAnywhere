@@ -714,7 +714,7 @@ let AutocardAnywhere = {
 		for (let i=0; i<children.length; i++) {
 			let n = children[i];
 			if (!n) continue;
-			if (n.nodeType == 1  &&  !/^(a|button|textarea|style|script)$/i.test(n.tagName) ) {
+			if (n.nodeType == 1  &&  !/^(a|button|textarea|style|script|noscript)$/i.test(n.tagName) ) {
 				AutocardAnywhere.traverse(n);
 			}
 			else if (n.nodeType == 3) {
@@ -726,7 +726,8 @@ let AutocardAnywhere = {
 
 						let newNode = $('<span>' + newHtml + '</span>');
 						AutocardAnywhere.initialisePopups(newNode);
-						n.after(newNode.get(0));
+						//n.after(newNode.get(0));
+						newNode.insertAfter(n);
 						n.remove();
 					});
 					
