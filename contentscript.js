@@ -818,7 +818,7 @@ let AutocardAnywhere = {
 		// Check we are clear to run on this website
 		if (((listType != 'whitelist' && thisSiteListed) || (listType == 'whitelist' && !thisSiteListed)) && !AutocardAnywhere.forceLoad) {
 			// disabled on this site
-			if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
+			//if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
 			return;
 		}
 
