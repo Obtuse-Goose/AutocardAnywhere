@@ -1,5 +1,5 @@
 {
-    "version": "4.18.0",
+    "version": "4.18.1",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -52,8 +52,8 @@
     "background": {
         "scripts": [
             "settings.js",
-			"games/dictionary.js", 
-			"games/games.js",
+            "games\/dictionary.js",
+            "games\/games.js",
             "background.js"
         ],
         "persistent": true
