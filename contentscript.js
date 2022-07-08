@@ -82,6 +82,9 @@ let AutocardAnywhere = {
 		}
 		return result;
 	},
+	sleep: function(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	},
 	replaceSelection: function(element) {
 	    if (window.getSelection && window.getSelection().getRangeAt) {
 	    	let range = window.getSelection().getRangeAt(0);
@@ -698,7 +701,7 @@ let AutocardAnywhere = {
 			}
 	    });
 	    // Restart the observer
-	    AutocardAnywhere.observeDomChanges();
+		AutocardAnywhere.observeDomChanges();
 	},
 
 	backgroundRunner: function(text) {
@@ -706,7 +709,7 @@ let AutocardAnywhere = {
 	},
 
 	// Function to traverse the DOM to find any text nodes.
-	traverse(node) {
+	traverse: async function(node) {
 		//console.log(node);
 		if (!node) return;
 		let children = node.childNodes;
@@ -733,6 +736,8 @@ let AutocardAnywhere = {
 					
 				}
 			}
+			// Pause slightly between messages
+			await AutocardAnywhere.sleep(5);
 		}
 	},
 
