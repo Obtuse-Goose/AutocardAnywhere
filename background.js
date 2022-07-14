@@ -774,8 +774,4 @@ else { // Chrome, Opera, Firefox or Edge
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
 	});
-
-	load().then(() => {
-		//console.log('loaded');
-	});
 }

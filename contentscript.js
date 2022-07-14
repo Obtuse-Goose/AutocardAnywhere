@@ -2,6 +2,9 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
+	insertionCount: 0,
+	insertionLimit: 1000,
+	ignoredStrings: [],
 	sendMessage(message) {
 		return new Promise((resolve, reject) => {
 			browser.runtime.sendMessage(message, response => resolve(response));
@@ -695,21 +698,80 @@ let AutocardAnywhere = {
 
 						// Traverse the new node.						
 						node.each((index, child) =>{
-							AutocardAnywhere.traverse(child.parentNode);
+							AutocardAnywhere.insertionCount++;
+							if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
+								AutocardAnywhere.traverse(child.parentNode);
+							}
 						});
 				}
 			}
 	    });
 	    // Restart the observer
-		AutocardAnywhere.observeDomChanges();
+		if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
+			AutocardAnywhere.observeDomChanges();
+		}
 	},
 
-	backgroundRunner: function(text) {
+	backgroundRunner: async function(text) {
+		// Pause slightly between messages
+		await AutocardAnywhere.sleep(10);
 		return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
 	},
 
+	foregroundRunner: function(text) {
+		// Run all enabled dictionaries
+		Object.keys(AutocardAnywhere.dictionaries).map( (key) => {
+			// Run the current dictionary.
+			let dictionary = AutocardAnywhere.dictionaries[key];
+			text = dictionary.run(text);
+
+			// Card names enclosed in [[]]
+			if (AutocardAnywhere.fuzzyLookup) {
+				text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
+					// Do a fuzzy lookup by name
+					let cards = dictionary.fuzzyLookup(name);
+					if (cards.length > 0) {
+						return dictionary.createLink(dictionary, cards[0], name, null, null, true);
+					}
+					return match;
+				});
+			}
+		});
+
+		// Nicknames
+		if (AutocardAnywhere.customNicknameRE != '()') {
+			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
+				let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
+				if (!nickname) return match;
+				if (!AutocardAnywhere.dictionaries[nickname.dictionary]) return match;
+				let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
+				let card = dictionary.findCard(nickname.fullname);
+				if ((!card) || (AutocardAnywhere.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()])) {return match}
+				if (AutocardAnywhereSettings.settings.expandNicknames) {
+					return f + dictionary.createLink(dictionary, card, nickname.fullname);
+				}
+				else {
+					return f + dictionary.createLink(dictionary, card, nickname.nickname);
+				}
+			});
+		}
+
+		// Sometimes a dictionary might link text within an earlier link...
+		// Run until there are no double AA links found.
+		let replacementMade = true;
+		while (replacementMade) {
+			replacementMade = false;
+			text = text.replace(/(<span class="autocardanywhere"><a[^<]*)<span class="autocardanywhere"><a[^>]*>([^<]*)<\/a><\/span>(.*<\/a><\/span>)/, function(match, f, s, t) {
+				replacementMade = true;
+				return f+s+t;
+			});
+		}
+
+		return text;
+	},
+
 	// Function to traverse the DOM to find any text nodes.
-	traverse: async function(node) {
+	traverse: function(node) {
 		//console.log(node);
 		if (!node) return;
 		let children = node.childNodes;
@@ -722,22 +784,40 @@ let AutocardAnywhere = {
 			}
 			else if (n.nodeType == 3) {
 				let html = n.nodeValue;
-				if (html.length>1 && /\S/.test(html)) {
+				if (html.length>2 && /[A-Za-z]/.test(html) && !AutocardAnywhere.ignoredStrings[html]) {
 					//console.log(html);
-					AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
-						if (newHtml == html) return;
+					if (AutocardAnywhere.isM1) {
+						//console.log('m1');
+						AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
+							if (newHtml == html) {
+								AutocardAnywhere.ignoredStrings[html] = 1;
+								return;
+							}
+
+							let newNode = $('<span>' + newHtml + '</span>');
+							AutocardAnywhere.initialisePopups(newNode);
+							//n.after(newNode.get(0));
+							newNode.insertAfter(n);
+							n.remove();
+						});
+					}
+					else {
+						//console.log('not m1');
+						let newHtml = AutocardAnywhere.foregroundRunner(html);
+						if (newHtml == html) {
+							AutocardAnywhere.ignoredStrings[html] = 1;
+							continue;
+						}
 
 						let newNode = $('<span>' + newHtml + '</span>');
 						AutocardAnywhere.initialisePopups(newNode);
 						//n.after(newNode.get(0));
 						newNode.insertAfter(n);
 						n.remove();
-					});
+					}
 					
 				}
 			}
-			// Pause slightly between messages
-			await AutocardAnywhere.sleep(5);
 		}
 	},
 
@@ -827,6 +907,25 @@ let AutocardAnywhere = {
 			//if (!AutocardAnywhereSettings.isSafari) {AutocardAnywhere.sendMessage({'name': 'disableIcon'})}
 			return;
 		}
+		
+		if (!AutocardAnywhere.isM1) {
+			// Ignore and unignore lists
+			AutocardAnywhere.ignoredCards = response.ignoredCards;
+			AutocardAnywhere.ignoreList = {};
+			if (response.ignoredCards !== undefined) {
+				response.ignoredCards.split('|').map(function(ignoredCard) {
+					AutocardAnywhere.ignoreList[ignoredCard.toLowerCase()] = 1;
+				});
+			}
+			AutocardAnywhere.unignoreList = {};
+			if (response.unignoredCards !== undefined) {
+				response.unignoredCards.split('|').map(function(unignoredCard) {
+					AutocardAnywhere.unignoreList[unignoredCard.toLowerCase()] = 1;
+				});
+			}
+			// Always ignore the card "Ow"
+			AutocardAnywhere.ignoreList['ow'] = 1;
+		}
 
 		// Load settings
 		AutocardAnywhere.popupLanguage = response.popupLanguage;
@@ -834,7 +933,7 @@ let AutocardAnywhere = {
 		AutocardAnywhere.popupHeight = response.popupHeight;
 		AutocardAnywhere.fontSize = Math.max(Math.ceil(AutocardAnywhere.popupHeight / 24), 14);
 		AutocardAnywhere.lineHeight = AutocardAnywhere.fontSize + 1;
-		//AutocardAnywhere.openInNewTab = response.newTab;
+		AutocardAnywhere.openInNewTab = response.newTab;
 		AutocardAnywhere.enablePopups = response.enablePopups;
 		AutocardAnywhere.enableIgnoreCardLink = response.enableIgnoreCardLink;
 		AutocardAnywhere.enableExtraInfo = response.enableExtraInfo;
@@ -849,7 +948,7 @@ let AutocardAnywhere = {
 		AutocardAnywhere.theme = response.theme;
 
 		AutocardAnywhere.replaceExistingLinks = response.replaceExistingLinks;
-		//AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
+		AutocardAnywhere.fuzzyLookup = response.fuzzyLookup;
 
 		AutocardAnywhereSettings.currencies.map(function(currency) {
 			if (currency.value == response.currency) {
@@ -939,6 +1038,11 @@ if (!AutocardAnywhereSettings.isBookmarklet) {
 		//AutocardAnywhere.persistentPort.postMessage({'data': 'ping'});
 	}
 	connect();
+
+	var w = document.createElement("canvas").getContext("webgl");
+	var d = w.getExtension('WEBGL_debug_renderer_info');
+	var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
+	AutocardAnywhere.isM1 = g.match(/Apple/) && !g.match(/Apple GPU/);
 
 
 	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);
