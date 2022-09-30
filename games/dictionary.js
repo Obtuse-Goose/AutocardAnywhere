@@ -28,21 +28,36 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	function simpleTitleCase(str) {
 		if (!dictionary.settings.emphasiseText) return str;
 		// This has to exactly match what the equivalent funcion in util.php is doing.
+		// Remove punctuation
+		//str = str.replace(/[\.\-\/&"\(\),’']/g, "");
+		
+		str = str.replace('-', ' ');
+		str = str.replace(',', '');
+		str = str.replace("'", '');
+		str = str.replace('’', '');
+		str = str.replace('"', '');
+
 		// Capitalise the first letter of the string
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 		// Capitalise anything that follows a space, full stop, hyphen, slash, ampersand, speech mark or bracket.
-		str = str.replace(/([\s\.\-\/&"\(\)])([a-z])/g, function(match, character, letter) {
+		//str = str.replace(/([\s\.\-\/&"\(\)])([a-z])/g, function(match, character, letter) {
+		str = str.replace(/([\s\.\/&\(\)])([a-z])/g, function(match, character, letter) {
 			return character + letter.toUpperCase();
 		});
 		return str;
 	};
 
 	cardname = cardname.replace(/&amp;/gi, '&');
-	let lookup = simpleTitleCase(cardname).replace(/’/g,"'").replace(/"/g, '`');
+	//let lookup = simpleTitleCase(cardname).replace(/’/g,"'").replace(/"/g, '`');
+	let lookup = simpleTitleCase(cardname);
 	let link = dictionary.cardNames[lookup];
 	//if (!link) link = this.cardNames[cardname];
 
-	//console.log(lookup);
+	//if (lookup.indexOf('anno') > -1) {
+		//console.log(cardname);
+		//console.log(lookup);
+		//console.log(link);
+	//}
 
 	if (!link) {return}
 	let result = {};
