@@ -205,7 +205,7 @@ function headFile(url, callback) {
 
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
-	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}], function(updateInfo) {
+	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}]).then( (updateInfo) => {
 		let lastUpdate = new Date('1970-01-01 00:00');
 		let timestamp = Date.parse(updateInfo.LastDataUpdate);
 		if (isNaN(timestamp) == false) {
@@ -218,7 +218,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 		updateRequired = ((now - lastUpdate) > updateInterval);
 		if (!updateRequired) return;
 		
-		//console.log('Updating data for: ' + gameName + gameLanguage);
+		console.log('Updating data for: ' + gameName + gameLanguage);
 		// Check if there are updated files available. If so, download them and store in localstorage.
 		let baseUrl = 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@latest/games/';
 		let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
@@ -238,7 +238,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 						saveSettings(requestPrefix, {'dataVersion': decoded.version}, false);
 					}
 					browser.storage.local.set(item, function() {
-						delete dictionaries[gameName + gameLanguage];
+						//delete dictionaries[gameName + gameLanguage];
 					});
 				});
 		//	}
@@ -254,7 +254,7 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 					let item = {};
 					item[gameName + gameLanguage] = response;
 					browser.storage.local.set(item, function() {
-						delete dictionaries[gameName + gameLanguage];
+						//delete dictionaries[gameName + gameLanguage];
 					});
 				});
 		//	}
