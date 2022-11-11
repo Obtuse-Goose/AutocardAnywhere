@@ -721,8 +721,6 @@ function onRequest(request, sender, sendResponse) {
 	return true;
 };
 
-//let settings = loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings);
-
 // Listen for the content script to send a message to the background page.
 if (AutocardAnywhereSettings.isSafari) {
 	safari.application.addEventListener("message", onRequest, false);
