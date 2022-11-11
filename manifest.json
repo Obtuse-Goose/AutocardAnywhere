@@ -25,7 +25,7 @@
             "id": "autocardanywhere-amo@autocardanywhere.com"
         }
     },
-    "short_name": "AutocardAnywhere",
+    "short_name": "AutoAny",
     "author": "Obtuse Goose Ltd",
     "manifest_version": 2,
     "content_scripts": [
