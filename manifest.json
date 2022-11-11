@@ -22,7 +22,7 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
-    "short_name": "AutocardAnywhere",
+    "short_name": "AutoAny",
     "author": "Obtuse Goose Ltd",
     "manifest_version": 3,
 	"background": {
