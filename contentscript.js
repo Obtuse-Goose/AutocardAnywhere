@@ -888,7 +888,7 @@ let AutocardAnywhere = {
 		if (response.listedSites) {
 			// boardgamearena tables explicitly disabled to avoid issue with links. 
 			let listedSites = response.listedSites;
-			if (listType != 'whitelist') listedSites += ";boardgamearena.com;";
+			if (listType != 'whitelist') listedSites += ";boardgamearena.com;wizards.com;";
 			listedSites.split(";").map(function(site) {
 				if ((site.length > 0) && (AutocardAnywhere.url.indexOf(site) != -1)) {
 					thisSiteListed = true;
