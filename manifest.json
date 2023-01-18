@@ -1,5 +1,5 @@
 {
-    "version": "4.25.0",
+    "version": "4.26.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -44,7 +44,8 @@
             ],
             "matches": [
                 "http:\/\/*\/*",
-                "https:\/\/*\/*"
+                "https:\/\/*\/*",
+				"file://*"
             ]
         }
     ],
@@ -69,7 +70,8 @@
 			],
 			"matches": [
 				"http:\/\/*\/*",
-                "https:\/\/*\/*"
+                "https:\/\/*\/*",
+				"file://*"
 			]
 		}
 	]
