@@ -1,5 +1,5 @@
 {
-    "version": "4.26.0",
+    "version": "4.28.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -7,9 +7,7 @@
         "unlimitedStorage"
     ],
 	"host_permissions": [
-		"http:\/\/*\/*",
-        "https:\/\/*\/*",
-		"file://*"
+		"<all_urls>"
 	],
     "action": {
         "default_popup": "popup.html",
@@ -44,9 +42,7 @@
                 "games\/games.js"
             ],
             "matches": [
-                "http:\/\/*\/*",
-                "https:\/\/*\/*",
-				"file://*"
+                "<all_urls>"
             ]
         }
     ],
@@ -70,9 +66,7 @@
 				"libs\/swiper-bundle.min.css"
 			],
 			"matches": [
-				"http:\/\/*\/*",
-                "https:\/\/*\/*",
-				"file://*"
+				"<all_urls>"
 			]
 		}
 	]
