@@ -3186,7 +3186,7 @@ YugiohDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://storage.googleapis.com/ygoprodeck.com/pics/<id>.jpg'
+			'default': 'https://images.ygoprodeck.com/images/cards/<id>.jpg'
 		},
 		{
 			'name': 'priceURL',
