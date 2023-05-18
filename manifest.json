@@ -4,7 +4,8 @@
         "contextMenus",
         "activeTab",
         "storage",
-        "unlimitedStorage"
+        "unlimitedStorage",
+        "<all_urls>"
     ],
 	"host_permissions": [
 		"<all_urls>"
@@ -21,10 +22,12 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
+    "browser_specific_settings": {
+        "gecko": {
+    },
     "short_name": "AutoAny",
     "author": "Obtuse Goose Ltd",
     "manifest_version": 3,
-	"background": {
 		"service_worker": "background.js"
 	},
     "content_scripts": [
