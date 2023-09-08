@@ -2331,7 +2331,6 @@ NetrunnerDictionary.prototype = new Dictionary({
 			'description': 'Link target:',
 			'type': 'string',
 			'default': 'https://netrunnerdb.com/find/?q=<name:simple>',
-			'resetToDefault': true,
 			'controlType': 'radio',
 			'options': [
 				{name: 'netrunnerdb', description: 'Netrunner DB', value: 'https://netrunnerdb.com/en/card/<en>'},
@@ -2342,7 +2341,7 @@ NetrunnerDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'type': 'string',
 			'resetToDefault': true,
-			'default': 'https://assets.netrunnerdb.com/v1/large/<en>.jpg'
+			'default': 'https://card-images.netrunnerdb.com/v1/large/<en>.jpg'
 		},
 		{
 			'name': 'defaultSection',
