@@ -35,9 +35,18 @@ AutocardAnywhereSettings = {
 		}
 	},
 	partnerStrings: {
-		tcgplayer: 'partner=AUTOANY',
-		cardmarket: 'referrer=autocardanywhere&utm_campaign=card_prices&utm_medium=text&utm_source=autocardanywhere',
-		cardhoarder: 'affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card'
+		tcgplayer: {
+			value: 'https://tcgplayer.pxf.io/PyWveM?u=',
+			type: 'prefix'
+		},
+		cardmarket: {
+			value: 'referrer=autocardanywhere&utm_campaign=card_prices&utm_medium=text&utm_source=autocardanywhere',
+			type: 'suffix'
+		},
+		cardhoarder: {
+			value: 'affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card',
+			type: 'suffix'
+		}
 	},
 	dictionaries: [
 		{'game': 'mtg', 'language': 'de', 'default': 0},
@@ -259,15 +268,23 @@ AutocardAnywhereSettings = {
 		return s;
 	},
 	appendPartnerString: function(url) {
-		let lastChar = url.charAt(url.length-1);
-		if (url.indexOf('?') < 0) url = url + '?';
-		else if (lastChar != '?' && lastChar != '&' ) {
-			url = url + '&';
+		for (const [key, partner] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
+			let type = partner.type;
+			let value = partner.value;
+			if (url.indexOf(key) < 0) continue;
+
+			if (type == 'prefix') {
+				return value + encodeURIComponent(url);
+			}
+			else if (type == 'suffix') {
+				let lastChar = url.charAt(url.length-1);
+				if (url.indexOf('?') < 0) url = url + '?';
+				else if (lastChar != '?' && lastChar != '&' ) {
+					url = url + '&';
+				}
+				return url + value;
+			}
 		}
-		for (const [key, value] of Object.entries(AutocardAnywhereSettings.partnerStrings)) {
-			if (url.indexOf(key) >= 0) url = url + value;
-		}
-		return url;
 	},
 	decodeHTMLEntities: function(text) {
 	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
