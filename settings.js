@@ -285,6 +285,7 @@ AutocardAnywhereSettings = {
 				return url + value;
 			}
 		}
+		return url;
 	},
 	decodeHTMLEntities: function(text) {
 	    let entities = [ ['apos', "'"], ['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'] ];
