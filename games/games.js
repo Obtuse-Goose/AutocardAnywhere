@@ -3179,7 +3179,14 @@ YugiohDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>',
+			'controlType': 'radio',
+			'options': [
+				{name: 'TCGPlayer', description: 'TCGplayer', value: 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'},
+				{name: 'YGOPRODECK', description: 'YGOPRODECK', value: 'https://ygoprodeck.com/card/?search=<id>'},
+				{name: 'YuGiOh Wiki', description: 'YuGiOh Wiki', value: 'https://yugipedia.com/wiki/<name:simple>'},
+				{name: 'Custom', description: 'Custom:', value: ''}
+			]
 		},
 		{
 			'name': 'imageURL',
