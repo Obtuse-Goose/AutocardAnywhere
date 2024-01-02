@@ -241,12 +241,13 @@ let AutocardAnywhere = {
 				
 				if (AutocardAnywhere.enableIgnoreCardLink) {
 					let ignore = document.createElement("a");
-					ignore.href = '#';
+					//ignore.href = '#';
 					ignore.style.marginTop = '2px';
 					ignore.style.float = 'right';
 					ignore.style.fontSize = '10px';
 					ignore.style.textDecoration = 'none';
 					ignore.style.color = '#243F7E';
+					ignore.style.cursor = 'pointer';
 					ignore.appendChild(document.createTextNode('Ignore this card in future'));
 					$(ignore).on('click', function() {
 						// Hide the current popup

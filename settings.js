@@ -114,7 +114,7 @@ AutocardAnywhereSettings = {
 		{'name': 'showIcon', 'type': 'boolean', 'default': false},
 		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
 		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
-		{'name': 'ignoredCards', 'type': 'string', 'default': 'Access Denied|Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Path|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|Time Out'},
+		{'name': 'ignoredCards', 'type': 'string', 'default': '7|Access Denied|Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Path|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|Time Out'},
 		{'name': 'unignoredCards', 'type': 'string', 'default': 'Endurance|Fury|Grief|Solitude|Subtlety'},
 		{'name': 'popupAnimation', 'type': 'string', 'default': 'scale'},
 		{'name': 'popupShowDuration', 'type': 'integer', 'default': 500},
