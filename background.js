@@ -144,7 +144,6 @@ function getExchangeRate() {
 			{'name': 'euroExchangeRate', 'type': 'float', 'default': 1.0},
 			{'name': 'exchangeRateLastUpdatedv4', 'type': 'string', 'default': ''}
 		]).then(function(currencyInfo) {
-
 			let now = new Date();
 			let lastUpdate = new Date(currencyInfo.exchangeRateLastUpdatedv4);
 			let updateInterval = 86400000; // 1 day = 24 * 60 * 60 * 1000 ms = 86400000
@@ -152,17 +151,19 @@ function getExchangeRate() {
 
 			if (currencyInfo.exchangeRateLastUpdatedv4 != '' && !updateRequired) {
 				resolve(currencyInfo);
+				return;
 			}
 
 			// Update is required
-			getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+			let currencyEndpoint = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/';
+			getFile(currencyEndpoint + 'usd.json', function(data) {
 				data = JSON.parse(data);
-				let dollarExchangeRate = data[currencyInfo.currency.toLowerCase()];
+				let dollarExchangeRate = data['usd'][currencyInfo.currency.toLowerCase()];
 				if (dollarExchangeRate) {
 
-					getFile('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/eur/' + currencyInfo.currency.toLowerCase() + '.json', function(data) {
+					getFile(currencyEndpoint + 'eur.json', function(data) {
 						data = JSON.parse(data);
-						let euroExchangeRate = data[currencyInfo.currency.toLowerCase()];
+						let euroExchangeRate = data['eur'][currencyInfo.currency.toLowerCase()];
 						if (euroExchangeRate) {
 							let exchangeRate = {
 								dollarExchangeRate: dollarExchangeRate,
