@@ -773,7 +773,9 @@ else { // Chrome, Opera, Firefox or Edge
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
 		else if (details.reason == "update") {
+			// Force update mtg data after every extension update to work around issue with Mozilla's 4MB limit for Firefox extensions.
 			let lastUpdate = new Date('1970-01-01 00:00');
+			saveSettings(AutocardAnywhereSettings.prefix + 'mtgen', {'LastDataUpdate': now.toString()}, false);
 			saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
 		}
 	});
