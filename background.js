@@ -772,5 +772,9 @@ else { // Chrome, Opera, Firefox or Edge
 			openURL(browser.runtime.getURL('options.html'));
 			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
 		}
+		else if (details.reason == "update") {
+			let lastUpdate = new Date('1970-01-01 00:00');
+			saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
+		}
 	});
 }
