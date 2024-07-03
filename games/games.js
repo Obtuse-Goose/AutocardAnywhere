@@ -1566,6 +1566,76 @@ AutocardAnywhere.games.l5r.en = new L5rDictionary({
 });
 
 //==============================================================================
+// Lorcana
+//==============================================================================
+function LorcanaDictionary(config) {
+	this.description = this.description + ' - ' + config.description;
+	this.language = config.language;
+	this.options = this.settings.concat(config.settings);
+};
+
+LorcanaDictionary.prototype = new Dictionary({
+	game: 'lorcana',
+	description: 'Lorcana',
+	// Settings and initialisation
+	settings: [
+		{
+			'name': 'linkTarget',
+			'description': 'Link target:',
+			'type': 'string',
+			'default': 'https://store.tcgplayer.com/lorcana/product/show?ProductName=<name:simple>'
+		},
+		{
+			'name': 'imageURL',
+			'description': 'Image source:',
+			'type': 'string',
+			'default': 'https://lorcana-api.com/images/<img>'
+		}
+	]
+}); 
+
+// Override parent functions
+LorcanaDictionary.prototype.findCardById = function(cardID, match, isDict) {
+	let cardData = this.cardData[cardID];
+	if (!cardData) {return}
+	return {
+		'game': this.game,
+		'language': this.language,
+		'name': match.replace(/"/g, '`'),
+		'match': match,
+		'en': cardID,
+		'id': cardID,
+		'img': cardData[0],
+		'rotate': cardData[1] || 0,
+		'isDict': isDict || 0
+	};
+};
+
+//==============================================================================
+// Individual language(s)
+//==============================================================================
+AutocardAnywhere.games.lorcana = {};
+// English
+AutocardAnywhere.games.lorcana.en = new LorcanaDictionary({
+	description: 'English',
+	language: 'en',
+	settings: [
+		{
+			'name': 'ignoreDictionaryWords',
+			'description': 'Ignore Dictionary Words',
+			'type': 'boolean',
+			'default': true,
+			'controlType': 'checkbox'
+		},
+		{
+			'name': 'emphasiseText',
+			'type': 'boolean',
+			'default': true
+		}
+	]
+});
+
+//==============================================================================
 // Lord of the Rings
 //==============================================================================
 function LotrDictionary(config) {
@@ -2771,6 +2841,79 @@ SolforgeDictionary.prototype.findCardById = function(cardID, match, isDict) {
 AutocardAnywhere.games.solforge = {};
 // English
 AutocardAnywhere.games.solforge.en = new SolforgeDictionary({
+	description: 'English',
+	language: 'en',
+	settings: [
+		{
+			'name': 'ignoreDictionaryWords',
+			'description': 'Ignore Dictionary Words',
+			'type': 'boolean',
+			'default': true,
+			'controlType': 'checkbox'
+		},
+		{
+			'name': 'emphasiseText',
+			'type': 'boolean',
+			'default': true
+		}
+	]
+});
+
+//==============================================================================
+// Sorcery
+//==============================================================================
+function SorceryDictionary(config) {
+	this.description = this.description + ' - ' + config.description;
+	this.language = config.language;
+	this.options = this.settings.concat(config.settings);
+};
+
+SorceryDictionary.prototype = new Dictionary({
+	game: 'sorcery',
+	description: 'Sorcery: Contested Realm',
+	// Settings and initialisation
+	settings: [
+		{
+			'name': 'linkTarget',
+			'description': 'Link target:',
+			'type': 'string',
+			'default': 'https://curiosa.io/cards/<name:simple>'
+		},
+		{
+			'name': 'imageURL',
+			'description': 'Image source:',
+			'type': 'string',
+			'default': 'https://d27a44hjr9gen3.cloudfront.net/<set>/<name:simple>.png'
+		}
+	]
+}); 
+
+// Override parent functions
+SorceryDictionary.prototype.simplify = function(s) {
+	return s.replace(/ /g, '_').toLowerCase();
+};
+SorceryDictionary.prototype.findCardById = function(cardID, match, isDict) {
+	let cardData = this.cardData[cardID];
+	if (!cardData) {return}
+	return {
+		'game': this.game,
+		'language': this.language,
+		'name': match.replace(/"/g, '`'),
+		'match': match,
+		'en': cardID,
+		'id': cardID,
+		'set': cardData[0],
+		'rotate': cardData[1] || 0,
+		'isDict': isDict || 0
+	};
+};
+
+//==============================================================================
+// Individual language(s)
+//==============================================================================
+AutocardAnywhere.games.sorcery = {};
+// English
+AutocardAnywhere.games.sorcery.en = new SorceryDictionary({
 	description: 'English',
 	language: 'en',
 	settings: [
