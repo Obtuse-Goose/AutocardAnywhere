@@ -742,6 +742,7 @@ let AutocardAnywhere = {
 		// Nicknames
 		if (AutocardAnywhere.customNicknameRE != '()') {
 			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
+				if (typeof(s) !== 'string') return match;
 				let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
 				if (!nickname) return match;
 				if (!AutocardAnywhere.dictionaries[nickname.dictionary]) return match;
@@ -889,7 +890,7 @@ let AutocardAnywhere = {
 		if (response.listedSites) {
 			// boardgamearena tables explicitly disabled to avoid issue with links. 
 			let listedSites = response.listedSites;
-			if (listType != 'whitelist') listedSites += ";boardgamearena.com;wizards.com;";
+			if (listType != 'whitelist') listedSites += ";boardgamearena.com;wizards.com;docs.google.com/spreadsheets;";
 			listedSites.split(";").map(function(site) {
 				if ((site.length > 0) && (AutocardAnywhere.url.indexOf(site) != -1)) {
 					thisSiteListed = true;
