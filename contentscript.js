@@ -257,9 +257,9 @@ let AutocardAnywhere = {
 							return $(this).text();
 						});
 						// Add the card name to the ignored cards list
-						let newIgnoredCards = AutocardAnywhere.ignoredCards + '|' + text;
+						AutocardAnywhere.ignoredCards += '|' + text;
 						AutocardAnywhere.saveSettings({
-							ignoredCards: newIgnoredCards
+							ignoredCards: AutocardAnywhere.ignoredCards
 						});
 					});
 					result.appendChild(ignore);
