@@ -206,7 +206,10 @@ Dictionary.prototype.run = function(text) {
 	let dictionary = this;
 	text = ' ' + text.replace(/\u00a0/g, " ") + ' ';
 	text = text.replace(dictionary.test, function (match, f, s, suffix, t) {
+		// If this card is on the ignore list, ignore it.
 		if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {return match}
+		// If the card name is followed by a d but doesn't end in e, don't link it.
+		if (suffix == 'd' && s.slice(-1) != 'e') {return match}
 		
 		// Get the first card in the array
 		let card = dictionary.findCard(s, ((f == '[') && (t == ']')));
