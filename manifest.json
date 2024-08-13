@@ -1,15 +1,13 @@
 {
-    "version": "4.38.0",
+    "version": "4.39.0",
     "permissions": [
         "contextMenus",
         "activeTab",
         "storage",
-        "unlimitedStorage"
+        "unlimitedStorage",
+        "<all_urls>"
     ],
-	"host_permissions": [
-		"<all_urls>"
-	],
-    "action": {
+    "browser_action": {
         "default_popup": "popup.html",
         "default_icon": {
             "19": "Icon-19.png",
@@ -21,12 +19,14 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "autocardanywhere-amo@autocardanywhere.com"
+        }
+    },
     "short_name": "AutoAny",
     "author": "Obtuse Goose Ltd",
-    "manifest_version": 3,
-	"background": {
-		"service_worker": "background.js"
-	},
+    "manifest_version": 2,
     "content_scripts": [
         {
             "all_frames": false,
@@ -47,27 +47,29 @@
         }
     ],
     "name": "AutocardAnywhere",
+    "background": {
+        "scripts": [
+            "settings.js",
+            "games\/dictionary.js",
+            "games\/games.js",
+            "background.js"
+        ],
+        "persistent": true
+    },
     "options_ui": {
         "page": "options.html",
         "open_in_tab": true
     },
     "description": "Displays card image popups for collectable card games on all webpages you visit.",
-	"web_accessible_resources": [
-		{
-			"resources": [
-				"img\/loading.gif",
-				"img\/broken.png",
-				"libs\/tippy\/light.css",
-				"libs\/tippy\/material.css",
-				"libs\/tippy\/scale.css",
-				"libs\/tippy\/perspective.css",
-				"libs\/tippy\/shift-away.css",
-				"libs\/tippy\/shift-toward.css",
-				"libs\/swiper-bundle.min.css"
-			],
-			"matches": [
-				"<all_urls>"
-			]
-		}
-	]
+    "web_accessible_resources": [
+        "img\/loading.gif",
+        "img\/broken.png",
+        "libs\/tippy\/light.css",
+        "libs\/tippy\/material.css",
+        "libs\/tippy\/scale.css",
+        "libs\/tippy\/perspective.css",
+        "libs\/tippy\/shift-away.css",
+        "libs\/tippy\/shift-toward.css",
+        "libs\/swiper-bundle.min.css"
+    ]
 }
