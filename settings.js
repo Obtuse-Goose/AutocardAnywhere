@@ -36,7 +36,7 @@ AutocardAnywhereSettings = {
 	},
 	partnerStrings: {
 		tcgplayer: {
-			value: 'https://tcgplayer.pxf.io/PyWveM?u=',
+			value: 'https://partner.tcgplayer.com/c/4970157/1780961/21018?u=',
 			type: 'prefix'
 		},
 		cardmarket: {
