@@ -164,7 +164,7 @@ AutocardAnywhere = {
 			return false;
 		}
 
-		$(node).find('a.autocardanywhere-popup').each(function() {
+		$(node).find('a.' + AutocardAnywhereSettings.className).each(function() {
 			let target = $(this);
 			//if (target.data('popup')) return;
 			if (target.hasClass('autocardanywhere-popup-added')) {
@@ -233,7 +233,7 @@ AutocardAnywhere = {
 				if (!cards) {return}
 				
 				let result = document.createElement("div");
-				result.className = 'autocardanywhere-popup swiper-container swiper-no-swiping';
+				result.className = AutocardAnywhereSettings.className + ' swiper-container swiper-no-swiping';
 				result.style.fontFamily = AutocardAnywhereSettings.font;
 
 				let cardsElement = document.createElement("div");
@@ -344,7 +344,7 @@ AutocardAnywhere = {
 				onTrigger() {
 					// If this tooltip has already been rendered, do nothing
 					//if (target.data('popup')) return;
-					if (!target.is('a.autocardanywhere-popup')) return;
+					if (!target.is('a.' + AutocardAnywhereSettings.className)) return;
 
 					//let paginationNumbers = false;
 					let extraInfoEnabled = false;
@@ -355,7 +355,7 @@ AutocardAnywhere = {
 							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
 								//target.data('popup', 1);
 								//console.log('complete');
-								target.removeClass('autocardanywhere-popup');
+								target.removeClass(AutocardAnywhereSettings.className);
 							}
 					}
 
@@ -514,15 +514,15 @@ AutocardAnywhere = {
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/shift-toward.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/swiper-bundle.min.css"));
 
-		let popupCss     =  ".autocardanywhere-popup {z-index: 15001 !important;}" +
-							".autocardanywhere-popup .swiper-pagination-bullets .swiper-pagination-bullet {margin: 4px;}" +
+		let popupCss     =  "." + AutocardAnywhereSettings.className + " {z-index: 15001 !important;}" +
+							"." + AutocardAnywhereSettings.className + " .swiper-pagination-bullets .swiper-pagination-bullet {margin: 4px;}" +
 							"div.tippy-box {max-width: none !important;}";
-		let imgLoadedCss =  ".autocardanywhere-popup .autocardanywhere-loading,.autocardanywhere-broken{background-color: black;background-position: center center;background-repeat: no-repeat;border-radius: 10px;}" +
-							".autocardanywhere-popup .autocardanywhere-loading{background-image: url('" + AutocardAnywhere.getURL('img/loading.gif') + "');background-color: black;}" +
-							".autocardanywhere-popup .autocardanywhere-broken{background-image: url('" + AutocardAnywhere.getURL('img/broken.png') + "');background-color: #be3730;}" +
-							".autocardanywhere-popup .autocardanywhere-loading img{display: none;}" +
-							".autocardanywhere-popup .autocardanywhere-broken img{display: none;}";
-		let scrollBarCss = ".autocardanywhere-popup ::-webkit-scrollbar{width: 0.5em;}.autocardanywhere-popup ::-webkit-scrollbar-button{height:0px;}.autocardanywhere-popup ::-webkit-scrollbar-track-piece{background:#888;}.autocardanywhere-popup ::-webkit-scrollbar-thumb{background:#ccc;}​";
+		let imgLoadedCss =  "." + AutocardAnywhereSettings.className + " .autocardanywhere-loading,.autocardanywhere-broken{background-color: black;background-position: center center;background-repeat: no-repeat;border-radius: 10px;}" +
+							"." + AutocardAnywhereSettings.className + " .autocardanywhere-loading{background-image: url('" + AutocardAnywhere.getURL('img/loading.gif') + "');background-color: black;}" +
+							"." + AutocardAnywhereSettings.className + " .autocardanywhere-broken{background-image: url('" + AutocardAnywhere.getURL('img/broken.png') + "');background-color: #be3730;}" +
+							"." + AutocardAnywhereSettings.className + " .autocardanywhere-loading img{display: none;}" +
+							"." + AutocardAnywhereSettings.className + " .autocardanywhere-broken img{display: none;}";
+		let scrollBarCss = "." + AutocardAnywhereSettings.className + " ::-webkit-scrollbar{width: 0.5em;}." + AutocardAnywhereSettings.className + " ::-webkit-scrollbar-button{height:0px;}." + AutocardAnywhereSettings.className + " ::-webkit-scrollbar-track-piece{background:#888;}." + AutocardAnywhereSettings.className + " ::-webkit-scrollbar-thumb{background:#ccc;}​";
 
 		let fontWeight = bold ? 'bold' : 'normal';
 		let fontStyle = italic ? 'italic' : 'none';

@@ -17,6 +17,7 @@ AutocardAnywhereSettings = {
 	isTouchInterface: false,//('ontouchstart' in window),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
 	prefix: 'autocardAnywhere',
+	className: 'autocardanywhere-' + Math.random().toString(36).slice(2, 8),
 	maxLevenshteinFactor: 1,
 	themes: {
 		light: {
