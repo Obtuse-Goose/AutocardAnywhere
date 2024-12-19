@@ -1,5 +1,17 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-let AutocardAnywhere = {
+
+try {
+	if (typeof AutocardAnywhere !== 'undefined') {
+		throw new Error('AutocardAnywhere already installed');
+	}
+}
+catch (error) {
+	if (error.message == 'AutocardAnywhere already installed') {
+		throw error;
+	}
+}
+
+AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
 	insertionCount: 0,
@@ -13,15 +25,24 @@ let AutocardAnywhere = {
 	ajax: function(url) {
 		return new Promise((resolve, reject) => {
 			// Performs an ajax call in the manner accepted by each browser.
-			if (AutocardAnywhereSettings.isBookmarklet) {
-				let xmlhttp = new XMLHttpRequest();
-				xmlhttp.onreadystatechange = function() {
-					if (xmlhttp.readyState==4) {
-						resolve(xmlhttp.response);
+			if (AutocardAnywhereSettings.isEmbedded) {
+				if (url == 'exchangeRate') {
+					resolve({
+						dollarExchangeRate: 1.0,
+						euroExchangeRate: 1.0,
+						exchangeRateLastUpdatedv4: new Date()
+					});
+				}
+				else {
+					let xmlhttp = new XMLHttpRequest();
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState==4) {
+							resolve(xmlhttp.response);
+						} 
 					} 
-				} 
-				xmlhttp.open("GET", url, true); 
-				xmlhttp.send();
+					xmlhttp.open("GET", url, true); 
+					xmlhttp.send();
+				}
 			}
 			else if (AutocardAnywhereSettings.isSafari) {
 				function getResponse(event) {
@@ -98,8 +119,8 @@ let AutocardAnywhere = {
 	    }
 	},
 	getURL: function(filename) {
-		if (AutocardAnywhereSettings.isBookmarklet) {
-			return 'http://update.autocardanywhere.com/misc/Firefox/data/' + filename;
+		if (AutocardAnywhereSettings.isEmbedded) {
+			return 'https://autocardanywhere.com/embed/' + filename;
 		}
 		else if (AutocardAnywhereSettings.isSafari) {
 			return safari.extension.baseURI + filename;
@@ -146,6 +167,10 @@ let AutocardAnywhere = {
 		$(node).find('a.autocardanywhere-popup').each(function() {
 			let target = $(this);
 			//if (target.data('popup')) return;
+			if (target.hasClass('autocardanywhere-popup-added')) {
+				return;
+			}
+			target.addClass('autocardanywhere-popup-added');
 			let cards = new Array();
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
@@ -329,6 +354,7 @@ let AutocardAnywhere = {
 						if ((!extraInfoEnabled || content.find('.autocardanywhere-loaded').length > 0) &&
 							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
 								//target.data('popup', 1);
+								//console.log('complete');
 								target.removeClass('autocardanywhere-popup');
 							}
 					}
@@ -991,10 +1017,12 @@ let AutocardAnywhere = {
 
 		// Then check that we don't have any extra dictionaries specified in settings.js that don't appear in the user's settings.
 		// This would happen if the dictionary in question has been added to the extension since the last time the user saved settings.
-		for (dictionaryName in dictionariesHash) {
-			let dictionary = dictionariesHash[dictionaryName];
-			if (dictionary.default == 1) {
-				dictionaries.push([dictionary.game, dictionary.language]);
+		if (!AutocardAnywhereSettings.isEmbedded) {
+			for (dictionaryName in dictionariesHash) {
+				let dictionary = dictionariesHash[dictionaryName];
+				if (dictionary.default == 1) {
+					dictionaries.push([dictionary.game, dictionary.language]);
+				}
 			}
 		}
 		
@@ -1027,7 +1055,7 @@ let AutocardAnywhere = {
 	}
 }
 
-if (!AutocardAnywhereSettings.isBookmarklet) {
+if (!AutocardAnywhereSettings.isEmbedded) {
 	function connect() {
 		//console.log('(re)connecting...');
 		AutocardAnywhere.persistentPort = chrome.runtime.connect({name: 'autocardanywhere'});
