@@ -13,7 +13,7 @@ AutocardAnywhereSettings = {
 	isSafari: (navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1),
 	isOpera: (navigator.userAgent.toLowerCase().indexOf('opr') > -1),
 	isEdge: (navigator.userAgent.toLowerCase().indexOf('edge') > -1),
-	isBookmarklet: (typeof(AutocardAnywhereLoader) !== 'undefined'),
+	isEmbedded: (typeof(AutocardAnywhereLoader) !== 'undefined'),
 	isTouchInterface: false,//('ontouchstart' in window),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
 	prefix: 'autocardAnywhere',
@@ -169,16 +169,16 @@ AutocardAnywhereSettings = {
 	],
 	load: function(prefix, settings) {
 		return new Promise((resolve, reject) => {
-			if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
-				AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
+			if (AutocardAnywhereSettings.isEmbedded) { // Running as bookmarklet
+				//AutocardAnywhereSettings.dictionaries = AutocardAnywhereSettings.bookmarkletDictionaries;
 				let response = {};
 				settings.map(function(setting) {
 					if (setting.name == 'linkLanguages') {
 						response[setting.name] = 'mtg:en:1;';
 					}
-					else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
-						response[setting.name] = false;
-					}
+					//else if (setting.name == 'enableExtraInfo' || setting.name == 'enablePrices') {
+					//	response[setting.name] = false;
+					//}
 					else {
 						response[setting.name] = setting.default;
 					}
@@ -300,7 +300,7 @@ AutocardAnywhereSettings = {
 		if (AutocardAnywhereSettings.isSafari) {
 			return safari.extension.displayVersion;
 		}
-		else if (!AutocardAnywhereSettings.isBookmarklet) { // Chrome, Opera, Firefox or Edge
+		else if (!AutocardAnywhereSettings.isEmbedded) { // Chrome, Opera, Firefox or Edge
 			return browser.runtime.getManifest().version;
 		}
 		return '';

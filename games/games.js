@@ -22,12 +22,28 @@ AutocardAnywhere.games = {
 						}
 					};
 
-					if (AutocardAnywhereSettings.isBookmarklet) { // Running as bookmarklet
+					if (AutocardAnywhereSettings.isEmbedded) { // Running embedded in a web page
+						AutocardAnywhere.ajax("https://autocardanywhere.com/embed/games/" + name + "/" + name + "-data.json").then((response) => {
+							//console.log(gameData);
+							let gameData = JSON.parse(response);
+							AutocardAnywhere.ajax("https://autocardanywhere.com/embed/games/" + name + "/" + language + "-data.json").then((response) => {
+								//console.log(languageData);
+								let languageData = JSON.parse(response);
+
+								messageCallback({
+									'cardData': gameData.cardData,
+									'test': languageData.test,
+									'cardNames': languageData.cardNames
+								});
+							});
+						});
+						/*
 						messageCallback({
 							'cardData': [],
 							'test': AutocardAnywhereLoader[name + language].test,
 							'cardNames': AutocardAnywhereLoader[name + language].cardNames
 						});
+						*/
 					}
 					else if (AutocardAnywhereSettings.isSafari) {
 						let messageID = AutocardAnywhereGuid();
@@ -1979,6 +1995,7 @@ MtgDictionary.prototype.parseExtraInfo = function(content, section, card) {
 MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
 	if (!cardData) {
+		/*
 		if (AutocardAnywhereSettings.isBookmarklet) {
 			return {
 				'game': this.game,
@@ -1990,8 +2007,9 @@ MtgDictionary.prototype.findCardById = function(cardID, match, isDict) {
 			}
 		}
 		else {
+		*/
 			return;
-		}
+		//}
 	}
 	// If the card is not legal in a selected format
 	//if ((this.settings.legality & (cardData[11]+4096)) == 0) {return}

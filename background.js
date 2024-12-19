@@ -387,10 +387,8 @@ function getDictionary(dictionary) {
 				});
 			}
 			else {
-				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(response) {
-					let gameData = response;
-					getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(response) {
-						let languageData = response;
+				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(gameData) {
+					getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(languageData) {
 						//let decoded = JSON.parse(languageData);
 						//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
 						console.log(gameName + gameLanguage + ' - found data on disk');
