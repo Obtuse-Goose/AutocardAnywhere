@@ -1,17 +1,12 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-
-try {
-	if (typeof AutocardAnywhere !== 'undefined') {
-		throw new Error('AutocardAnywhere already installed');
+if (AutocardAnywhereSettings.isEmbedded) {
+	if (document.cookie.indexOf("autocardanywhereextensioninstalled=true") > -1) {
+		throw new Error('AutocardAnywhere already installed as extension');
 	}
 }
-catch (error) {
-	if (error.message == 'AutocardAnywhere already installed') {
-		throw error;
-	}
-}
+document.cookie = "autocardanywhereextensioninstalled=true";
 
-AutocardAnywhere = {
+let AutocardAnywhere = {
 	loaded: false,
 	forceLoad: false,
 	insertionCount: 0,
@@ -167,10 +162,6 @@ AutocardAnywhere = {
 		$(node).find('a.' + AutocardAnywhereSettings.className).each(function() {
 			let target = $(this);
 			//if (target.data('popup')) return;
-			if (target.hasClass('autocardanywhere-popup-added')) {
-				return;
-			}
-			target.addClass('autocardanywhere-popup-added');
 			let cards = new Array();
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
@@ -354,7 +345,7 @@ AutocardAnywhere = {
 						if ((!extraInfoEnabled || content.find('.autocardanywhere-loaded').length > 0) &&
 							(!pricesEnabled || content.find('.autocardanywhere-prices').length > 0)) {
 								//target.data('popup', 1);
-								//console.log('complete');
+								//console.log('load complete');
 								target.removeClass(AutocardAnywhereSettings.className);
 							}
 					}
