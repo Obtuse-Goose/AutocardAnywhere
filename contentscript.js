@@ -1,7 +1,7 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
 if (AutocardAnywhereSettings.isEmbedded) {
 	if (document.cookie.indexOf("autocardanywhereextensioninstalled=true") > -1) {
-		throw new Error('AutocardAnywhere already installed as extension');
+		throw new Error('AutocardAnywhere is already installed as an extension');
 	}
 }
 document.cookie = "autocardanywhereextensioninstalled=true";
