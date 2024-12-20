@@ -682,6 +682,12 @@ AutocardAnywhere = {
 			let cardElement = createCardLink($(this).text(), $(this).text(), $(this).attr('href'));
 			return cardElement ? cardElement : $(this).clone(); // Couldn't find the card, so return the link unchanged
 		});
+		// Custom link
+		$(node).find('a.autocardanywhere-link').replaceWith(function() {
+			// Link to the card specified in the href attribute with the text from inside the element
+			let cardElement = createCardLink($(this).attr('href'), $(this).text());
+			return cardElement ? cardElement : $(this).clone(); // Couldn't find the card, so return the link unchanged
+		});
 	},
 
 	observeDomChanges: function() {
