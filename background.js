@@ -510,31 +510,6 @@ function load() {
 				//AutocardAnywhere.dictionaries.push(dictionary);
 				AutocardAnywhere.dictionaries[dictionary.game + dictionary.language] = dictionary;
 			}
-			
-			// Nicknames
-			if (settings.customNicknames && (settings.customNicknames != '')) {
-				if (settings.customNicknames.indexOf(';') > -1) {
-					settings.customNicknames = settings.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
-				}
-				AutocardAnywhere.customNicknames = {};
-				AutocardAnywhere.customNicknameRE = '(';
-				settings.customNicknames.split('||').map(function(x) {
-					let nickname = x.split('|');
-					if (nickname.length == 3) {
-						AutocardAnywhere.customNicknames[nickname[1].toLowerCase()] = {
-							dictionary: nickname[0],
-							nickname: nickname[1],
-							fullname: nickname[2]
-						};
-						AutocardAnywhere.customNicknameRE += nickname[1] + '|';
-					}
-				});
-
-				if (AutocardAnywhere.customNicknameRE.length > 1) {
-					AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
-				}
-				AutocardAnywhere.customNicknameRE += ')';
-			}
 
 			AutocardAnywhere.loaded = 1;
 			AutocardAnywhere.loading = 0;

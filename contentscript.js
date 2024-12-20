@@ -1057,6 +1057,33 @@ AutocardAnywhere = {
 				}
 			}
 		});
+
+		
+		// Nicknames
+		if (response.customNicknames && (response.customNicknames != '')) {
+			if (response.customNicknames.indexOf(';') > -1) {
+				response.customNicknames = response.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
+			}
+			AutocardAnywhere.customNicknames = {};
+			AutocardAnywhere.customNicknameRE = '(';
+			response.customNicknames.split('||').map(function(x) {
+				let nickname = x.split('|');
+				if (nickname.length == 3) {
+					AutocardAnywhere.customNicknames[nickname[1].toLowerCase()] = {
+						dictionary: nickname[0],
+						nickname: nickname[1],
+						fullname: nickname[2]
+					};
+					AutocardAnywhere.customNicknameRE += nickname[1] + '|';
+				}
+			});
+
+			if (AutocardAnywhere.customNicknameRE.length > 1) {
+				AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
+			}
+			AutocardAnywhere.customNicknameRE += ')';
+		}
+
 		AutocardAnywhere.loaded = true;
 	}
 }
