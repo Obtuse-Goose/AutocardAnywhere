@@ -120,7 +120,7 @@ AutocardAnywhere = {
 	},
 	getURL: function(filename) {
 		if (AutocardAnywhereSettings.isEmbedded) {
-			return 'https://autocardanywhere.com/embed/' + filename;
+			return 'https://cdn.jsdelivr.net/gh/Obtuse-Goose/AutocardAnywhere@latest/' + filename;
 		}
 		else if (AutocardAnywhereSettings.isSafari) {
 			return safari.extension.baseURI + filename;
