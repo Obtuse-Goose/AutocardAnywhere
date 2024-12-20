@@ -4,7 +4,9 @@ if (AutocardAnywhereSettings.isEmbedded) {
 		throw new Error('AutocardAnywhere is already installed as an extension');
 	}
 }
-document.cookie = "autocardanywhereextensioninstalled=true";
+else {
+	document.cookie = "autocardanywhereextensioninstalled=true";
+}
 
 let AutocardAnywhere = {
 	loaded: false,
