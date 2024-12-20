@@ -23,10 +23,10 @@ AutocardAnywhere.games = {
 					};
 
 					if (AutocardAnywhereSettings.isEmbedded) { // Running embedded in a web page
-						AutocardAnywhere.ajax("https://autocardanywhere.com/embed/games/" + name + "/" + name + "-data.json").then((response) => {
+						AutocardAnywhere.ajax(AutocardAnywhere.getURL("games/" + name + "/" + name + "-data.json")).then((response) => {
 							//console.log(gameData);
 							let gameData = JSON.parse(response);
-							AutocardAnywhere.ajax("https://autocardanywhere.com/embed/games/" + name + "/" + language + "-data.json").then((response) => {
+							AutocardAnywhere.ajax(AutocardAnywhere.getURL("games/" + name + "/" + language + "-data.json")).then((response) => {
 								//console.log(languageData);
 								let languageData = JSON.parse(response);
 
