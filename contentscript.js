@@ -1,11 +1,13 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
 if (AutocardAnywhereSettings.isEmbedded) {
-	if (document.cookie.indexOf("autocardanywhereextensioninstalled=true") > -1) {
+	if (document.getElementById('autocardanywhereextensioninstalled')) {
 		throw new Error('AutocardAnywhere is already installed as an extension');
 	}
 }
 else {
-	document.cookie = "autocardanywhereextensioninstalled=true";
+	let elem = document.createElement("div");
+	elem.setAttribute("id", "autocardanywhereextensioninstalled");
+	document.querySelector('body').appendChild(elem);
 }
 
 let AutocardAnywhere = {
@@ -168,8 +170,10 @@ let AutocardAnywhere = {
 
 			if (AutocardAnywhereSettings.isTouchInterface) {
 				target.bind('click', function(event) {
-		    		event.preventDefault();
-		    		return false;
+					if (!target[0]._tippy.state.isShown) {
+						event.preventDefault();
+						return false;
+					}
 				});
 			}
 
