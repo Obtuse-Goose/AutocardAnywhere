@@ -10,7 +10,7 @@ AutocardAnywhereSettings = {
 	// Define some global constants
 	isFirefox: (navigator.userAgent.toLowerCase().indexOf('firefox') > -1),
 	isChrome: (navigator.userAgent.toLowerCase().indexOf('chrome') > -1),
-	isSafari: (navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1),
+	isSafari: false,//(navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1),
 	isOpera: (navigator.userAgent.toLowerCase().indexOf('opr') > -1),
 	isEdge: (navigator.userAgent.toLowerCase().indexOf('edge') > -1),
 	isEmbedded: (typeof(AutocardAnywhereLoader) !== 'undefined'),
