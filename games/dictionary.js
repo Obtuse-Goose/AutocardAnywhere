@@ -9,6 +9,9 @@ Dictionary.prototype.load = function() {
 	return new Promise((resolve, reject) => {
 		let dictionary = this;
 		AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix + dictionary.game + dictionary.language, dictionary.options).then(function(data) {
+			if (AutocardAnywhere[dictionary.game + dictionary.language]) {
+				Object.assign(data, AutocardAnywhere[dictionary.game + dictionary.language]);
+			}
 			dictionary.settings = data;
 			resolve(dictionary);
 		});

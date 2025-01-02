@@ -10,11 +10,11 @@ AutocardAnywhereSettings = {
 	// Define some global constants
 	isFirefox: (navigator.userAgent.toLowerCase().indexOf('firefox') > -1),
 	isChrome: (navigator.userAgent.toLowerCase().indexOf('chrome') > -1),
-	isSafari: (navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1),
+	isSafari: false,//(navigator.userAgent.toLowerCase().indexOf('safari') > -1 && navigator.userAgent.toLowerCase().indexOf('chrome') == -1),
 	isOpera: (navigator.userAgent.toLowerCase().indexOf('opr') > -1),
 	isEdge: (navigator.userAgent.toLowerCase().indexOf('edge') > -1),
 	isEmbedded: (typeof(AutocardAnywhereLoader) !== 'undefined'),
-	isTouchInterface: false,//('ontouchstart' in window),
+	isTouchInterface: ('ontouchstart' in window),
 	font: "'Gill Sans','Gill Sans MT',Calibri,Arial,sans-serif",
 	prefix: 'autocardAnywhere',
 	className: 'autocardanywhere-' + Math.random().toString(36).slice(2, 8),
