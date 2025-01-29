@@ -1,6 +1,15 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
 if (AutocardAnywhereSettings.isEmbedded) {
 	if (document.getElementById('autocardanywhereextensioninstalled')) {
+		// Temporarily disable error reporting then throw a controlled exception to stop execution.
+		setTimeout(function() {
+			window.onerror = function(message, url, lineNumber) {  
+				return false;
+			};
+		}, 50); // Sets a slight delay and then restores normal error reporting
+		window.onerror = function(message, url, lineNumber) {  
+			return true;
+		};
 		throw new Error('AutocardAnywhere is already installed as an extension');
 	}
 }
@@ -168,7 +177,7 @@ let AutocardAnywhere = {
 			//if (target.data('popup')) return;
 			let cards = new Array();
 
-			if (AutocardAnywhereSettings.isTouchInterface) {
+			if (AutocardAnywhere.isTouchInterface) {
 				target.bind('click', function(event) {
 					if (!target[0]._tippy.state.isShown) {
 						event.preventDefault();
@@ -873,7 +882,7 @@ let AutocardAnywhere = {
 	initialiseContextMenu: function() {
 		function processMessage(message, sender, sendResponse) {
 			if (message.name == 'contextmenuitemclick') {
-				if (!AutocardAnywhereSettings.isTouchInterface) { // No context menu on touch interfaces
+				if (!AutocardAnywhere.isTouchInterface) { // No context menu on touch interfaces
 					AutocardAnywhere.contextMenuClick();
 				}
 				sendResponse({message: "ack"});
@@ -913,6 +922,8 @@ let AutocardAnywhere = {
 			console.error('Load settings failed');
 			return;
 		}
+		
+		AutocardAnywhere.isTouchInterface = ('ontouchstart' in window);
 		let listType = response.listType;
 		let thisSiteListed = false;
 		AutocardAnywhere.url = AutocardAnywhere.getCurrentUrl();

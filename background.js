@@ -695,6 +695,7 @@ function onRequest(request, sender, sendResponse) {
 	return true;
 };
 
+/*
 // Listen for the content script to send a message to the background page.
 if (AutocardAnywhereSettings.isSafari) {
 	safari.application.addEventListener("message", onRequest, false);
@@ -719,7 +720,9 @@ if (AutocardAnywhereSettings.isSafari) {
 		}
 	});
 }
-else { // Chrome, Opera, Firefox or Edge
+else { 
+*/
+	// Chrome, Opera, Firefox or Edge
 	// Simple messages
 	browser.runtime.onMessage.addListener(onRequest);
 	// Persistent connections
@@ -747,9 +750,10 @@ else { // Chrome, Opera, Firefox or Edge
 		}
 		else if (details.reason == "update") {
 			// Force update mtg data after every extension update to work around issue with Mozilla's 4MB limit for Firefox extensions.
+			let now = new Date();
 			let lastUpdate = new Date('1970-01-01 00:00');
 			saveSettings(AutocardAnywhereSettings.prefix + 'mtgen', {'LastDataUpdate': now.toString()}, false);
 			saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
 		}
 	});
-}
+//}
