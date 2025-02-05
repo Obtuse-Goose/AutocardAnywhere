@@ -404,6 +404,7 @@ let AutocardAnywhere = {
 									let dataDiv = content.find(dataDivClass);
 									dataDiv.find('.autocardanywhere-data-section').hide();
 									dataDiv.find('.' + $(this).data('div')).fadeTo(500, 1);
+									return false;
 								});
 
 								// Get the extra info data from the configured source(s)
@@ -456,14 +457,33 @@ let AutocardAnywhere = {
 						});
 					}
 
-					// If extra info is enabled, setup listeners to show/hide it on mouseover/out.
+					// If extra info is enabled, setup listeners to show/hide it.
 					if (extraInfoEnabled) {
-						content.find('.autocardanywhere-loading').on('mouseover', function() {
-							$(this).find('.autocardanywhere-data').show();
-						});
-						content.find('.autocardanywhere-loading').on('mouseout', function() {
-							$(this).find('.autocardanywhere-data').hide();
-						});
+						// On a touch interface, require an explicit tap to show/hide.
+						let loadingDiv = content.find('.autocardanywhere-loading');
+						if (!loadingDiv.data('extrainfolistenersadded')) {
+							if (AutocardAnywhere.isTouchInterface) {
+								let dataDiv = content.find('.autocardanywhere-data');
+								loadingDiv.on('click', function() {
+									if (dataDiv.is(":visible")) {
+										dataDiv.hide();
+									}
+									else {
+										dataDiv.show();
+									}
+								});
+							}
+							// On a non-touch interface, show and hide the extra info on mouseover/out.
+							else {
+								loadingDiv.on('mouseover', function() {
+									$(this).find('.autocardanywhere-data').show();
+								});
+								loadingDiv.on('mouseout', function() {
+									$(this).find('.autocardanywhere-data').hide();
+								});
+							}
+							loadingDiv.data('extrainfolistenersadded', 1)
+						}
 					}
 
 					// Check if the image has loaded
