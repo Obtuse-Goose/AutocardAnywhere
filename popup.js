@@ -35,8 +35,18 @@ function getCurrentHost(callback) {
 	}
 	else { // Chrome, Opera, Firefox or Edge
 		browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			let tab = tabs[0];
+			chrome.tabs.sendMessage(tab.id, {name: 'checkifrunningembedded'}).then(() => {
+				// If no an embedded version is installed on the website, 
+				// then enable the checkbox and hide the note to the user explaining that the extension is disabled.
+				// The default state of these is for when an embedded version is detected.
+				let label = document.getElementById('embedded-detected-label');
+				let checkbox = document.getElementById('site-enabled-checkbox');
+				label.style.display = 'none';
+				checkbox.disabled = false;
+			});
 			// Check the current site isn't already on the list
-			callback(parseUri(tabs[0].url).host.toLowerCase());
+			callback(parseUri(tab.url).host.toLowerCase());
 	    });
 	}
 }
@@ -132,6 +142,8 @@ function onShow() {
 }
 
 function loadSettings(settings) {
+	let checkbox = document.getElementById('site-enabled-checkbox');
+
 	if (settings.theme == 'dark') {
 		let body = document.body;
 		body.setAttribute('style','background-color:#505355; color:white;');
@@ -142,7 +154,7 @@ function loadSettings(settings) {
 	getCurrentHost(function(host) {
 		let listed = isListed(host);
 		let isEnabled = ((!isWhiteList && !listed) || (isWhiteList && listed))
-		document.getElementById('site-enabled-checkbox').checked = isEnabled;
+		checkbox.checked = isEnabled;
 		setIcon(isEnabled);
 	});
 }

@@ -1,22 +1,6 @@
 if (typeof chrome !== 'undefined') {var browser = chrome;}
-if (AutocardAnywhereSettings.isEmbedded) {
-	if (document.getElementById('autocardanywhereextensioninstalled')) {
-		// Temporarily disable error reporting then throw a controlled exception to stop execution.
-		setTimeout(function() {
-			window.onerror = function(message, url, lineNumber) {  
-				return false;
-			};
-		}, 50); // Sets a slight delay and then restores normal error reporting
-		window.onerror = function(message, url, lineNumber) {  
-			return true;
-		};
-		throw new Error('AutocardAnywhere is already installed as an extension');
-	}
-}
-else {
-	let elem = document.createElement("div");
-	elem.setAttribute("id", "autocardanywhereextensioninstalled");
-	document.querySelector('body').appendChild(elem);
+if (!AutocardAnywhereSettings.isEmbedded && document.getElementById('autocardanywhereinstalled')) {
+	throw new Error('AutocardAnywhere is already installed on this website.');
 }
 
 let AutocardAnywhere = {
@@ -920,6 +904,9 @@ let AutocardAnywhere = {
 				});
 				sendResponse({message: "ack"});
 			}
+			else if (message.name == 'checkifrunningembedded') {
+				sendResponse({status: 'false'});
+			}
 		}
 
 		if (AutocardAnywhereSettings.isSafari) {
@@ -938,6 +925,10 @@ let AutocardAnywhere = {
 	},
 	
 	settingsCallback: function(response) {
+		if (!AutocardAnywhereSettings.isEmbedded && document.getElementById('autocardanywhereinstalled')) {
+			throw new Error('AutocardAnywhere is already installed on this website.');
+		}
+
 		if (!response) {
 			console.error('Load settings failed');
 			return;
