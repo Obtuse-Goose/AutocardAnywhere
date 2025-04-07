@@ -1,5 +1,5 @@
 {
-    "version": "4.50.0",
+    "version": "4.51.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -21,11 +21,24 @@
         "128": "Icon-128.png",
         "24": "Icon-24.png"
     },
+    "name": "AutocardAnywhere",
     "short_name": "AutoAny",
+    "description": "Displays card image popups for collectable card games on all webpages you visit.",
     "author": "Obtuse Goose Ltd",
     "manifest_version": 3,
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "autocardanywhere-amo@autocardanywhere.com"
+        }
+    },
 	"background": {
-		"service_worker": "background.js"
+		"service_worker": "background.js",
+        "scripts": [
+            "settings.js",
+            "games\/dictionary.js",
+            "games\/games.js",
+            "background.js"
+        ]
 	},
     "content_scripts": [
         {
@@ -46,12 +59,10 @@
             ]
         }
     ],
-    "name": "AutocardAnywhere",
     "options_ui": {
         "page": "options.html",
         "open_in_tab": true
     },
-    "description": "Displays card image popups for collectable card games on all webpages you visit.",
 	"web_accessible_resources": [
 		{
 			"resources": [

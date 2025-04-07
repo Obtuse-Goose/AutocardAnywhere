@@ -756,4 +756,14 @@ else {
 			saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
 		}
 	});
+
+	// If we're running on Firefox and the user hasn't granted permission to run, show the options page so that it can popup the permissions dialog.
+	if (AutocardAnywhereSettings.isFirefox) {
+		browser.permissions.getAll().then((permissions) => {
+			let hasPermission = permissions.origins.indexOf("<all_urls>") > - 1;
+			if (!hasPermission) {
+				openURL(browser.runtime.getURL('options.html'));
+			}
+		});
+	}
 //}

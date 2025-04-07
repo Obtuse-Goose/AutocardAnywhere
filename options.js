@@ -746,4 +746,28 @@ $(function() {
 		// Save the new setting
 		saveSettings({});
 	});
+
+	if (AutocardAnywhereSettings.isFirefox) {
+		browser.permissions.getAll().then((permissions) => {
+			let hasPermission = permissions.origins.indexOf("<all_urls>") > - 1;
+			if (!hasPermission) {
+				$('#dialogs').append('<div id="dialog" title="Permissions Required">In order to function, AutocardAnywhere needs to be able to read the text on all pages you visit.<br/>Please allow the request for extra permissions in the next popup window.</div>');
+				$("#dialogs").dialog({
+					resizable: false,
+					height: "auto",
+					width: 400,
+					modal: true,
+					buttons: {
+						Continue: function() {
+							browser.permissions.request({origins: ['<all_urls>']})
+							$(this).dialog("close");
+						},
+						Cancel: function() {
+							$(this).dialog("close");
+						}
+					}
+				});
+			}
+		});
+	}
 });

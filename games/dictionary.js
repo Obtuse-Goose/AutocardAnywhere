@@ -227,7 +227,7 @@ Dictionary.prototype.run = function(text) {
 // Functions related to the popup
 Dictionary.prototype.getCardElement = function(card, linkCount) {
 	let dictionary = this;
-	let linkHref = AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary) + AutocardAnywhereSettings.partnerString;
+	let linkHref = AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary));
 
 	let result = document.createElement("div");
 	result.className = 'autocardanywhere-card swiper-slide';
@@ -241,6 +241,8 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	cardImg.style.height = AutocardAnywhere.popupHeight + 'px';
 	cardImg.style.width = AutocardAnywhere.popupWidth + 'px';
 	cardImg.dataset.id = card.id + '-' + card.face;
+	cardImg.alt = card.name + ' card image';
+	//cardImg.src = 'https://cards.scryfall.io/large/front/c/d/cdc86e78-8911-4a0d-ba3a-7802f8d991ef.jpg?1627701697';
 	//cardImg.style.mixBlendMode = 'multiply';
 
 	if (card.ratio == 'square') {

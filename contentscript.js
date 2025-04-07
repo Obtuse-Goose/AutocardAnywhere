@@ -839,10 +839,15 @@ let AutocardAnywhere = {
 							}
 
 							let newNode = $('<span>' + newHtml + '</span>');
-							AutocardAnywhere.initialisePopups(newNode);
+							//AutocardAnywhere.initialisePopups(newNode);
 							//n.after(newNode.get(0));
 							newNode.insertAfter(n);
 							n.remove();
+							
+							// Delay for a short time before initialising to fix a race condition bug on Reddit.
+							setTimeout(function() {
+								AutocardAnywhere.initialisePopups(newNode);
+							}, 10);
 						});
 					}
 					else {
@@ -854,10 +859,15 @@ let AutocardAnywhere = {
 						}
 
 						let newNode = $('<span>' + newHtml + '</span>');
-						AutocardAnywhere.initialisePopups(newNode);
+						//AutocardAnywhere.initialisePopups(newNode);
 						//n.after(newNode.get(0));
 						newNode.insertAfter(n);
 						n.remove();
+
+						// Delay for a short time before initialising to fix a race condition bug on Reddit.
+						setTimeout(function() {
+							AutocardAnywhere.initialisePopups(newNode);
+						}, 10);
 					}
 					
 				}
