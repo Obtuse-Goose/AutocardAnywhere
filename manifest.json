@@ -1,14 +1,14 @@
 {
-    "version": "4.51.0",
+    "version": "4.51.1",
     "permissions": [
         "contextMenus",
         "activeTab",
         "storage",
         "unlimitedStorage"
     ],
-	"host_permissions": [
-		"<all_urls>"
-	],
+    "host_permissions": [
+        "<all_urls>"
+    ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
@@ -31,15 +31,15 @@
             "id": "autocardanywhere-amo@autocardanywhere.com"
         }
     },
-	"background": {
-		"service_worker": "background.js",
+    "background": {
+        "service_worker": "background.js",
         "scripts": [
             "settings.js",
             "games\/dictionary.js",
             "games\/games.js",
             "background.js"
         ]
-	},
+    },
     "content_scripts": [
         {
             "all_frames": false,
@@ -63,22 +63,22 @@
         "page": "options.html",
         "open_in_tab": true
     },
-	"web_accessible_resources": [
-		{
-			"resources": [
-				"img\/loading.gif",
-				"img\/broken.png",
-				"libs\/tippy\/light.css",
-				"libs\/tippy\/material.css",
-				"libs\/tippy\/scale.css",
-				"libs\/tippy\/perspective.css",
-				"libs\/tippy\/shift-away.css",
-				"libs\/tippy\/shift-toward.css",
-				"libs\/swiper-bundle.min.css"
-			],
-			"matches": [
-				"<all_urls>"
-			]
-		}
-	]
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "img\/loading.gif",
+                "img\/broken.png",
+                "libs\/tippy\/light.css",
+                "libs\/tippy\/material.css",
+                "libs\/tippy\/scale.css",
+                "libs\/tippy\/perspective.css",
+                "libs\/tippy\/shift-away.css",
+                "libs\/tippy\/shift-toward.css",
+                "libs\/swiper-bundle.min.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
 }
