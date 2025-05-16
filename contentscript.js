@@ -728,12 +728,12 @@ let AutocardAnywhere = {
 		    for (let i=0; i<nodes.length; i++) {
 	    		let node = $(nodes[i]);
 	    		// Check the new node is not a script, a stylesheet, a textarea, an input or part of an AutocardAnywhere popup...
-	    		if ((!/^(a|button|input|textarea|script|style)$/i.test(nodes[i].tagName)) &&
+	    		if ((!/^(a|button|input|textarea|style|script|noscript)$/i.test(nodes[i].tagName)) &&
+					(!nodes[i].isContentEditable) &&
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
-	    			(node.children('span.autocardanywhere').length === 0) &&
-	    			//(!node.is("span.autocardanywhere")) &&
-	    			(!nodes[i].isContentEditable)
+					//(!node.is("span.autocardanywhere")) &&
+	    			(node.children('span.autocardanywhere').length === 0)
 	    			) {
 			    		// Linkify the new node and then add popups in it.
 						// Replace any existing card links in the new node.
@@ -823,7 +823,7 @@ let AutocardAnywhere = {
 		for (let i=0; i<children.length; i++) {
 			let n = children[i];
 			if (!n) continue;
-			if (n.nodeType == 1  &&  !/^(a|button|textarea|style|script|noscript)$/i.test(n.tagName) ) {
+			if (n.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(n.tagName) && !n.isContentEditable) {
 				AutocardAnywhere.traverse(n);
 			}
 			else if (n.nodeType == 3) {
