@@ -733,6 +733,7 @@ let AutocardAnywhere = {
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
 					//(!node.is("span.autocardanywhere")) &&
+					(node.parents(".autocardanywhere-ignored").length === 0) &&
 					(!node.is(".autocardanywhere-ignored")) &&
 	    			(node.children('span.autocardanywhere').length === 0)
 	    			) {
