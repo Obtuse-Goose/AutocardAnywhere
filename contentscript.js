@@ -733,6 +733,7 @@ let AutocardAnywhere = {
 	    			(node.children('div.tippy-box').length === 0) &&
 	    			(node.parents("div.tippy-box").length === 0) &&
 					//(!node.is("span.autocardanywhere")) &&
+					(!node.is(".autocardanywhere-ignored")) &&
 	    			(node.children('span.autocardanywhere').length === 0)
 	    			) {
 			    		// Linkify the new node and then add popups in it.
@@ -823,7 +824,7 @@ let AutocardAnywhere = {
 		for (let i=0; i<children.length; i++) {
 			let n = children[i];
 			if (!n) continue;
-			if (n.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(n.tagName) && !n.isContentEditable) {
+			if (n.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(n.tagName) && !n.isContentEditable && !n.classList.contains("autocardanywhere-ignored")) {
 				AutocardAnywhere.traverse(n);
 			}
 			else if (n.nodeType == 3) {
