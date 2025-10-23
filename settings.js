@@ -47,6 +47,10 @@ AutocardAnywhereSettings = {
 		cardhoarder: {
 			value: 'affiliate_id=autocard&utm_campaign=affiliate&utm_source=autocard&utm_medium=card',
 			type: 'suffix'
+		},
+		manapool: {
+			value: 'ref=autocard',
+			type: 'suffix'
 		}
 	},
 	dictionaries: [

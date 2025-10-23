@@ -1744,6 +1744,7 @@ MtgDictionary.prototype = new Dictionary({
 			'controlType': 'radio',
 			'options': [
 				{name: 'TCGPlayer', description: 'TCGplayer', value: 'https://store.tcgplayer.com/magic/product/show?ProductName=<name:simple>'},
+				{name: 'ManaPool', description: 'Mana Pool', value: 'https://manapool.com/card/<name:simple>'},
 				{name: 'Cardmarket', description: 'Cardmarket', value: 'https://www.cardmarket.com/en/Magic/Products/Search?searchString=<name:simple>'},
 				{name: 'Cardhoarder', description: 'Cardhoarder', value: 'https://www.cardhoarder.com/cards?data[search]=<name:simple>'},
 				{name: 'Scryfall', description: 'Scryfall', value: 'https://scryfall.com/search?q=%21%22<name:simple>%22'},
@@ -1766,6 +1767,11 @@ MtgDictionary.prototype = new Dictionary({
 			'resetToDefault': true,
 			//'default': 'https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=<id>'
 			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<id:folders>.png'
+		},
+		{
+			'name': 'manaPoolURL',
+			'type': 'string',
+			'default': 'https://manapool.com/card/<name:simple>'
 		},
 		{
 			'name': 'tcgPlayerURL',
