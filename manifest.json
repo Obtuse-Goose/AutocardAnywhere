@@ -1,5 +1,5 @@
 {
-    "version": "4.54.0",
+    "version": "4.55.0",
     "permissions": [
         "contextMenus",
         "activeTab",
@@ -28,7 +28,12 @@
     "manifest_version": 3,
     "browser_specific_settings": {
         "gecko": {
-            "id": "autocardanywhere-amo@autocardanywhere.com"
+            "id": "autocardanywhere-amo@autocardanywhere.com",
+            "data_collection_permissions": {
+                "required": [
+                    "none"
+                ]
+            }
         }
     },
     "background": {
