@@ -516,6 +516,8 @@ let AutocardAnywhere = {
 			document.getElementsByTagName('head')[0].appendChild(style);
 		}
 
+		
+		injectCSSFile("https://fonts.googleapis.com/css2?family=Cal+Sans&family=Gabarito:wght@400..900&display=swap");
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/light.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/material.css"));
         injectCSSFile(AutocardAnywhere.getURL("libs/tippy/scale.css"));

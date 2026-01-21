@@ -26,7 +26,7 @@ $path = getcwd();
 
 $files = [];
 foreach (new RecursiveIteratorIterator( new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)) as $file) {
-    array_push($files, str_replace(getcwd() . '\\', '', $file));
+    array_push($files, str_replace('\\', '/', str_replace(getcwd() . '\\', '', $file)));
 }
 
 for ($i = (count($files)-1); $i >= 0; $i--) {
@@ -41,12 +41,14 @@ for ($i = (count($files)-1); $i >= 0; $i--) {
 }
 
 function zip($files, $manifest, $filename) {
-    unlink($filename);
+    if (file_exists($filename)) {
+        unlink($filename);
+    }
     $zip = new \ZipArchive;
     if ($zip->open($filename, \ZIPARCHIVE::CREATE | \ZipArchive::OVERWRITE)) {
         foreach($files as $file) {
             if ($filename == 'Firefox.zip' && preg_match('/mtg-data\.json$/', $file)) {
-                //print($file);
+                //print($file . PHP_EOL);
                 $handle = fopen($file, "r");
                 $contents = fread($handle, 4000000);
                 fclose($handle);
