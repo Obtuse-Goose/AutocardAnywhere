@@ -71,7 +71,12 @@ function zip($files, $manifest, $filename) {
 //print_r($files);
 
 // Firefox
-$manifest->{'background'} = array("scripts" => array("background.js"));
+$manifest->{'background'} = array("scripts" => array(
+    "settings.js",
+    "games/dictionary.js",
+    "games/games.js",
+    "background.js"
+));
 zip($files, json_encode($manifest, JSON_PRETTY_PRINT), 'Firefox.zip');
 
 // Chrome and Edge
