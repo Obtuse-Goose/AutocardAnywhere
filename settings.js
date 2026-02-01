@@ -257,7 +257,7 @@ AutocardAnywhereSettings = {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
 		});
 		s = s.replace(/<([^>]+):hyphenated:lowercase>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,']/g, '').replace(/ /g, '-') : '';
+			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,'\.\/\:!]/g, '').replace(/ /g, '-').replace(/--/g, '-') : '';
 		});
 		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';

@@ -1751,6 +1751,7 @@ MtgDictionary.prototype = new Dictionary({
 				{name: 'Gatherer', description: 'Gatherer', value: 'https://gatherer.wizards.com/Pages/Search/Default.aspx?name=+[<name:simple>]'},
 				{name: 'LigaMagic', description: 'Liga Magic', value: 'http://www.ligamagic.com.br/?view=cartas/card&card=<name:simple>'},
 				{name: 'TappedOut', description: 'Tapped Out', value: 'http://tappedout.net/mtg-card/<name:hyphenated>/'},
+				{name: 'EDHRec', description: 'EDH Rec', value: 'https://edhrec.com/cards/<name:hyphenated:lowercase>'},
 				{name: 'Custom', description: 'Custom:', value: ''}
 			]
 		},
