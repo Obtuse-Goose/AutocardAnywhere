@@ -121,7 +121,7 @@ AutocardAnywhereSettings = {
 		{'name': 'showIcon', 'type': 'boolean', 'default': false},
 		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
 		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
-		{'name': 'ignoredCards', 'type': 'string', 'default': '7|Access Denied|Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Path|Pest Control|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|There|They\'re|Their|Time Out'},
+		{'name': 'ignoredCards', 'type': 'string', 'default': '7|Access Denied|Bad Ass|Bant|Black Market|Break Open|Bring Back|Brought Back|Brute Force|Cockatrice|Deal Damage|Face to Face|First Pick|Guest List|Grixis|Jund|Lifelink|Little Girl|Look At Me|Mana Screw|Mirror Match|Naya|Path|Pest Control|Pirate Ship|Second Chance|Special Offer|Stop That|The Circle|The Deck|The Fallen|The Lady|There|They\'re|Their|Time Out|You'},
 		{'name': 'unignoredCards', 'type': 'string', 'default': 'Endurance|Fury|Grief|Solitude|Subtlety'},
 		{'name': 'popupAnimation', 'type': 'string', 'default': 'scale'},
 		{'name': 'popupShowDuration', 'type': 'integer', 'default': 500},
@@ -217,7 +217,7 @@ AutocardAnywhereSettings = {
 		        "ú": "u", "ù": "u", "û": "u", "ó": "o", "ò": "o", "ô": "o",
 		        "Á": "A", "À": "A", "Â": "A", "É": "E", "È": "E", "Ê": "E",
 		        "Ú": "U", "Ù": "U", "Û": "U", "Ó": "O", "Ò": "O", "Ô": "O",
-		        "ß": "ss", "Æ": "Ae", "æ": "ae"
+		        "ß": "ss", "Æ": "Ae", "æ": "ae", "í": "i", "ï": "i"
 		    };
 
 		    let result = '';
@@ -257,7 +257,7 @@ AutocardAnywhereSettings = {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
 		});
 		s = s.replace(/<([^>]+):hyphenated:lowercase>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,'\.\/\:!]/g, '').replace(/ /g, '-').replace(/--/g, '-') : '';
+			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,'\.\/\:!]/g, '').replace(/ /g, '-').replace(/--/g, '-').replace(/\+/g, 'plus-') : '';
 		});
 		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';
