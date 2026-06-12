@@ -136,7 +136,7 @@ function onShow() {
 	// Load settings
 	browser.runtime.sendMessage({'name': 'loadSettings', 'prefix': prefix, 'settings': [
 		{'name': 'listType', 'type': 'string', 'default': 'blacklist'},
-		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org'},
+		{'name': 'listedSites', 'type': 'string', 'default': 'deckbox.org;melee.gg'},
 		{'name': 'theme', 'type': 'string', 'default': 'light'}
 	]}, loadSettings);
 }
