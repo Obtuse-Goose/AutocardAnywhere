@@ -150,12 +150,12 @@ Dictionary.prototype.fuzzyLookup = function(cardname) {
 };
 // Functions called when linkifying the page
 Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, href, cardID, isFuzzy) {
-	/*
+	
 	let anchor = document.createElement("a");
 	anchor.href = href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary));
-	anchor.className = 'autocardanywhere-link';
+	anchor.className = AutocardAnywhereSettings.className + ' autocardanywhere-link';
 	if (dictionary.settings.emphasiseText) { anchor.className += ' autocardanywhere-emphasised'; }
-	anchor.dataset.dictionary = this.game + this.language;
+	//anchor.dataset.dictionary = this.game + this.language;
 	if (cardID) {
 		anchor.dataset.multiverseid = cardID;
 	}
@@ -172,16 +172,17 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 		anchor.appendChild(document.createTextNode((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match));
 	}
 
-	let result = document.createElement('span');
-	result.appendChild(anchor);
-	return result;
-	*/
+	//let result = document.createElement('span');
+	//result.appendChild(anchor);
+	return anchor;
+	
 
+	/*
 	let result = 
 		'<span class="autocardanywhere"><a href="' + 
 		(href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))) + 
 		'" class="' + AutocardAnywhereSettings.className + ' autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : '') + '" ' +
-		'data-dictionary="' + this.game + this.language + '" ' +
+		//'data-dictionary="' + this.game + this.language + '" ' +
 		(cardID ? 'data-multiverseid="' + cardID + '" ' : 'data-name="' + card.match + '" ') +
 		(isFuzzy ? 'data-fuzzy="1" ' : '') +
 		(card.override ? 'data-override="1" ' : '') +
@@ -191,8 +192,23 @@ Dictionary.prototype.createLinkElement = function(dictionary, card, linkText, hr
 		'</a></span>';
 
 	return result;
-	
+	*/
+/*
+	let result = {
+		type: 'link',
+		href: (href ? href : AutocardAnywhereSettings.appendPartnerString(AutocardAnywhereSettings.format(dictionary.settings.linkTarget, card, dictionary))),
+		class: AutocardAnywhereSettings.className + ' autocardanywhere-link' + (dictionary.settings.emphasiseText ? ' autocardanywhere-emphasised' : ''),
+		cardID: cardID,
+		name: card.match,
+		isFuzzy: isFuzzy,
+		override: card.override,
+		text: (linkText ? linkText : ((dictionary.settings.expandLegendNames && card.linkCount==1) ? card.name : card.match)) 
+	}
+
+	return result;
+	*/
 };
+/*
 Dictionary.prototype.createLink = function(dictionary, card, linkText, href, cardID, isFuzzy) {
 
 	function decodeHTMLEntities(text) {
@@ -205,25 +221,7 @@ Dictionary.prototype.createLink = function(dictionary, card, linkText, href, car
 
 	return decodeHTMLEntities(this.createLinkElement(dictionary, card, linkText, href, cardID, isFuzzy));
 };
-Dictionary.prototype.run = function(text) {
-	let dictionary = this;
-	text = ' ' + text.replace(/\u00a0/g, " ") + ' ';
-	text = text.replace(dictionary.test, function (match, f, s, suffix, t) {
-		// If this card is on the ignore list, ignore it.
-		if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {return match}
-		// If the card name is followed by a d but doesn't end in e, don't link it.
-		if (suffix == 'd' && s.slice(-1) != 'e') {return match}
-		
-		// Get the first card in the array
-		let card = dictionary.findCard(s, ((f == '[') && (t == ']')));
-		// If no card was found, or we don't want to link this card then return the text unchanged
-		if ((!card) || (AutocardAnywhere.ignoreList[card.name.toLowerCase()])) {return match}
-		
-		return f + dictionary.createLink(dictionary, card);
-	});
-	text = text.substr(1, text.length-2);
-	return text;
-};
+*/
 // Functions related to the popup
 Dictionary.prototype.getCardElement = function(card, linkCount) {
 	let dictionary = this;

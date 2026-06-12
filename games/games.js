@@ -11,7 +11,8 @@ AutocardAnywhere.games = {
 
 				AutocardAnywhere.games[name][language].load().then(function(dictionary) {
 					function messageCallback(response) {
-						dictionary.test = new RegExp(response.test, "gi");
+						//dictionary.test = new RegExp(response.test, "gi");
+						dictionary.test = response.test;
 						dictionary.cardNames = response.cardNames;
 						dictionary.cardData = response.cardData;
 						result[name + language] = dictionary;

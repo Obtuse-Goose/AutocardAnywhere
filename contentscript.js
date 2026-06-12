@@ -9,6 +9,7 @@ let AutocardAnywhere = {
 	insertionCount: 0,
 	insertionLimit: 1000,
 	ignoredStrings: [],
+	processedNodes: new Set(),
 	sendMessage(message) {
 		return new Promise((resolve, reject) => {
 			browser.runtime.sendMessage(message, response => resolve(response));
@@ -104,10 +105,14 @@ let AutocardAnywhere = {
 	replaceSelection: function(element) {
 	    if (window.getSelection && window.getSelection().getRangeAt) {
 	    	let range = window.getSelection().getRangeAt(0);
-			let newNode = $.parseHTML(element)[0];
-	        AutocardAnywhere.initialisePopups(newNode);
+			//let newNode = $.parseHTML(element)[0];
 	        range.deleteContents();
-	        range.insertNode(newNode);
+	        range.insertNode(element);
+			window.getSelection().empty();
+
+	        setTimeout(function() {
+				AutocardAnywhere.initialisePopups(document.body);
+			}, 10);
 	    }
 	},
 	getURL: function(filename) {
@@ -728,7 +733,9 @@ let AutocardAnywhere = {
 	    	// Only interested in nodes being added.
 		    let nodes = mutation.addedNodes;
 		    for (let i=0; i<nodes.length; i++) {
+			//mutation.addedNodes.forEach((node) => {
 	    		let node = $(nodes[i]);
+				//console.log(node);
 	    		// Check the new node is not a script, a stylesheet, a textarea, an input or part of an AutocardAnywhere popup...
 	    		if ((!/^(a|button|input|textarea|style|script|noscript)$/i.test(nodes[i].tagName)) &&
 					(!nodes[i].isContentEditable) &&
@@ -747,6 +754,7 @@ let AutocardAnywhere = {
 						node.each((index, child) =>{
 							AutocardAnywhere.insertionCount++;
 							if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
+								//console.log(child.parentNode);
 								AutocardAnywhere.traverse(child.parentNode);
 							}
 						});
@@ -766,62 +774,111 @@ let AutocardAnywhere = {
 	},
 
 	foregroundRunner: function(text) {
-		// Run all enabled dictionaries
-		Object.keys(AutocardAnywhere.dictionaries).map( (key) => {
-			// Run the current dictionary.
-			let dictionary = AutocardAnywhere.dictionaries[key];
-			text = dictionary.run(text);
+		let nodes = [];
 
+		function textNode(text) {
 			// Card names enclosed in [[]]
 			if (AutocardAnywhere.fuzzyLookup) {
-				text = text.replace(new RegExp(/\[\[(.*?)\]\]/, "gi"), function(match, name) {
-					// Do a fuzzy lookup by name
-					let cards = dictionary.fuzzyLookup(name);
-					if (cards.length > 0) {
-						return dictionary.createLink(dictionary, cards[0], name, null, null, true);
-					}
-					return match;
-				});
-			}
-		});
+				let matchLength = 0;
+				let result = text.replace(new RegExp(/((?:.|\n)*?\[\[)(.*?)\]\]/, "gi"), function(match, f, name) {
+					
+					matchLength += match.length;
+						
+					for (let i=0; i<keys.length; i++) {
+						let dictionary = AutocardAnywhere.dictionaries[keys[i]];
 
-		// Nicknames
-		if (AutocardAnywhere.customNicknameRE != '()') {
-			text = text.replace(new RegExp("([^a-zA-Z_0-9-'])" + AutocardAnywhere.customNicknameRE + "(?=[^a-zA-Z_0-9-'])", "gi"), function(match, f, s) {
-				if (typeof(s) !== 'string') return match;
-				let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
-				if (!nickname) return match;
-				if (!AutocardAnywhere.dictionaries[nickname.dictionary]) return match;
+						// Do a fuzzy lookup by name
+						let cards = dictionary.fuzzyLookup(name);
+						if (cards.length > 0) {
+							nodes.push(document.createTextNode(f));
+							nodes.push(dictionary.createLinkElement(dictionary, cards[0], name, null, null, true));
+							nodes.push(document.createTextNode(']]'));
+							return;
+						}
+					}
+					// If the card wasn't found in any dictionary, return the text unchanged.
+					nodes.push(document.createTextNode(match));
+				});
+
+				let unmatched = text.slice(matchLength);
+				nodes.push(document.createTextNode(unmatched));
+			}
+			else {
+				nodes.push(document.createTextNode(text));
+			}
+		}
+
+		text = text.replace("\u00a0", " ") + ' ';
+		let matchLength = 0;
+		let keys = Object.keys(AutocardAnywhere.dictionaries);
+
+		text.replace(AutocardAnywhere.test, function (match, f, s, suffix, t) {
+
+			if (typeof(s) !== 'string') {textNode(match); return;}
+			matchLength += match.length;
+			// If this card is on the ignore list, ignore it.
+			if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {textNode(match); return;}
+			// If the card name is followed by a d but doesn't end in e, don't link it.
+			if (suffix == 'd' && s.slice(-1) != 'e') {textNode(match); return;}
+
+			let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
+			if (nickname) {
+				if (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()]) {textNode(match); return;}
 				let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
 				let card = dictionary.findCard(nickname.fullname);
-				if ((!card) || (AutocardAnywhere.ignoreList[nickname.nickname.toLowerCase()]) || (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()])) {return match}
-				if (AutocardAnywhereSettings.settings.expandNicknames) {
-					return f + dictionary.createLink(dictionary, card, nickname.fullname);
+				if (card) {
+					textNode(f);
+					if (AutocardAnywhereSettings.settings.expandNicknames) {
+						nodes.push(dictionary.createLinkElement(dictionary, card, nickname.fullname));
+					}
+					else {
+						nodes.push(dictionary.createLinkElement(dictionary, card, nickname.nickname));
+					}
+					return;
 				}
-				else {
-					return f + dictionary.createLink(dictionary, card, nickname.nickname);
-				}
-			});
-		}
+			}
+			for (let i=0; i<keys.length; i++) {
+				let dictionary = AutocardAnywhere.dictionaries[keys[i]];
+				
+				// Get the first card in the array
+				let card = dictionary.findCard(s, ((f == '[') && (t == ']')));
+				// If no card was found, try the next dictionary
+				if (!card) continue;
+				// If we don't want to link this card then return the text unchanged.
+				if (AutocardAnywhere.ignoreList[card.name.toLowerCase()]) {textNode(match); return;}
+				
+				textNode(f);
+				nodes.push(dictionary.createLinkElement(dictionary, card));
+				return;
+			}
 
-		// Sometimes a dictionary might link text within an earlier link...
-		// Run until there are no double AA links found.
-		let replacementMade = true;
-		while (replacementMade) {
-			replacementMade = false;
-			text = text.replace(/(<span class="autocardanywhere"><a[^<]*)<span class="autocardanywhere"><a[^>]*>([^<]*)<\/a><\/span>(.*<\/a><\/span>)/, function(match, f, s, t) {
-				replacementMade = true;
-				return f+s+t;
-			});
-		}
+			// If no card was found in any dictionary then return the text unchanged
+			textNode(match);
+			return;
+		});
 
-		return text;
+		let unmatched = text.slice(matchLength, -1);
+		textNode(unmatched);
+
+		if (nodes.length == 0) {
+			return false;
+		}
+		//let result = document.createDocumentFragment();
+		let result = document.createElement('span');
+		for (let i=0; i<nodes.length; i++) {
+			result.appendChild(nodes[i]);
+		}
+		//console.log(result);
+
+		return $(result);
 	},
 
 	// Function to traverse the DOM to find any text nodes.
 	traverse: function(node) {
-		//console.log(node);
 		if (!node) return;
+		if (AutocardAnywhere.processedNodes.has(node)) return;
+		AutocardAnywhere.processedNodes.add(node);
+
 		let children = node.childNodes;
 		if (!children) return;
 		for (let i=0; i<children.length; i++) {
@@ -832,15 +889,15 @@ let AutocardAnywhere = {
 			}
 			else if (n.nodeType == 3) {
 				let html = n.nodeValue;
-				if (html.length>2 && /[A-Za-z]/.test(html) && !AutocardAnywhere.ignoredStrings[html]) {
+				if (html.length>2 && /[A-Za-z]/.test(html) ) { //&& !AutocardAnywhere.ignoredStrings[html]) {
 					//console.log(html);
 					if (AutocardAnywhere.isM1) {
 						//console.log('m1');
 						AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
-							if (newHtml == html) {
-								AutocardAnywhere.ignoredStrings[html] = 1;
-								return;
-							}
+							//if (newHtml == html) {
+							//	AutocardAnywhere.ignoredStrings[html] = 1;
+							//	return;
+							//}
 
 							let newNode = $('<span>' + newHtml + '</span>');
 							//AutocardAnywhere.initialisePopups(newNode);
@@ -856,15 +913,18 @@ let AutocardAnywhere = {
 					}
 					else {
 						//console.log('not m1');
-						let newHtml = AutocardAnywhere.foregroundRunner(html);
-						if (newHtml == html) {
-							AutocardAnywhere.ignoredStrings[html] = 1;
-							continue;
-						}
+						//let newHtml = AutocardAnywhere.foregroundRunner(html);
+						//if (newHtml == html) {
+						//	AutocardAnywhere.ignoredStrings[html] = 1;
+							//console.log(html);
+						//	continue;
+						//}
 
-						let newNode = $('<span>' + newHtml + '</span>');
+						let newNode = AutocardAnywhere.foregroundRunner(html);
 						//AutocardAnywhere.initialisePopups(newNode);
 						//n.after(newNode.get(0));
+						if (newNode === false) continue;
+						
 						newNode.insertAfter(n);
 						n.remove();
 
@@ -1068,6 +1128,49 @@ let AutocardAnywhere = {
 		// Now load all dictionaries
 		AutocardAnywhere.games.load(dictionaries).then((result) => {
 			AutocardAnywhere.dictionaries = result;
+			let dictionaryNames = Object.keys(AutocardAnywhere.dictionaries);
+			let test = '(';
+			
+			// Nicknames
+			if (response.customNicknames && (response.customNicknames != '')) {
+				if (response.customNicknames.indexOf(';') > -1) {
+					response.customNicknames = response.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
+				}
+				AutocardAnywhere.customNicknames = {};
+				AutocardAnywhere.customNicknameRE = '(';
+				response.customNicknames.split('||').map(function(x) {
+					let nickname = x.split('|');
+					if (nickname.length == 3 && dictionaryNames.includes(nickname[0])) {
+						AutocardAnywhere.customNicknames[nickname[1].toLowerCase()] = {
+							dictionary: nickname[0],
+							nickname: nickname[1],
+							fullname: nickname[2]
+						};
+						AutocardAnywhere.customNicknameRE += nickname[1] + '|';
+					}
+				});
+
+				if (AutocardAnywhere.customNicknameRE.length > 1) {
+					AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
+				}
+				AutocardAnywhere.customNicknameRE += ')';
+				
+				if (AutocardAnywhere.customNicknameRE != '()') {
+					test += AutocardAnywhere.customNicknameRE + '|';
+				}
+			}
+
+			//for (let i=0; i<AutocardAnywhere.dictionaries.length; i++) {
+			dictionaryNames.map( (key) => {
+				test += AutocardAnywhere.dictionaries[key].test.replace("([^a-zA-Z_0-9-'])(", '').replace(")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", '') + '|';
+			});
+			if (test.length > 1) {
+				test = test.slice(0, -1);
+			}
+			test += ')';
+			//console.log(test);
+			AutocardAnywhere.test = new RegExp("((?:.|\n)*?[^a-zA-Z_0-9-'])(?:" + test + ")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", "gi");
+
 
 			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
 			if (AutocardAnywhere.forceLoad) {
@@ -1090,32 +1193,6 @@ let AutocardAnywhere = {
 				}
 			}
 		});
-
-		
-		// Nicknames
-		if (response.customNicknames && (response.customNicknames != '')) {
-			if (response.customNicknames.indexOf(';') > -1) {
-				response.customNicknames = response.customNicknames.replace(/;/g, '||').replace(/:/g, '|');
-			}
-			AutocardAnywhere.customNicknames = {};
-			AutocardAnywhere.customNicknameRE = '(';
-			response.customNicknames.split('||').map(function(x) {
-				let nickname = x.split('|');
-				if (nickname.length == 3) {
-					AutocardAnywhere.customNicknames[nickname[1].toLowerCase()] = {
-						dictionary: nickname[0],
-						nickname: nickname[1],
-						fullname: nickname[2]
-					};
-					AutocardAnywhere.customNicknameRE += nickname[1] + '|';
-				}
-			});
-
-			if (AutocardAnywhere.customNicknameRE.length > 1) {
-				AutocardAnywhere.customNicknameRE = AutocardAnywhere.customNicknameRE.slice(0,-1);
-			}
-			AutocardAnywhere.customNicknameRE += ')';
-		}
 
 		AutocardAnywhere.loaded = true;
 	}
