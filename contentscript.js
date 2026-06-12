@@ -894,14 +894,7 @@ let AutocardAnywhere = {
 					if (AutocardAnywhere.isM1) {
 						//console.log('m1');
 						AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
-							//if (newHtml == html) {
-							//	AutocardAnywhere.ignoredStrings[html] = 1;
-							//	return;
-							//}
-
 							let newNode = $('<span>' + newHtml + '</span>');
-							//AutocardAnywhere.initialisePopups(newNode);
-							//n.after(newNode.get(0));
 							newNode.insertAfter(n);
 							n.remove();
 							
@@ -912,17 +905,8 @@ let AutocardAnywhere = {
 						});
 					}
 					else {
-						//console.log('not m1');
-						//let newHtml = AutocardAnywhere.foregroundRunner(html);
-						//if (newHtml == html) {
-						//	AutocardAnywhere.ignoredStrings[html] = 1;
-							//console.log(html);
-						//	continue;
-						//}
-
+						//console.log('not m1')
 						let newNode = AutocardAnywhere.foregroundRunner(html);
-						//AutocardAnywhere.initialisePopups(newNode);
-						//n.after(newNode.get(0));
 						if (newNode === false) continue;
 						
 						newNode.insertAfter(n);
@@ -1199,23 +1183,22 @@ let AutocardAnywhere = {
 }
 
 if (!AutocardAnywhereSettings.isEmbedded) {
+	/*
 	function connect() {
 		//console.log('(re)connecting...');
 		AutocardAnywhere.persistentPort = chrome.runtime.connect({name: 'autocardanywhere'});
 		AutocardAnywhere.persistentPort.onDisconnect.addListener(connect);
-		/*
-		AutocardAnywhere.persistentPort.onMessage.addListener(msg => {
-			console.log('received', msg, 'from bg');
-		});
-		*/
 		//AutocardAnywhere.persistentPort.postMessage({'data': 'ping'});
 	}
 	connect();
+	*/
 
+	/*
 	var w = document.createElement("canvas").getContext("webgl");
 	var d = w.getExtension('WEBGL_debug_renderer_info');
 	var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
-	AutocardAnywhere.isM1 = g.match(/Apple/) && !g.match(/Apple GPU/);
+	*/
+	AutocardAnywhere.isM1 = false;//g.match(/Apple/) && !g.match(/Apple GPU/);
 
 
 	AutocardAnywhereSettings.load(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(AutocardAnywhere.settingsCallback);

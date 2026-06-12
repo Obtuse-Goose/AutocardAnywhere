@@ -4,19 +4,13 @@ if (typeof chrome !== 'undefined') {var browser = chrome;}
 
 try {
 	if (typeof importScripts != 'undefined') importScripts(
-		'settings.js', 
-		"games/dictionary.js", 
-		"games/games.js"
+		'settings.js'
+		//,"games/dictionary.js",
+		//"games/games.js"
 	);
 }
 catch (e) {
 	console.error(e);
-}
-
-
-function getItem(key) {
-	//return window.localStorage.getItem(key);
-	return;
 }
 
 function setItem(key, value) {
@@ -46,7 +40,7 @@ function loadSettings(prefix, settings) {
 
 		browser.storage.sync.get(requestedSettings, function(data) {
 			settings.map(function(setting) {
-				let value = isDefined(data[prefix + setting.name]) ? data[prefix + setting.name] : getItem(prefix + setting.name);
+				let value = data[prefix + setting.name];
 				if (setting.resetToDefault) {
 					result[setting.name] = setting.default;
 					setItem(prefix + setting.name, setting.default);
@@ -79,7 +73,6 @@ function loadSettings(prefix, settings) {
 					}
 				}
 				else {
-					//let value = data[prefix + setting.name] || getItem(prefix + setting.name) || setting.default;
 					value = isDefined(value) ? value : setting.default;
 		
 					// Rewrite defunct link targets
@@ -118,22 +111,22 @@ function saveSettings(prefix, settings, updateLastSaved) {
 }
 
 function getURL(filename) {
-	if (AutocardAnywhereSettings.isSafari) {
-		return safari.extension.baseURI + filename;
-	}
-	else { // Chrome, Opera, Firefox or Edge
+	//if (AutocardAnywhereSettings.isSafari) {
+	//	return safari.extension.baseURI + filename;
+	//}
+	//else { // Chrome, Opera, Firefox or Edge
 		return browser.runtime.getURL(filename);
-	}
+	//}
 }
 
 function openURL(url) {
 	// Opens a new tab in the browser at url
-	if (AutocardAnywhereSettings.isSafari) {
-		window.open(url, '_blank');
-	}
-	else { // Chrome, Opera, Firefox or Edge
+	//if (AutocardAnywhereSettings.isSafari) {
+	//	window.open(url, '_blank');
+	//}
+	//else { // Chrome, Opera, Firefox or Edge
 		browser.tabs.create({'url': url});
-	}
+	//}
 }
 
 function getExchangeRate() {
@@ -191,19 +184,6 @@ function getFile(url, callback) {
 	}
 }
 
-/*
-function headFile(url, callback) {
-	let xmlhttp = new XMLHttpRequest();
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-		    callback(xmlhttp.getAllResponseHeaders());
-		} 
-	} 
-	xmlhttp.open("HEAD", url, true); 
-	xmlhttp.send();
-}
-*/
-
 function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 	// See if it has been more than a day since we last checked for updates.
 	loadSettings(requestPrefix + gameName + gameLanguage, [{'name': 'LastDataUpdate'}]).then( (updateInfo) => {
@@ -225,41 +205,25 @@ function checkForUpdates(requestPrefix, gameName, gameLanguage) {
 		let gameDataUrl = baseUrl + gameName + '/' + gameName + '-data.json';
 		let languageDataUrl = baseUrl + gameName + '/' + gameLanguage + '-data.json';
 		
-		//headFile(gameDataUrl, function(response) {
-		//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
-			//console.log(lastModified);
-		//	if (lastModified > lastUpdate) {
-				getFile(gameDataUrl, function(response) {
-					//setItem(requestPrefix + gameName, response);
-					//delete dictionaries[gameName + gameLanguage];
-					let item = {};
-					item[gameName] = response;
-					let decoded = JSON.parse(response);
-					if (decoded.version) {
-						saveSettings(requestPrefix, {'dataVersion': decoded.version}, false);
-					}
-					browser.storage.local.set(item, function() {
-						//delete dictionaries[gameName + gameLanguage];
-					});
-				});
-		//	}
-		//});
+		getFile(gameDataUrl, function(response) {
+			let item = {};
+			item[gameName] = response;
+			let decoded = JSON.parse(response);
+			if (decoded.version) {
+				saveSettings(requestPrefix, {'dataVersion': decoded.version}, false);
+			}
+			browser.storage.local.set(item, function() {
+				//delete dictionaries[gameName + gameLanguage];
+			});
+		});
 		
-		//headFile(languageDataUrl, function(response) {
-		//	let lastModified = new Date(response.match(/last\-modified\: (.*)/)[1]);
-			//console.log(lastModified);
-		//	if (lastModified > lastUpdate) {
-				getFile(languageDataUrl, function(response) {
-					//setItem(requestPrefix + gameName + gameLanguage, response);
-					//delete dictionaries[gameName + gameLanguage];
-					let item = {};
-					item[gameName + gameLanguage] = response;
-					browser.storage.local.set(item, function() {
-						//delete dictionaries[gameName + gameLanguage];
-					});
-				});
-		//	}
-		//});
+		getFile(languageDataUrl, function(response) {
+			let item = {};
+			item[gameName + gameLanguage] = response;
+			browser.storage.local.set(item, function() {
+				//delete dictionaries[gameName + gameLanguage];
+			});
+		});
 		
 		saveSettings(requestPrefix + gameName + gameLanguage, {'LastDataUpdate': now.toString()}, false);
 		saveSettings(requestPrefix, {'lastDataUpdate': now.toString()}, false);
@@ -323,62 +287,17 @@ function stats(requestPrefix, settings, forceFullUpdate) {
 }
 */
 
-/*
-function getDictionaryFromDisk(dictionary) {
-	//console.log(request);
-	return new Promise((resolve, reject) => {
-		//let dictionary = AutocardAnywhere.games[request.game][request.language];
-		//console.log(dictionary);
-
-		getFile(getURL("games/" + dictionary.game + "/" + dictionary.game + "-data.json"), function(response) {
-			let gameData = JSON.parse(response);
-			getFile(getURL("games/" + dictionary.game + "/" + dictionary.language + "-data.json"), function(response) {
-				let languageData = JSON.parse(response);
-				//let decoded = JSON.parse(languageData);
-				//console.log(dictionary.game + dictionary.language + ' - found data on disk, version ' + decoded.version);
-				console.log(dictionary.game + dictionary.language + ' - found data on disk');
-
-				dictionary.test = languageData.test;
-				dictionary.cardNames = languageData.cardNames;
-				dictionary.cardData = gameData.cardData;
-
-				resolve(dictionary);
-			});
-		});
-	});
-}
-*/
-
 function getDictionary(dictionary) {
 	return new Promise((resolve, reject) => {
 		let gameName = dictionary.game;
 		let gameLanguage = dictionary.language;
 
-		//let dictionaries = [];
-
 		checkForUpdates(AutocardAnywhereSettings.prefix, gameName, gameLanguage);
 
 		browser.storage.local.get([gameName, gameName+gameLanguage], function(storageResponse) {
-			/*
-			if (dictionaries[gameName + gameLanguage]) {
-				console.log(gameName + gameLanguage + ' - found data in memory');
-				
-				resolve(dictionaries[gameName + gameLanguage]);
-			}
-			else 
-			*/
+
 			if (storageResponse[gameName] && storageResponse[gameName + gameLanguage]) {
 				console.log(gameName + gameLanguage + ' - found data in storage.local');
-				//let decoded = JSON.parse(storageResponse[gameName + gameLanguage]);
-				//console.log(gameName + gameLanguage + ' - found data in storage.local, version ' + decoded.version);
-				/*
-				dictionaries[gameName + gameLanguage] = {
-					'game': gameName,
-					'language': gameLanguage,
-					'gameData': storageResponse[gameName],
-					'languageData': storageResponse[gameName + gameLanguage]
-				};
-				*/
 				resolve({
 					'game': gameName,
 					'language': gameLanguage,
@@ -389,18 +308,8 @@ function getDictionary(dictionary) {
 			else {
 				getFile(getURL("games/" + gameName + "/" + gameName + "-data.json"), function(gameData) {
 					getFile(getURL("games/" + gameName + "/" + gameLanguage + "-data.json"), function(languageData) {
-						//let decoded = JSON.parse(languageData);
-						//console.log(gameName + gameLanguage + ' - found data on disk, version ' + decoded.version);
 						console.log(gameName + gameLanguage + ' - found data on disk');
 				
-						/*
-						dictionaries[gameName + gameLanguage] = {
-							'game': gameName,
-							'language': gameLanguage,
-							'gameData': gameData,
-							'languageData': languageData
-						};
-						*/
 						resolve({
 							'game': gameName,
 							'language': gameLanguage,
@@ -414,7 +323,7 @@ function getDictionary(dictionary) {
 	});
 }
 
-
+/*
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -498,15 +407,6 @@ function load() {
 
 				//console.log(dictionary);
 
-				// Run it to force compilation
-				/*
-				console.log('compiling regex');
-				let text = "Pyromancer Ascension";
-				text = dictionary.run(text);
-				console.log(text);
-				*/
-				
-
 				//AutocardAnywhere.dictionaries.push(dictionary);
 				AutocardAnywhere.dictionaries[dictionary.game + dictionary.language] = dictionary;
 			}
@@ -576,7 +476,6 @@ function parse(text, sendResponse) {
 }
 
 
-
 // Handle persistent connections - keep background alive so that we don't need to reload the regexps on every page.
 function onMessage(msg, port) {
 	//console.log('received', msg, 'from', port.sender);
@@ -599,61 +498,63 @@ function onConnect(port) {
 	port.onMessage.addListener(onMessage);
 	port.onDisconnect.addListener(deleteTimer);
 	port._timer = setTimeout(forceReconnect, 250e3, port);
-	/*
-	port.onMessage.addListener(function(request) {
-		if (request.type == "dictionary") { // Requested a dictionary by name
-			getDictionary(port, request);
-		}
-		else if (request.type == "file") { // Requested a file by url
-			getFile(request.url, function(response) {
-				port.postMessage({'url': request.url, 'data': response});
-			});
-		}
-	});
-	*/
+	
+	// port.onMessage.addListener(function(request) {
+	// 	if (request.type == "dictionary") { // Requested a dictionary by name
+	// 		getDictionary(port, request);
+	// 	}
+	// 	else if (request.type == "file") { // Requested a file by url
+	// 		getFile(request.url, function(response) {
+	// 			port.postMessage({'url': request.url, 'data': response});
+	// 		});
+	// 	}
+	// });
+	
 
 	return true;
 }
+*/
 
 
 // Handle simple requests
 function onRequest(request, sender, sendResponse) {
 	if (request.name == "loadSettings") {
-		if (AutocardAnywhereSettings.isSafari) {
-			loadSettings(request.message.prefix, request.message.settings).then(function(settings) {
-				request.target.page.dispatchMessage(request.message.id, settings);
-			});
-		}
-		else { // Chrome, Opera, Firefox or Edge
+		//if (AutocardAnywhereSettings.isSafari) {
+		//	loadSettings(request.message.prefix, request.message.settings).then(function(settings) {
+		//		request.target.page.dispatchMessage(request.message.id, settings);
+		//	});
+		//}
+		//else { // Chrome, Opera, Firefox or Edge
 			loadSettings(request.prefix, request.settings).then(sendResponse);
-		}
+		//}
 	}
 	else if (request.name == "saveSettings") {
-		if (AutocardAnywhereSettings.isSafari) {
-			saveSettings(request.message.prefix, request.message.settings, true);
-			console.log('unloading');
-			AutocardAnywhere.loaded = false;
-		}
-		else { // Chrome, Opera, Firefox or Edge
+		//if (AutocardAnywhereSettings.isSafari) {
+		//	saveSettings(request.message.prefix, request.message.settings, true);
+		//	console.log('unloading');
+		//	AutocardAnywhere.loaded = false;
+		//}
+		//else { // Chrome, Opera, Firefox or Edge
 			saveSettings(request.prefix, request.settings, true);
 			console.log('unloading');
 			AutocardAnywhere.loaded = false;
-		}
+		//}
 	}
 	else if (request.name == "getFile") {
-		if (AutocardAnywhereSettings.isSafari) {
-			getFile(request.message.url, function(response) {
-				request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
-			});
-		}
-		else { // Chrome, Opera, Firefox or Edge
+		//if (AutocardAnywhereSettings.isSafari) {
+		//	getFile(request.message.url, function(response) {
+		//		request.target.page.dispatchMessage('getFileCallback', {'url': request.message.url, 'data': response});
+		//	});
+		//}
+		//else { // Chrome, Opera, Firefox or Edge
 			getFile(request.url, (response) => {
 				sendResponse({'url': request.url, 'data': response});
 			});
-		}
+		//}
 	}
 	else if (request.name == "getDictionary") {
 		//console.log(AutocardAnywhere.dictionaries);
+		/*
 		if (AutocardAnywhereSettings.isSafari) {
 			let gameName = request.message.game;
 			let gameLanguage = request.message.language;
@@ -677,8 +578,9 @@ function onRequest(request, sender, sendResponse) {
 			}
 		}
 		else { // Chrome, Opera, Firefox or Edge
+		*/
 			getDictionary(request).then(sendResponse);
-		}
+		//}
 	}
 	else if (request.name == "disableIcon") {
 		browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -688,82 +590,54 @@ function onRequest(request, sender, sendResponse) {
 			});
 	    });
 	}
-	else if (request.name == "parse") {
-		parse(request.data, sendResponse);
-	}
+	//else if (request.name == "parse") {
+	//	parse(request.data, sendResponse);
+	//}
 
 	return true;
 };
 
-/*
-// Listen for the content script to send a message to the background page.
-if (AutocardAnywhereSettings.isSafari) {
-	safari.application.addEventListener("message", onRequest, false);
+// Chrome, Opera, Firefox or Edge
+// Simple messages
+browser.runtime.onMessage.addListener(onRequest);
+// Persistent connections
+//browser.runtime.onConnect.addListener(onConnect);
 
-	// When the context menu is displayed, add an item to it if there is text selected (stored as boolean in event.userInfo)
-	safari.application.addEventListener("contextmenu", function(event) {
-		if (event.userInfo) {
-			event.contextMenu.appendContextMenuItem("contextmenuitemclick", "AutocardAnywhere Lookup");
-		}
-	}, false);
-	// When the context menu item is clicked, send a message to the injected script.
-	safari.application.addEventListener("command", function(event) {
-		if (event.command === "contextmenuitemclick") {
-			safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("contextmenuitemclick");
-		}
-	}, false);
-	
-	loadSettings(AutocardAnywhereSettings.prefix, AutocardAnywhereSettings.settings).then(function(settings) {
-		if (!settings.setupShown) {
-			openURL(safari.extension.baseURI + 'options.html');
-			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
+// Add the context menu item
+browser.contextMenus.removeAll(() => {
+	let id = 'autocardanywherecontextmenuitem'
+	let menuItem = browser.contextMenus.create({
+		id: id,
+		title: 'AutocardAnywhere Lookup',
+		contexts: ["selection"]
+	});
+	browser.contextMenus.onClicked.addListener(function(info, tab) {
+		if (info.menuItemId != id) return;
+		browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
+	});
+});
+
+// On first install open the options page
+browser.runtime.onInstalled.addListener((details) => {
+	if (details.reason == 'install') {
+		openURL(browser.runtime.getURL('options.html'));
+		//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
+	}
+	else if (details.reason == "update") {
+		// Force update mtg data after every extension update to work around issue with Mozilla's 4MB limit for Firefox extensions.
+		let now = new Date();
+		let lastUpdate = new Date('1970-01-01 00:00');
+		saveSettings(AutocardAnywhereSettings.prefix + 'mtgen', {'LastDataUpdate': now.toString()}, false);
+		saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
+	}
+});
+
+// If we're running on Firefox and the user hasn't granted permission to run, show the options page so that it can popup the permissions dialog.
+if (AutocardAnywhereSettings.isFirefox) {
+	browser.permissions.getAll().then((permissions) => {
+		let hasPermission = permissions.origins.indexOf("<all_urls>") > - 1;
+		if (!hasPermission) {
+			openURL(browser.runtime.getURL('options.html'));
 		}
 	});
 }
-else { 
-*/
-	// Chrome, Opera, Firefox or Edge
-	// Simple messages
-	browser.runtime.onMessage.addListener(onRequest);
-	// Persistent connections
-	browser.runtime.onConnect.addListener(onConnect);
-
-	// Add the context menu item
-	browser.contextMenus.removeAll(() => {
-		let id = 'autocardanywherecontextmenuitem'
-		let menuItem = browser.contextMenus.create({
-			id: id,
-			title: 'AutocardAnywhere Lookup',
-			contexts: ["selection"]
-		});
-		browser.contextMenus.onClicked.addListener(function(info, tab) {
-			if (info.menuItemId != id) return;
-			browser.tabs.sendMessage(tab.id, {'name': 'contextmenuitemclick'});
-		});
-	});
-
-	// On first install open the options page
-	browser.runtime.onInstalled.addListener((details) => {
-		if (details.reason == 'install') {
-			openURL(browser.runtime.getURL('options.html'));
-			//setItem(AutocardAnywhereSettings.prefix + 'priceSetupShown', true);
-		}
-		else if (details.reason == "update") {
-			// Force update mtg data after every extension update to work around issue with Mozilla's 4MB limit for Firefox extensions.
-			let now = new Date();
-			let lastUpdate = new Date('1970-01-01 00:00');
-			saveSettings(AutocardAnywhereSettings.prefix + 'mtgen', {'LastDataUpdate': now.toString()}, false);
-			saveSettings(AutocardAnywhereSettings.prefix, {'lastDataUpdate': lastUpdate.toString()}, false);
-		}
-	});
-
-	// If we're running on Firefox and the user hasn't granted permission to run, show the options page so that it can popup the permissions dialog.
-	if (AutocardAnywhereSettings.isFirefox) {
-		browser.permissions.getAll().then((permissions) => {
-			let hasPermission = permissions.origins.indexOf("<all_urls>") > - 1;
-			if (!hasPermission) {
-				openURL(browser.runtime.getURL('options.html'));
-			}
-		});
-	}
-//}
