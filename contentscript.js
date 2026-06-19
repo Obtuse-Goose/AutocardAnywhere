@@ -801,14 +801,14 @@ let AutocardAnywhere = {
 				});
 
 				let unmatched = text.slice(matchLength);
-				nodes.push(document.createTextNode(unmatched));
+				nodes.push(document.createTextNode(unmatched.replaceAll("\x00", "")));
 			}
 			else {
-				nodes.push(document.createTextNode(text));
+				nodes.push(document.createTextNode(text.replaceAll("\x00", "")));
 			}
 		}
 
-		text = text.replace("\u00a0", " ") + ' ';
+		text = "\x00" + text.replaceAll("\u00a0", " ") + "\x00";
 		let matchLength = 0;
 		let keys = Object.keys(AutocardAnywhere.dictionaries);
 
