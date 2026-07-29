@@ -240,8 +240,6 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	cardImg.style.width = AutocardAnywhere.popupWidth + 'px';
 	cardImg.dataset.id = card.id + '-' + card.face;
 	cardImg.alt = card.name + ' card image';
-	//cardImg.src = 'https://cards.scryfall.io/large/front/c/d/cdc86e78-8911-4a0d-ba3a-7802f8d991ef.jpg?1627701697';
-	//cardImg.style.mixBlendMode = 'multiply';
 
 	if (card.ratio == 'square') {
 		cardDiv.style.width = AutocardAnywhere.popupHeight + 'px';
@@ -252,7 +250,7 @@ Dictionary.prototype.getCardElement = function(card, linkCount) {
 	let overlayHeight = AutocardAnywhere.popupHeight;
 
 	// If we have rotation set at 360 and are using Scryfall as the image target, then change rotation to 90.
-	if ((card.rotate == 360) && (dictionary.settings.imageURL.indexOf('api.scryfall.com') > -1)) {
+	if ((card.rotate == 360) && (dictionary.settings.imageURL.indexOf('scryfall') > -1)) {
 		card.rotate = 90;
 	}
 

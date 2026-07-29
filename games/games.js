@@ -1768,7 +1768,7 @@ MtgDictionary.prototype = new Dictionary({
 			'type': 'string',
 			'resetToDefault': true,
 			//'default': 'https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=<id>'
-			'default': 'https://c1.scryfall.com/file/scryfall-cards/png/<face>/<id:folders>.png'
+			'default': 'https://cards.scryfall.io/png/<face>/<id:folders>.png'
 		},
 		{
 			'name': 'manaPoolURL',
