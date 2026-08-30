@@ -750,14 +750,17 @@ let AutocardAnywhere = {
 						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 
-						// Traverse the new node.						
+						// Traverse the new node.
+						/*					
 						node.each((index, child) =>{
 							AutocardAnywhere.insertionCount++;
 							if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
-								//console.log(child.parentNode);
 								AutocardAnywhere.traverse(child.parentNode);
 							}
 						});
+						*/
+
+						AutocardAnywhere.traverse(nodes[i]);
 				}
 			}
 	    });
@@ -878,47 +881,49 @@ let AutocardAnywhere = {
 		if (!node) return;
 		if (AutocardAnywhere.processedNodes.has(node)) return;
 		AutocardAnywhere.processedNodes.add(node);
-
+		
+		AutocardAnywhere.processNode(node);
 		let children = node.childNodes;
 		if (!children) return;
 		for (let i=0; i<children.length; i++) {
-			let n = children[i];
-			if (!n) continue;
-			if (n.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(n.tagName) && !n.isContentEditable && !n.classList.contains("autocardanywhere-ignored")) {
-				AutocardAnywhere.traverse(n);
-			}
-			else if (n.nodeType == 3) {
-				let html = n.nodeValue;
-				if (html.length>2 && /[A-Za-z]/.test(html) ) { //&& !AutocardAnywhere.ignoredStrings[html]) {
-					//console.log(html);
-					if (AutocardAnywhere.isM1) {
-						//console.log('m1');
-						AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
-							let newNode = $('<span>' + newHtml + '</span>');
-							newNode.insertAfter(n);
-							n.remove();
-							
-							// Delay for a short time before initialising to fix a race condition bug on Reddit.
-							setTimeout(function() {
-								AutocardAnywhere.initialisePopups(newNode);
-							}, 10);
-						});
-					}
-					else {
-						//console.log('not m1')
-						let newNode = AutocardAnywhere.foregroundRunner(html);
-						if (newNode === false) continue;
-						
-						newNode.insertAfter(n);
-						n.remove();
+			if (children[i]) AutocardAnywhere.processNode(children[i]);
+		}
+	},
 
+	processNode: function(node) {
+		if (node.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(node.tagName) && !node.isContentEditable && !node.classList.contains("autocardanywhere-ignored")) {
+			AutocardAnywhere.traverse(node);
+		}
+		else if (node.nodeType == 3) {
+			let html = node.nodeValue;
+			if (html.length>2 && /[A-Za-z]/.test(html) ) { //&& !AutocardAnywhere.ignoredStrings[html]) {
+				if (AutocardAnywhere.isM1) {
+					//console.log('m1');
+					AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
+						let newNode = $('<span>' + newHtml + '</span>');
+						newNode.insertAfter(node);
+						node.remove();
+						
 						// Delay for a short time before initialising to fix a race condition bug on Reddit.
 						setTimeout(function() {
 							AutocardAnywhere.initialisePopups(newNode);
 						}, 10);
-					}
-					
+					});
 				}
+				else {
+					//console.log('not m1')
+					let newNode = AutocardAnywhere.foregroundRunner(html);
+					if (newNode === false) return;
+					
+					newNode.insertAfter(node);
+					node.remove();
+
+					// Delay for a short time before initialising to fix a race condition bug on Reddit.
+					setTimeout(function() {
+						AutocardAnywhere.initialisePopups(newNode);
+					}, 10);
+				}
+				
 			}
 		}
 	},
