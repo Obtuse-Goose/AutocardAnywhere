@@ -2437,7 +2437,7 @@ NetrunnerDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'type': 'string',
 			'resetToDefault': true,
-			'default': 'https://card-images.netrunnerdb.com/v1/large/<en>.jpg'
+			'default': 'https://card-images.netrunnerdb.com/v2/large/<en>.jpg'
 		},
 		{
 			'name': 'defaultSection',
