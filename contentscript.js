@@ -488,7 +488,12 @@ let AutocardAnywhere = {
 					})
 					.each(function() {
 						if (this.complete) {
-							$(this).load();
+							try {
+								$(this).load();
+							}
+							catch {
+								// Do nothing
+							}
 						} 
 						else if (this.error) {
 							$(this).error();
@@ -729,6 +734,7 @@ let AutocardAnywhere = {
 		// Respond to a dom change
 		// Stop observing so as to avoid picking-up on the popup node being inserted
 		AutocardAnywhere.unobserveDomChanges();
+		let mutated = false;
 	    mutations.map(function(mutation) {
 	    	// Only interested in nodes being added.
 		    let nodes = mutation.addedNodes;
@@ -746,96 +752,95 @@ let AutocardAnywhere = {
 					(!node.is(".autocardanywhere-ignored")) &&
 	    			(node.children('span.autocardanywhere').length === 0)
 	    			) {
-			    		// Linkify the new node and then add popups in it.
+			    		// Linkify the new node.
 						// Replace any existing card links in the new node.
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 
 						// Traverse the new node.
-						/*					
-						node.each((index, child) =>{
-							AutocardAnywhere.insertionCount++;
-							if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
-								AutocardAnywhere.traverse(child.parentNode);
-							}
-						});
-						*/
-
 						AutocardAnywhere.traverse(nodes[i]);
+						mutated = true;
 				}
 			}
 	    });
+		// Add popups for the new node.
+		if (mutated) AutocardAnywhere.initialisePopups(document.body);
 	    // Restart the observer
 		if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
 			AutocardAnywhere.observeDomChanges();
 		}
 	},
 
-	backgroundRunner: async function(text) {
-		// Pause slightly between messages
-		await AutocardAnywhere.sleep(10);
-		return AutocardAnywhere.sendMessage({name: 'parse', data: text}).then((response) => response.data);
-	},
+	foregroundRunner: function(text, node) {
+		let replacements = [];
+		let range = document.createRange();
 
-	foregroundRunner: function(text) {
-		let nodes = [];
-
-		function textNode(text) {
-			// Card names enclosed in [[]]
-			if (AutocardAnywhere.fuzzyLookup) {
-				let matchLength = 0;
-				let result = text.replace(new RegExp(/((?:.|\n)*?\[\[)(.*?)\]\]/, "gi"), function(match, f, name) {
-					
-					matchLength += match.length;
-						
-					for (let i=0; i<keys.length; i++) {
-						let dictionary = AutocardAnywhere.dictionaries[keys[i]];
-
-						// Do a fuzzy lookup by name
-						let cards = dictionary.fuzzyLookup(name);
-						if (cards.length > 0) {
-							nodes.push(document.createTextNode(f));
-							nodes.push(dictionary.createLinkElement(dictionary, cards[0], name, null, null, true));
-							nodes.push(document.createTextNode(']]'));
-							return;
-						}
-					}
-					// If the card wasn't found in any dictionary, return the text unchanged.
-					nodes.push(document.createTextNode(match));
-				});
-
-				let unmatched = text.slice(matchLength);
-				nodes.push(document.createTextNode(unmatched.replaceAll("\x00", "")));
-			}
-			else {
-				nodes.push(document.createTextNode(text.replaceAll("\x00", "")));
-			}
+		function makeReplacement(replacement) {
+			//console.log(replacement);
+			if (replacement.start > node.length || replacement.end > node.length) return;
+			range.setStart(node, replacement.start);
+			range.setEnd(node, replacement.end);
+			range.deleteContents();
+	        range.insertNode(replacement.element);
 		}
 
 		text = "\x00" + text.replaceAll("\u00a0", " ") + "\x00";
-		let matchLength = 0;
 		let keys = Object.keys(AutocardAnywhere.dictionaries);
 
-		text.replace(AutocardAnywhere.test, function (match, f, s, suffix, t) {
+		// Card names enclosed in [[]]
+		if (AutocardAnywhere.fuzzyLookup) {
+			text.replace(new RegExp(/((?:.|\n)*?\[\[)(.*?)\]\]/, "gi"), function(match, f, name) {
 
-			if (typeof(s) !== 'string') {textNode(match); return;}
-			matchLength += match.length;
+				let start = text.indexOf(name) - 1;
+				let end = start + name.length;
+				
+				for (let i=0; i<keys.length; i++) {
+					let dictionary = AutocardAnywhere.dictionaries[keys[i]];
+
+					// Do a fuzzy lookup by name
+					let cards = dictionary.fuzzyLookup(name);
+					if (cards.length > 0) {
+						replacements.push({
+							start: start,
+							end: end,
+							element: dictionary.createLinkElement(dictionary, cards[0], name, null, null, true)
+						});
+
+						// We found a card in a dictionary - return before trying other dictionaries.
+						return;
+					}
+				}
+			});
+		}
+
+		text.replace(AutocardAnywhere.test, function (match, f, s, suffix, t) {
+			if (typeof(s) !== 'string') {return}
 			// If this card is on the ignore list, ignore it.
-			if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {textNode(match); return;}
+			if (AutocardAnywhere.ignoreList[s.toLowerCase()]) {return}
 			// If the card name is followed by a d but doesn't end in e, don't link it.
-			if (suffix == 'd' && s.slice(-1) != 'e') {textNode(match); return;}
+			if (suffix == 'd' && s.slice(-1) != 'e') {return}
+			
+			let start = text.indexOf(s) - 1;
+			let end = start + s.length;
 
 			let nickname = AutocardAnywhere.customNicknames[s.toLowerCase()];
 			if (nickname) {
-				if (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()]) {textNode(match); return;}
+				if (AutocardAnywhere.ignoreList[nickname.fullname.toLowerCase()]) {return}
 				let dictionary = AutocardAnywhere.dictionaries[nickname.dictionary];
 				let card = dictionary.findCard(nickname.fullname);
 				if (card) {
-					textNode(f);
 					if (AutocardAnywhereSettings.settings.expandNicknames) {
-						nodes.push(dictionary.createLinkElement(dictionary, card, nickname.fullname));
+						replacements.push({
+							start: start,
+							end: end,
+							element: dictionary.createLinkElement(dictionary, card, nickname.fullname)
+						});
 					}
 					else {
-						nodes.push(dictionary.createLinkElement(dictionary, card, nickname.nickname));
+						replacements.push({
+							start: start,
+							end: end,
+							element: dictionary.createLinkElement(dictionary, card, nickname.nickname)
+						});
 					}
 					return;
 				}
@@ -848,32 +853,25 @@ let AutocardAnywhere = {
 				// If no card was found, try the next dictionary
 				if (!card) continue;
 				// If we don't want to link this card then return the text unchanged.
-				if (AutocardAnywhere.ignoreList[card.name.toLowerCase()]) {textNode(match); return;}
+				if (AutocardAnywhere.ignoreList[card.name.toLowerCase()]) {return}
 				
-				textNode(f);
-				nodes.push(dictionary.createLinkElement(dictionary, card));
+				replacements.push({
+					start: start,
+					end: end,
+					//matchedCardName: s,
+					element: dictionary.createLinkElement(dictionary, card)
+				});
+
+				// We found a card in a dictionary - return before trying other dictionaries.
 				return;
 			}
-
-			// If no card was found in any dictionary then return the text unchanged
-			textNode(match);
-			return;
 		});
 
-		let unmatched = text.slice(matchLength, -1);
-		textNode(unmatched);
-
-		if (nodes.length == 0) {
-			return false;
+		//console.log(replacements);
+		for (let i=replacements.length-1; i>=0; i--) {
+			makeReplacement(replacements[i]);
 		}
-		//let result = document.createDocumentFragment();
-		let result = document.createElement('span');
-		for (let i=0; i<nodes.length; i++) {
-			result.appendChild(nodes[i]);
-		}
-		//console.log(result);
-
-		return $(result);
+		return node;
 	},
 
 	// Function to traverse the DOM to find any text nodes.
@@ -881,49 +879,18 @@ let AutocardAnywhere = {
 		if (!node) return;
 		if (AutocardAnywhere.processedNodes.has(node)) return;
 		AutocardAnywhere.processedNodes.add(node);
-		
-		AutocardAnywhere.processNode(node);
-		let children = node.childNodes;
-		if (!children) return;
-		for (let i=0; i<children.length; i++) {
-			if (children[i]) AutocardAnywhere.processNode(children[i]);
-		}
-	},
 
-	processNode: function(node) {
 		if (node.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(node.tagName) && !node.isContentEditable && !node.classList.contains("autocardanywhere-ignored")) {
-			AutocardAnywhere.traverse(node);
+			let children = node.childNodes;
+			if (!children) return;
+			for (let i=0; i<children.length; i++) {
+				if (children[i]) AutocardAnywhere.traverse(children[i]);
+			}
 		}
 		else if (node.nodeType == 3) {
 			let html = node.nodeValue;
 			if (html.length>2 && /[A-Za-z]/.test(html) ) { //&& !AutocardAnywhere.ignoredStrings[html]) {
-				if (AutocardAnywhere.isM1) {
-					//console.log('m1');
-					AutocardAnywhere.backgroundRunner(html).then((newHtml) => {
-						let newNode = $('<span>' + newHtml + '</span>');
-						newNode.insertAfter(node);
-						node.remove();
-						
-						// Delay for a short time before initialising to fix a race condition bug on Reddit.
-						setTimeout(function() {
-							AutocardAnywhere.initialisePopups(newNode);
-						}, 10);
-					});
-				}
-				else {
-					//console.log('not m1')
-					let newNode = AutocardAnywhere.foregroundRunner(html);
-					if (newNode === false) return;
-					
-					newNode.insertAfter(node);
-					node.remove();
-
-					// Delay for a short time before initialising to fix a race condition bug on Reddit.
-					setTimeout(function() {
-						AutocardAnywhere.initialisePopups(newNode);
-					}, 10);
-				}
-				
+				AutocardAnywhere.foregroundRunner(html, node);
 			}
 		}
 	},
@@ -1169,11 +1136,11 @@ let AutocardAnywhere = {
 			else {
 				// Replace existing card links
 				if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(document.body)}
-				AutocardAnywhere.initialisePopups(document.body);
 
 				// Traverse the DOM looking for text nodes to linkify
 				$('body').each((index, node) => {
 					AutocardAnywhere.traverse(node);
+					AutocardAnywhere.initialisePopups(document.body);
 				})
 				// Setup the mutation observer to pickup any changes to the DOM
 				if (typeof(MutationObserver) !== 'undefined') {
