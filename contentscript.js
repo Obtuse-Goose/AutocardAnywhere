@@ -81,6 +81,25 @@ let AutocardAnywhere = {
 		//return html.replace(/\n/g, '<br/>');
 		return html.split("\n");
 	},
+	removeDiacriticsAndPunctuation: function(str) {
+		let lookupLetters = {
+			"ä": "a", "ö": "o", "ü": "u", "Ä": "A", "Ö": "O", "Ü": "U",
+			"á": "a", "à": "a", "â": "a", "é": "e", "è": "e", "ê": "e",
+			"ú": "u", "ù": "u", "û": "u", "ó": "o", "ò": "o", "ô": "o",
+			"Á": "A", "À": "A", "Â": "A", "É": "E", "È": "E", "Ê": "E",
+			"Ú": "U", "Ù": "U", "Û": "U", "Ó": "O", "Ò": "O", "Ô": "O",
+			"í": "i", "ï": "i", "-": " ", "’": "'"
+		};
+
+		let result = '';
+		for(let i=0; i<str.length; i++) {
+			result += lookupLetters[str[i]] || str[i];
+		}
+
+		//result = result.replace(/[,'’"]/g, '');
+
+		return result;
+	},
 	createPricesElement: function(className, text) {
 		let result = document.createElement("div");
 		result.style.marginTop = '5px';
@@ -609,10 +628,8 @@ let AutocardAnywhere = {
             	cardName = queryStringList['singlesearch'] || queryStringList['q'] || queryStringList['card'] || queryStringList['cardname'] || queryStringList['name'] || filename;
 
                 if (cardName) {
-	                cardName = cardName.replace(/\[/g, '');
-					cardName = cardName.replace(/\]/g, '');
+	                cardName = cardName.replace(/[\[\]"]/g, '');
 					cardName = cardName.replace(/\+/g, ' ');
-					cardName = cardName.replace(/"/g, '');
 	                if ((cardName[0] == '!') || (cardName[0] == ' ')) {
 	                	cardName = cardName.substr(1, cardName.length);
                 	}
@@ -783,8 +800,11 @@ let AutocardAnywhere = {
 	        range.insertNode(replacement.element);
 		}
 
+
 		text = "\x00" + text.replaceAll("\u00a0", " ") + "\x00";
 		let keys = Object.keys(AutocardAnywhere.dictionaries);
+
+		text = AutocardAnywhere.removeDiacriticsAndPunctuation(text);
 
 		// Card names enclosed in [[]]
 		if (AutocardAnywhere.fuzzyLookup) {
@@ -857,7 +877,7 @@ let AutocardAnywhere = {
 				
 				replacements.push({
 					start: start,
-					end: end,
+					end: end,//start + card.name.length,
 					//matchedCardName: s,
 					element: dictionary.createLinkElement(dictionary, card)
 				});

@@ -29,16 +29,9 @@ Dictionary.prototype.findCardLink = function(cardname, overrideIgnoreDictionaryW
 	let dictionary = this;
 
 	function simpleTitleCase(str) {
+		// This has to exactly match what the equivalent function in util.php is doing.
 		if (!dictionary.settings.emphasiseText) return str;
-		// This has to exactly match what the equivalent funcion in util.php is doing.
-		// Remove punctuation
-		//str = str.replace(/[\.\-\/&"\(\),’']/g, "");
-		
-		str = str.replace('-', ' ');
-		str = str.replace(',', '');
-		str = str.replace("'", '');
-		str = str.replace('’', '');
-		str = str.replace('"', '');
+		str = AutocardAnywhere.removeDiacriticsAndPunctuation(str);
 
 		// Capitalise the first letter of the string
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();

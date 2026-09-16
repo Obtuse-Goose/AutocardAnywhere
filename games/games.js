@@ -2909,7 +2909,7 @@ SorceryDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://d27a44hjr9gen3.cloudfront.net/<set>/<name:simple>.png'
+			'default': 'https://d27a44hjr9gen3.cloudfront.net/cards/<image>.png'
 		}
 	]
 }); 
@@ -2928,7 +2928,7 @@ SorceryDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id': cardID,
-		'set': cardData[0],
+		'image': cardData[0],
 		'rotate': cardData[1] || 0,
 		'isDict': isDict || 0
 	};
