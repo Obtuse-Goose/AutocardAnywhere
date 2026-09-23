@@ -190,7 +190,7 @@ CardfightVanguardDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://<img>'
+			'default': 'https://<img>'
 		},
 		{
 			'name': 'tcgPlayerURL',
