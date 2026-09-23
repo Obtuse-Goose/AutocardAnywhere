@@ -1105,7 +1105,7 @@ let AutocardAnywhere = {
 		AutocardAnywhere.games.load(dictionaries).then((result) => {
 			AutocardAnywhere.dictionaries = result;
 			let dictionaryNames = Object.keys(AutocardAnywhere.dictionaries);
-			let test = '(';
+			let test = '';
 			
 			// Nicknames
 			if (response.customNicknames && (response.customNicknames != '')) {
@@ -1138,14 +1138,13 @@ let AutocardAnywhere = {
 
 			//for (let i=0; i<AutocardAnywhere.dictionaries.length; i++) {
 			dictionaryNames.map( (key) => {
-				test += AutocardAnywhere.dictionaries[key].test.replace("([^a-zA-Z_0-9-'])(", '').replace(")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", '') + '|';
+				test += AutocardAnywhere.dictionaries[key].test + '|';
 			});
 			if (test.length > 1) {
 				test = test.slice(0, -1);
 			}
-			test += ')';
 			//console.log(test);
-			AutocardAnywhere.test = new RegExp("((?:.|\n)*?[^a-zA-Z_0-9-'])(?:" + test + ")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", "gi");
+			AutocardAnywhere.test = new RegExp("((?:.|\n)*?[^a-zA-Z_0-9-'])(" + test + ")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", "gi");
 
 
 			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text

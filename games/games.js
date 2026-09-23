@@ -925,13 +925,13 @@ FabDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://fabdb2.imgix.net/cards/printings/<img>.png'
+			'default': 'https://legendstory-production-s3-public.s3.amazonaws.com/media/cards/normal/<img>.webp'
 		},
 		{
 			'name': 'tcgPlayerURL',
 			'type': 'string',
 			'default': 'https://www.tcgplayer.com/search/flesh-and-blood-tcg/product?q=<id>'
-		},
+		}/*,
 		{
 			'name': 'extraInfoBorderRadius',
 			'type': 'integer',
@@ -947,8 +947,8 @@ FabDictionary.prototype = new Dictionary({
 				{name: 'text', description: 'Card Text', value: 'text'},
 				{name: 'flavour', description: 'Flavour', value: 'flavour'}
 			]
-		}
-	],
+		}*/
+	]/*,
 	extraInfo: [
 		{
 			'url': 'https://api.fabdb.net/cards/<id>',
@@ -963,7 +963,7 @@ FabDictionary.prototype = new Dictionary({
 				}
 			]
 		}
-	]
+	]*/
 });
 
 // Override parent functions
@@ -1606,7 +1606,7 @@ LorcanaDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://lorcana-api.com/images/<img>'
+			'default': '<img>'
 		}
 	]
 }); 
