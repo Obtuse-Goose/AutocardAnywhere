@@ -9,6 +9,8 @@ AutocardAnywhere.games = {
 				let name = game[0];
 				let language = game[1];
 
+				if (!AutocardAnywhere.games[name]) return;
+
 				AutocardAnywhere.games[name][language].load().then(function(dictionary) {
 					function messageCallback(response) {
 						//dictionary.test = new RegExp(response.test, "gi");
@@ -272,75 +274,6 @@ AutocardAnywhere.games.cardfightvanguard.en = new CardfightVanguardDictionary({
 });
 
 //==============================================================================
-// Chronicle
-//==============================================================================
-function ChronicleDictionary(config) {
-	this.description = this.description + ' - ' + config.description;
-	this.language = config.language;
-	this.options = this.settings.concat(config.settings);
-};
-
-ChronicleDictionary.prototype = new Dictionary({
-	game: 'chronicle',
-	description: 'Chronicle: RuneScape Legends',
-	// Settings and initialisation
-	settings: [
-		{
-			'name': 'linkTarget',
-			'description': 'Link target:',
-			'type': 'string',
-			'default': 'http://chronicle.gamepedia.com/<name:simple>'
-		},
-		{
-			'name': 'imageURL',
-			'description': 'Image source:',
-			'type': 'string',
-			'default': 'https://hydra-media.cursecdn.com/chronicle.gamepedia.com/<img>'
-		}
-	]
-}); 
-
-// Override parent functions
-ChronicleDictionary.prototype.findCardById = function(cardID, match, isDict) {
-	let cardData = this.cardData[cardID];
-	if (!cardData) {return}
-	return {
-		'game': this.game,
-		'language': this.language,
-		'name': match.replace(/"/g, '`'),
-		'match': match,
-		'en': cardID,
-		'id': cardID,
-		'img': cardData[0],
-		'isDict': isDict || 0
-	};
-};
-
-//==============================================================================
-// Individual language(s)
-//==============================================================================
-AutocardAnywhere.games.chronicle = {};
-// English
-AutocardAnywhere.games.chronicle.en = new ChronicleDictionary({
-	description: 'English',
-	language: 'en',
-	settings: [
-		{
-			'name': 'ignoreDictionaryWords',
-			'description': 'Ignore Dictionary Words',
-			'type': 'boolean',
-			'default': true,
-			'controlType': 'checkbox'
-		},
-		{
-			'name': 'emphasiseText',
-			'type': 'boolean',
-			'default': true
-		}
-	]
-});
-
-//==============================================================================
 // Codex
 //==============================================================================
 function CodexDictionary(config) {
@@ -429,13 +362,13 @@ DbzDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://dbztoptier.com/index.php/database.html?cmd=showcard&id=<cardID>'
+			'default': 'https://www.ccgtrader.net/card/<id>/<title>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://dbztoptier.com/images/carddatabase/<img>'
+			'default': 'https://api.ccgtrader.co.uk/_/assets/<img>'
 		}
 	]
 }); 
@@ -451,8 +384,8 @@ DbzDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id': cardID,
-		'cardID': cardData[0],
-		'img': cardData[1],
+		'img': cardData[0],
+		'title': cardData[1],
 		'isDict': isDict || 0
 	};
 };
@@ -709,13 +642,13 @@ DuelystDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://duelyst.gamepedia.com/<name:simple>'
+			'default': 'http://duelyst.fandom.com/wiki/<name:simple>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://hydra-media.cursecdn.com/duelyst.gamepedia.com/<img>'
+			'default': 'http://hydra-media.cursecdn.com/duelyst.fandom.com/<img>'
 		}
 	]
 }); 
@@ -847,13 +780,13 @@ EternalDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://www.numotgaming.com/cards/<name:simple>'
+			'default': 'https://eternalwarcry.com/cards/d/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://www.numotgaming.com/cards/images/cards/<name:simple>.png'
+			'default': 'https://cards.eternalwarcry.com/cards/full/<name:downscore>.png'
 		}
 	]
 }); 
@@ -872,7 +805,7 @@ EternalDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id': cardID,
-		//'link': cardData[0],
+		'link': cardData[0],
 		'isDict': isDict || 0
 	};
 };

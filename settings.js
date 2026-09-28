@@ -67,7 +67,6 @@ AutocardAnywhereSettings = {
 		{'game': 'mtg', 'language': 'ko', 'default': 0},
 		{'game': 'agot', 'language': 'en', 'default': 0},
 		{'game': 'cardfightvanguard', 'language': 'en', 'default': 0},
-		{'game': 'chronicle', 'language': 'en', 'default': 0},
 		{'game': 'codex', 'language': 'en', 'default': 0},
 		{'game': 'dicemasters', 'language': 'en', 'default': 0},
 		{'game': 'dominion', 'language': 'en', 'default': 0},
@@ -255,6 +254,9 @@ AutocardAnywhereSettings = {
 		});
 		s = s.replace(/<([^>]+):hyphenated>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
+		});
+		s = s.replace(/<([^>]+):downscore>/g, function(match, key) {
+			return card[key] ? removeDiacritics(card[key]).replace(/ /g, '_') : '';
 		});
 		s = s.replace(/<([^>]+):hyphenated:lowercase>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,'\.\/\:!]/g, '').replace(/ /g, '-').replace(/--/g, '-').replace(/\+/g, 'plus-') : '';
