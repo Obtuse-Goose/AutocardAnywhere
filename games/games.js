@@ -858,7 +858,7 @@ FabDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://legendstory-production-s3-public.s3.amazonaws.com/media/cards/normal/<img>.webp'
+			'default': 'https://legendstory-production-s3-public.s3.amazonaws.com/media/cards/normal/<id>.webp'
 		},
 		{
 			'name': 'tcgPlayerURL',
@@ -910,7 +910,7 @@ FabDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	return {
 		'game': this.game,
 		'language': this.language,
-		'img': cardID,
+		//'img': cardID,
 		'name': match.replace(/"/g, '`'),
 		'match': match,
 		'id': cardData[0],
@@ -1003,13 +1003,13 @@ FaeriaDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://faeriaguide.com/img/Faeria_Cards/CardExport/medium/<id>.png'
+			'default': 'https://github.com/abrakam/Faeria_Cards/blob/master/CardExport/English/<id>.png'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://raw.githubusercontent.com/faeria-org/Faeria_Cards/master/CardExport/English/720-<id>.png'
+			'default': 'https://github.com/abrakam/Faeria_Cards/blob/master/CardExport/English/<id>.png?raw=true'
 		}
 	]
 }); 
@@ -1023,8 +1023,8 @@ FaeriaDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'language': this.language,
 		'name': match.replace(/"/g, '`'),
 		'match': match,
-		'en': cardData[0],
-		'id': cardData[0],
+		'en': cardID,
+		'id': String(cardID).padStart(3, '0'),
 		'isDict': isDict || 0,
 		'ratio': 'square'
 	};
