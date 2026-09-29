@@ -74,13 +74,13 @@ AutocardAnywhereSettings = {
 		{'game': 'dbz', 'language': 'en', 'default': 0},
 		{'game': 'duelyst', 'language': 'en', 'default': 0},
 		{'game': 'elderscrolls', 'language': 'en', 'default': 0},
+		{'game': 'emerald', 'language': 'en', 'default': 0},
 		{'game': 'eternal', 'language': 'en', 'default': 0},
 		{'game': 'faeria', 'language': 'en', 'default': 0},
 		{'game': 'fab', 'language': 'en', 'default': 0},
 		{'game': 'forceofwill', 'language': 'en', 'default': 0},
 		{'game': 'gwent', 'language': 'en', 'default': 0},
 		{'game': 'hearthstone', 'language': 'en', 'default': 0},
-		{'game': 'l5r', 'language': 'en', 'default': 0},
 		{'game': 'lorcana', 'language': 'en', 'default': 0},
 		{'game': 'lotr', 'language': 'en', 'default': 0},
 		{'game': 'mylittlepony', 'language': 'en', 'default': 0},
@@ -254,12 +254,17 @@ AutocardAnywhereSettings = {
 		s = s.replace(/<([^>]+):hyphenated>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '-') : '';
 		});
-		s = s.replace(/<([^>]+):downscore>/g, function(match, key) {
-			return card[key] ? removeDiacritics(card[key]).replace(/ /g, '_') : '';
-		});
 		s = s.replace(/<([^>]+):hyphenated:lowercase>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).toLowerCase().replace(/[,'\.\/\:!]/g, '').replace(/ /g, '-').replace(/--/g, '-').replace(/\+/g, 'plus-') : '';
 		});
+		s = s.replace(/<([^>]+):downscore>/g, function(match, key) {
+			return card[key] ? removeDiacritics(card[key]).replace(/ /g, '_') : '';
+		});
+		/*
+		s = s.replace(/<([^>]+):downscore:lowercase>/g, function(match, key) {
+			return card[key] ? removeDiacritics(card[key]).replace(/ /g, '_').toLowerCase() : '';
+		});
+		*/
 		s = s.replace(/<([^>]+):plus>/g, function(match, key) {
 			return card[key] ? removeDiacritics(card[key]).replace(/[,']/g, '').replace(/ /g, '+') : '';
 		});

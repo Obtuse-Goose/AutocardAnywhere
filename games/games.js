@@ -1354,7 +1354,7 @@ EmeraldDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://www.emeralddb.org/card/<name:downscore>'
+			'default': 'https://www.emeralddb.org/card/<name:hyphenated:lowercase>'
 		},
 		{
 			'name': 'imageURL',
@@ -1366,10 +1366,6 @@ EmeraldDictionary.prototype = new Dictionary({
 }); 
 
 // Override parent functions
-EmeraldDictionary.prototype.parseHtml = function(html) {
-	// Replace img tags with their alt attribute
-	return html.replace(/<\/div>/g, "\n");
-};
 EmeraldDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
 	if (!cardData) {return}
