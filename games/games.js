@@ -2641,13 +2641,13 @@ StarrealmsDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://www.starrealms.com/wp-content/uploads/<img>'
+			'default': 'https://www.starrealms.com/card-gallery'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://www.starrealms.com/wp-content/uploads/<img>'
+			'default': 'https://www.starrealms.com/card-gallery/images/content/card-gallery/<name:hyphenated:lowercase>.webp'
 		}
 	]
 }); 
