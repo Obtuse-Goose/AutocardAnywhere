@@ -432,13 +432,13 @@ DicemastersDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://dicemastersdb.com/<link>'
+			'default': 'https://www.tcgplayer.com/product/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://dicemastersdb.com/<img>'
+			'default': 'https://tcgplayer-cdn.tcgplayer.com/product/<img>'
 		}
 	]
 }); 
@@ -1072,13 +1072,13 @@ ForceOfWillDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://db.fowtcg.us/index.php?p=card&code=<code>'
+			'default': 'https://www.tcgplayer.com/product/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://db.fowtcg.us/cards/<img>'
+			'default': 'https://tcgplayer-cdn.tcgplayer.com/product/<img>'
 		},
 		{
 			'name': 'cardmarketURL',
@@ -1100,7 +1100,7 @@ ForceOfWillDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'en': cardID,
 		'id': cardID,
 		'img': cardData[0],
-		'code': cardData[1],
+		'link': cardData[1],
 		'isDict': isDict || 0
 	};
 };
@@ -1147,13 +1147,13 @@ GwentDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://www.gwentdb.com/cards/<url>'
+			'default': 'https://gwent.one/en/card/<id>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://media-seawolf.cursecdn.com/avatars/thumbnails/<img>'
+			'default': 'https://gwent.one/image/gwent/assets/card/art/medium/<img>.jpg'
 		},
 		{
 			'name': 'defaultSection',
@@ -1203,8 +1203,7 @@ GwentDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id': cardID,
-		'url': cardData[0],
-		'img': cardData[1],
+		'img': cardData[0],
 		'isDict': isDict || 0
 	};
 };
@@ -1321,76 +1320,6 @@ HearthstoneDictionary.prototype.findCardById = function(cardID, match, isDict) {
 AutocardAnywhere.games.hearthstone = {};
 // English
 AutocardAnywhere.games.hearthstone.en = new HearthstoneDictionary({
-	description: 'English',
-	language: 'en',
-	settings: [
-		{
-			'name': 'ignoreDictionaryWords',
-			'description': 'Ignore Dictionary Words',
-			'type': 'boolean',
-			'default': true,
-			'controlType': 'checkbox'
-		},
-		{
-			'name': 'emphasiseText',
-			'type': 'boolean',
-			'default': true
-		}
-	]
-});
-
-//==============================================================================
-// Hex
-//==============================================================================
-function HexDictionary(config) {
-	this.description = this.description + ' - ' + config.description;
-	this.language = config.language;
-	this.options = this.settings.concat(config.settings);
-};
-
-HexDictionary.prototype = new Dictionary({
-	game: 'hex',
-	description: 'Hex',
-	// Settings and initialisation
-	settings: [
-		{
-			'name': 'linkTarget',
-			'description': 'Link target:',
-			'type': 'string',
-			'default': 'http://hex.tcgbrowser.com/#!/cards/cardid=<tcgbrowserid>'
-		},
-		{
-			'name': 'imageURL',
-			'description': 'Image source:',
-			'type': 'string',
-			'default': 'http://storage.hex.tcgbrowser.com/big/<img>.jpg'
-		}
-	]
-}); 
-
-// Override parent functions
-HexDictionary.prototype.findCardById = function(cardID, match, isDict) {
-	let cardData = this.cardData[cardID];
-	if (!cardData) {return}
-	return {
-		'game': this.game,
-		'language': this.language,
-		'name': match.replace(/"/g, '`'),
-		'match': match,
-		'en': cardID,
-		'id': cardID,
-		'tcgbrowserid': cardData[0],
-		'img': cardData[1],
-		'isDict': isDict || 0
-	};
-};
-
-//==============================================================================
-// Individual language(s)
-//==============================================================================
-AutocardAnywhere.games.hex = {};
-// English
-AutocardAnywhere.games.hex.en = new HexDictionary({
 	description: 'English',
 	language: 'en',
 	settings: [
@@ -2836,13 +2765,13 @@ SorceryDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://curiosa.io/cards/<name:simple>'
+			'default': 'https://www.tcgplayer.com/product/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://d27a44hjr9gen3.cloudfront.net/cards/<image>.png'
+			'default': 'https://tcgplayer-cdn.tcgplayer.com/product/<img>'
 		}
 	]
 }); 
@@ -2861,8 +2790,8 @@ SorceryDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'en': cardID,
 		'id': cardID,
-		'image': cardData[0],
-		'rotate': cardData[1] || 0,
+		'img': cardData[0],
+		'link': cardData[1],
 		'isDict': isDict || 0
 	};
 };
@@ -3053,13 +2982,13 @@ WowDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://www.tcgplayer.com/product/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://www.wowcards.info/scans/<set>/en/<en><img>.jpg'
+			'default': 'https://tcgplayer-cdn.tcgplayer.com/product/<img>'
 		},
 		{
 			'name': 'priceURL',
@@ -3138,11 +3067,12 @@ WowDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'language': this.language,
 		'name': match.replace(/"/g, '`'),
 		'match': match,
-		'en': cardData[0],
+		'en': cardID,
 		'id': cardID,
-		'set': cardData[1],
-		'isDoubleFaced': cardData[2],
-		'img': '_' + this.simplify(match),
+		'img': cardData[0],
+		'link': cardData[1],
+		//'isDoubleFaced': cardData[2],
+		//'img': '_' + this.simplify(match),
 		'isDict': isDict || 0
 	};
 };

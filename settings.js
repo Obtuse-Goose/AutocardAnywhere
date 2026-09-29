@@ -80,7 +80,6 @@ AutocardAnywhereSettings = {
 		{'game': 'forceofwill', 'language': 'en', 'default': 0},
 		{'game': 'gwent', 'language': 'en', 'default': 0},
 		{'game': 'hearthstone', 'language': 'en', 'default': 0},
-		{'game': 'hex', 'language': 'en', 'default': 0},
 		{'game': 'l5r', 'language': 'en', 'default': 0},
 		{'game': 'lorcana', 'language': 'en', 'default': 0},
 		{'game': 'lotr', 'language': 'en', 'default': 0},
