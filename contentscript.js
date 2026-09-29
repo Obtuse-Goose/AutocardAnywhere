@@ -1083,7 +1083,7 @@ let AutocardAnywhere = {
 			if (linkLanguage.length == 3) {
 				let game = linkLanguage[0];
 				let language = linkLanguage[1];
-				if (linkLanguage[2] == '1') {
+				if (linkLanguage[2] == '1' && AutocardAnywhere.games[game] && AutocardAnywhere.games[game][language]) {
 					dictionaries.push([game, language]);
 				}
 				delete dictionariesHash[game + language];
@@ -1095,7 +1095,7 @@ let AutocardAnywhere = {
 		if (!AutocardAnywhereSettings.isEmbedded) {
 			for (dictionaryName in dictionariesHash) {
 				let dictionary = dictionariesHash[dictionaryName];
-				if (dictionary.default == 1) {
+				if (dictionary.default == 1 && AutocardAnywhere.games[game] && AutocardAnywhere.games[game][language]) {
 					dictionaries.push([dictionary.game, dictionary.language]);
 				}
 			}
@@ -1138,7 +1138,9 @@ let AutocardAnywhere = {
 
 			//for (let i=0; i<AutocardAnywhere.dictionaries.length; i++) {
 			dictionaryNames.map( (key) => {
-				test += AutocardAnywhere.dictionaries[key].test + '|';
+				if (AutocardAnywhere.dictionaries[key]) {
+					test += AutocardAnywhere.dictionaries[key].test + '|';
+				}
 			});
 			if (test.length > 1) {
 				test = test.slice(0, -1);

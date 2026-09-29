@@ -9,8 +9,6 @@ AutocardAnywhere.games = {
 				let name = game[0];
 				let language = game[1];
 
-				if (!AutocardAnywhere.games[name]) return;
-
 				AutocardAnywhere.games[name][language].load().then(function(dictionary) {
 					function messageCallback(response) {
 						//dictionary.test = new RegExp(response.test, "gi");
@@ -1339,74 +1337,40 @@ AutocardAnywhere.games.hearthstone.en = new HearthstoneDictionary({
 });
 
 //==============================================================================
-// Legend of the Five Rings
+// Emerald Legacy
 //==============================================================================
-function L5rDictionary(config) {
+function EmeraldDictionary(config) {
 	this.description = this.description + ' - ' + config.description;
 	this.language = config.language;
 	this.options = this.settings.concat(config.settings);
 };
 
-L5rDictionary.prototype = new Dictionary({
-	game: 'l5r',
-	description: 'Legend of the Five Rings',
+EmeraldDictionary.prototype = new Dictionary({
+	game: 'emerald',
+	description: 'Emerald Legacy',
 	// Settings and initialisation
 	settings: [
 		{
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://imperialassembly.com/oracle/#cardid=<id>,#hashid=1fc816f7545c2bd39f6cc7737803644c,#cardcount=20'
+			'default': 'https://www.emeralddb.org/card/<name:downscore>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://imperialassembly.com/oracle/showimage?prefix=printing&cardid=<id>&nestid=1&class=details&tagid=34&.jpg'
-		},
-		{
-			'name': 'defaultSection',
-			'description': 'Default info section:',
-			'type': 'string',
-			'default': 'text',
-			'controlType': 'radio',
-			'options': [
-				{name: 'text', description: 'Text', value: 'text'},
-				{name: 'info', description: 'Info', value: 'info'},
-				{name: 'flavour', description: 'Flavour', value: 'flavour'}
-			]
-		}
-	],
-	extraInfo: [
-		{
-			'url': 'http://imperialassembly.com/oracle/docard?cardid=<id>',
-			'sections': [
-				{
-					'name': 'text',
-					'description': 'Text',
-					're': '<td[^>]*><div[^>]*>Text</div><div[^>]*>[^<]*</div></td>\s*<td[^>]*><div[^>]*>([^^]*?)</div>'
-				},
-				{
-					'name': 'info',
-					'description': 'Info',
-					're': '<td[^>]*><div[^>]*>(Set|Keywords|Artist|Card Type|Rarity|Legality)</div><div[^>]*>[^<]*</div></td>\s*<td[^>]*><div[^>]*>([^^]*?</div>)'
-				},
-				{
-					'name': 'flavour',
-					'description': 'Flavour',
-					're': '<td[^>]*><div[^>]*>Flavor&nbsp;Text</div><div[^>]*>[^<]*</div></td>\s*<td[^>]*><div[^>]*>([^^]*?)</div>'
-				}
-			]
+			'default': '<img>'
 		}
 	]
 }); 
 
 // Override parent functions
-L5rDictionary.prototype.parseHtml = function(html) {
+EmeraldDictionary.prototype.parseHtml = function(html) {
 	// Replace img tags with their alt attribute
 	return html.replace(/<\/div>/g, "\n");
 };
-L5rDictionary.prototype.findCardById = function(cardID, match, isDict) {
+EmeraldDictionary.prototype.findCardById = function(cardID, match, isDict) {
 	let cardData = this.cardData[cardID];
 	if (!cardData) {return}
 	return {
@@ -1414,6 +1378,7 @@ L5rDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'language': this.language,
 		'en': cardID,
 		'id': cardID,
+		'img': cardData[0],
 		'name': match.replace(/"/g, '`'),
 		'match': match,
 		'isDict': isDict || 0
@@ -1423,9 +1388,9 @@ L5rDictionary.prototype.findCardById = function(cardID, match, isDict) {
 //==============================================================================
 // Individual language(s)
 //==============================================================================
-AutocardAnywhere.games.l5r = {};
+AutocardAnywhere.games.emerald = {};
 // English
-AutocardAnywhere.games.l5r.en = new L5rDictionary({
+AutocardAnywhere.games.emerald.en = new EmeraldDictionary({
 	description: 'English',
 	language: 'en',
 	settings: [
