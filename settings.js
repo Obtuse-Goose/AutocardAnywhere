@@ -86,7 +86,6 @@ AutocardAnywhereSettings = {
 		{'game': 'mylittlepony', 'language': 'en', 'default': 0},
 		{'game': 'netrunner', 'language': 'en', 'default': 0},
 		{'game': 'pokemon', 'language': 'en', 'default': 0},
-		{'game': 'scrolls', 'language': 'en', 'default': 0},
 		{'game': 'solforge', 'language': 'en', 'default': 0},
 		{'game': 'sorcery', 'language': 'en', 'default': 0},
 		{'game': 'starrealms', 'language': 'en', 'default': 0},

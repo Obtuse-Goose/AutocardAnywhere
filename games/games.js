@@ -2366,13 +2366,13 @@ PokemonDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'https://store.tcgplayer.com/<game>/product/show?ProductName=<name:simple>'
+			'default': 'https://www.tcgplayer.com/product/<link>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'https://images.pokemontcg.io/<img>_hires.png'
+			'default': 'https://tcgplayer-cdn.tcgplayer.com/product/<img>'
 		},
 		{
 			'name': 'priceURL',
@@ -2396,7 +2396,7 @@ PokemonDictionary.prototype = new Dictionary({
 			'type': 'boolean',
 			'default': true,
 			'controlType': 'checkbox'
-		},
+		}/*,
 		{
 			'name': 'defaultSection',
 			'description': 'Default info section:',
@@ -2408,8 +2408,9 @@ PokemonDictionary.prototype = new Dictionary({
 				{name: 'flavourtext', description: 'Flavour', value: 'flavourtext'},
 				{name: 'attacks', description: 'Attacks', value: 'attacks'}
 			]
-		}
-	],
+		}*/
+	]
+	/*,
 	extraInfo: [
 		{
 			'url': 'https://api.pokemontcg.io/v2/cards/<id>',
@@ -2429,6 +2430,7 @@ PokemonDictionary.prototype = new Dictionary({
 			]
 		}
 	]
+	*/
 }); 
 
 // Override parent functions
@@ -2451,6 +2453,7 @@ PokemonDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'match': match,
 		'id': cardID,
 		'img': cardData[0],
+		'link': cardData[1],
 		'isDict': isDict || 0
 	};
 };
@@ -2529,75 +2532,6 @@ PokemonDictionary.prototype.parseExtraInfo = function(content, section, card) {
 AutocardAnywhere.games.pokemon = {};
 // English
 AutocardAnywhere.games.pokemon.en = new PokemonDictionary({
-	description: 'English',
-	language: 'en',
-	settings: [
-		{
-			'name': 'ignoreDictionaryWords',
-			'description': 'Ignore Dictionary Words',
-			'type': 'boolean',
-			'default': true,
-			'controlType': 'checkbox'
-		},
-		{
-			'name': 'emphasiseText',
-			'type': 'boolean',
-			'default': true
-		}
-	]
-});
-
-//==============================================================================
-// Scrolls
-//==============================================================================
-function ScrollsDictionary(config) {
-	this.description = this.description + ' - ' + config.description;
-	this.language = config.language;
-	this.options = this.settings.concat(config.settings);
-};
-
-ScrollsDictionary.prototype = new Dictionary({
-	game: 'scrolls',
-	description: 'Scrolls',
-	// Settings and initialisation
-	settings: [
-		{
-			'name': 'linkTarget',
-			'description': 'Link target:',
-			'type': 'string',
-			'default': 'http://www.scrollsguide.com/wiki/<name:simple>'
-		},
-		{
-			'name': 'imageURL',
-			'description': 'Image source:',
-			'type': 'string',
-			'default': 'http://www.scrollsguide.com/wiki/images/<img>'
-		}
-	]
-}); 
-
-// Override parent functions
-ScrollsDictionary.prototype.findCardById = function(cardID, match, isDict) {
-	let cardData = this.cardData[cardID];
-	if (!cardData) {return}
-	return {
-		'game': this.game,
-		'language': this.language,
-		'name': match.replace(/"/g, '`'),
-		'match': match,
-		'en': cardID,
-		'id': cardID,
-		'img': cardData[0],
-		'isDict': isDict || 0
-	};
-};
-
-//==============================================================================
-// Individual language(s)
-//==============================================================================
-AutocardAnywhere.games.scrolls = {};
-// English
-AutocardAnywhere.games.scrolls.en = new ScrollsDictionary({
 	description: 'English',
 	language: 'en',
 	settings: [
