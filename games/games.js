@@ -646,7 +646,7 @@ DuelystDictionary.prototype = new Dictionary({
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://hydra-media.cursecdn.com/duelyst.fandom.com/<img>'
+			'default': 'https://static.wikia.nocookie.net/duelyst_gamepedia/images/<img>'
 		}
 	]
 }); 
@@ -2711,13 +2711,13 @@ WarframeDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://warframe.wikia.com/wiki/<name:simple>'
+			'default': 'https://warframe.fandom.com/wiki/<name:simple>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': '<img>'
+			'default': 'https://static.wikia.nocookie.net/warframe/images/<img>'
 		}
 	]
 }); 
