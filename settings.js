@@ -73,7 +73,6 @@ AutocardAnywhereSettings = {
 		{'game': 'doomtown', 'language': 'en', 'default': 0},
 		{'game': 'dbz', 'language': 'en', 'default': 0},
 		{'game': 'duelyst', 'language': 'en', 'default': 0},
-		{'game': 'elderscrolls', 'language': 'en', 'default': 0},
 		{'game': 'emerald', 'language': 'en', 'default': 0},
 		{'game': 'eternal', 'language': 'en', 'default': 0},
 		{'game': 'faeria', 'language': 'en', 'default': 0},

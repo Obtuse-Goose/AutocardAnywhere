@@ -800,7 +800,6 @@ let AutocardAnywhere = {
 	        range.insertNode(replacement.element);
 		}
 
-
 		text = "\x00" + text.replaceAll("\u00a0", " ") + "\x00";
 		let keys = Object.keys(AutocardAnywhere.dictionaries);
 
@@ -1147,7 +1146,6 @@ let AutocardAnywhere = {
 			}
 			//console.log(test);
 			AutocardAnywhere.test = new RegExp("((?:.|\n)*?[^a-zA-Z_0-9-'])(" + test + ")(?=(en|es|s|ed|d|'s){0,1}([^a-zA-Z_0-9-']))", "gi");
-
 
 			// If we've just been loaded as a result of the user clicking the context menu item, run on the selected text
 			if (AutocardAnywhere.forceLoad) {

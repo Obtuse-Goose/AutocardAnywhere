@@ -692,75 +692,6 @@ AutocardAnywhere.games.duelyst.en = new DuelystDictionary({
 });
 
 //==============================================================================
-// Elder Scrolls
-//==============================================================================
-function ElderScrollsDictionary(config) {
-	this.description = this.description + ' - ' + config.description;
-	this.language = config.language;
-	this.options = this.settings.concat(config.settings);
-};
-
-ElderScrollsDictionary.prototype = new Dictionary({
-	game: 'elderscrolls',
-	description: 'Elder Scrolls: Legends',
-	// Settings and initialisation
-	settings: [
-		{
-			'name': 'linkTarget',
-			'description': 'Link target:',
-			'type': 'string',
-			'default': 'http://elderscrolls.wikia.com/wiki/<name:simple>'
-		},
-		{
-			'name': 'imageURL',
-			'description': 'Image source:',
-			'type': 'string',
-			'default': 'http://vignette.wikia.nocookie.net/elderscrolls/images/<img>'
-		}
-	]
-}); 
-
-// Override parent functions
-ElderScrollsDictionary.prototype.findCardById = function(cardID, match, isDict) {
-	let cardData = this.cardData[cardID];
-	if (!cardData) {return}
-	return {
-		'game': this.game,
-		'language': this.language,
-		'name': match.replace(/"/g, '`'),
-		'match': match,
-		'en': cardID,
-		'id': cardID,
-		'img': cardData[0],
-		'isDict': isDict || 0
-	};
-};
-
-//==============================================================================
-// Individual language(s)
-//==============================================================================
-AutocardAnywhere.games.elderscrolls = {};
-// English
-AutocardAnywhere.games.elderscrolls.en = new ElderScrollsDictionary({
-	description: 'English',
-	language: 'en',
-	settings: [
-		{
-			'name': 'ignoreDictionaryWords',
-			'description': 'Ignore Dictionary Words',
-			'type': 'boolean',
-			'default': true,
-			'controlType': 'checkbox'
-		},
-		{
-			'name': 'emphasiseText',
-			'type': 'boolean',
-			'default': true
-		}
-	]
-});
-
-//==============================================================================
 // Eternal
 //==============================================================================
 function EternalDictionary(config) {
@@ -1493,13 +1424,13 @@ LotrDictionary.prototype = new Dictionary({
 			'name': 'linkTarget',
 			'description': 'Link target:',
 			'type': 'string',
-			'default': 'http://www.cardgamedb.com/index.php/lotr/lord-of-the-rings-card-spoiler/_/<link>'
+			'default': 'https://ringsdb.com/card/<id>'
 		},
 		{
 			'name': 'imageURL',
 			'description': 'Image source:',
 			'type': 'string',
-			'default': 'http://www.cardgamedb.com/forums/uploads/lotr/<img>'
+			'default': 'https://ringsdb.com/bundles/cards/<id>.png'
 		}
 	]
 }); 
@@ -1514,9 +1445,7 @@ LotrDictionary.prototype.findCardById = function(cardID, match, isDict) {
 		'name': match.replace(/"/g, '`'),
 		'match': match,
 		'en': cardID,
-		'id': cardID,
-		'img': cardData[0],
-		'link': cardData[1],
+		'id': cardID.replace('#', ''),
 		'isDict': isDict || 0
 	};
 };
