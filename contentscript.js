@@ -9,7 +9,8 @@ let AutocardAnywhere = {
 	insertionCount: 0,
 	insertionLimit: 1000,
 	ignoredStrings: [],
-	processedNodes: new Set(),
+	//processedNodes: new Set(),
+	replacementCount: 0,
 	sendMessage(message) {
 		return new Promise((resolve, reject) => {
 			browser.runtime.sendMessage(message, response => resolve(response));
@@ -162,9 +163,11 @@ let AutocardAnywhere = {
 	},
 	// Main extension code
 	initialisePopups: function(node) {
-		//console.log('init popups');
 		// Searches node for any autocard anywhere links and adds a popup.
+		// If popups are disabled, do nothing.
 		if (!AutocardAnywhere.enablePopups) return;
+		// If no links have been added since this last ran, do nothing.
+		if (AutocardAnywhere.replacementCount == 0) return;
 		
 		function escape(s) {
 			if (!s) {return ''}
@@ -524,6 +527,8 @@ let AutocardAnywhere = {
 				}
 			});
 		});
+
+		AutocardAnywhere.replacementCount = 0;
 	},
 	
 	injectCSS: function(bold, italic, underline, colour, icon, dashed) {
@@ -752,7 +757,6 @@ let AutocardAnywhere = {
 		// Respond to a dom change
 		// Stop observing so as to avoid picking-up on the popup node being inserted
 		AutocardAnywhere.unobserveDomChanges();
-		replacementCount = 0;
 	    mutations.map(function(mutation) {
 	    	// Only interested in nodes being added.
 		    let nodes = mutation.addedNodes;
@@ -775,12 +779,12 @@ let AutocardAnywhere = {
 					    if (AutocardAnywhere.replaceExistingLinks) {AutocardAnywhere.replaceLinks(nodes[i])}
 
 						// Traverse the new node.
-						replacementCount += AutocardAnywhere.traverse(nodes[i]);
+						AutocardAnywhere.traverse(nodes[i]);
 				}
 			}
 	    });
 		// Add popups for the new node.
-		if (replacementCount > 0) AutocardAnywhere.initialisePopups(document.body);
+		AutocardAnywhere.initialisePopups(document.body);
 	    // Restart the observer
 		if (AutocardAnywhere.insertionCount < AutocardAnywhere.insertionLimit) {
 			AutocardAnywhere.observeDomChanges();
@@ -890,30 +894,28 @@ let AutocardAnywhere = {
 		for (let i=replacements.length-1; i>=0; i--) {
 			makeReplacement(replacements[i]);
 		}
-		return (replacements.length > 0);
+		AutocardAnywhere.replacementCount += replacements.length;
 	},
 
 	// Function to traverse the DOM to find any text nodes.
 	traverse: function(node) {
 		if (!node) return;
-		let replacementCount = 0;
 
 		if (node.nodeType == 1  &&  !/^(a|button|input|textarea|style|script|noscript)$/i.test(node.tagName) && !node.isContentEditable && !node.classList.contains("autocardanywhere-ignored")) {
 			let children = node.childNodes;
 			if (!children) return;
 			for (let i=0; i<children.length; i++) {
 				if (children[i]) {
-					replacementCount += AutocardAnywhere.traverse(children[i]);
+					AutocardAnywhere.traverse(children[i]);
 				}
 			}
 		}
 		else if (node.nodeType == 3) {
 			let html = node.nodeValue;
 			if (html.length>2 && /[A-Za-z]/.test(html) ) { //&& !AutocardAnywhere.ignoredStrings[html]) {
-				replacementCount += AutocardAnywhere.foregroundRunner(html, node);
+				AutocardAnywhere.foregroundRunner(html, node);
 			}
 		}
-		return replacementCount;
 	},
 
 	contextMenuClick: function() {
